@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 #include "drone/model/sensors/base_sensor.h"
 
 // Test subclass to implement the pure virtual method
@@ -12,36 +12,40 @@ public:
     }
 };
 
-class BaseSensorTest : public ::testing::Test {
-protected:
-    TestSensor sensor{"TestSensor", SensorType::SENSING};
-};
-
 // Test constructor
-TEST_F(BaseSensorTest, ConstructorSetsNameAndType) {
-    EXPECT_EQ(sensor.getName(), "TestSensor");
-    EXPECT_EQ(sensor.getType(), SensorType::SENSING);
-    EXPECT_EQ(sensor.getStatus(), SensorStatus::INACTIVE);  // Default status
+TEST_CASE("BaseSensor Constructor sets name and type", "[base_sensor]") {
+    TestSensor sensor("TestSensor", SensorType::SENSING);
+    REQUIRE(sensor.getName() == "TestSensor");
+    REQUIRE(sensor.getType() == SensorType::SENSING);
+    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);  // Default status
 }
 
 // Test getters
-TEST_F(BaseSensorTest, GettersReturnCorrectValues) {
-    EXPECT_EQ(sensor.getName(), "TestSensor");
-    EXPECT_EQ(sensor.getType(), SensorType::SENSING);
-    EXPECT_EQ(sensor.getStatus(), SensorStatus::INACTIVE);
+TEST_CASE("BaseSensor Getters return correct values", "[base_sensor]") {
+    TestSensor sensor("TestSensor", SensorType::SENSING);
+    REQUIRE(sensor.getName() == "TestSensor");
+    REQUIRE(sensor.getType() == SensorType::SENSING);
+    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);
 }
 
 // Test setter
-TEST_F(BaseSensorTest, SetStatusUpdatesStatus) {
+TEST_CASE("BaseSensor SetStatus updates status", "[base_sensor]") {
+    TestSensor sensor("TestSensor", SensorType::SENSING);
     sensor.setStatus(SensorStatus::ACTIVE);
-    EXPECT_EQ(sensor.getStatus(), SensorStatus::ACTIVE);
+    REQUIRE(sensor.getStatus() == SensorStatus::ACTIVE);
 
     sensor.setStatus(SensorStatus::ERROR);
-    EXPECT_EQ(sensor.getStatus(), SensorStatus::ERROR);
+    REQUIRE(sensor.getStatus() == SensorStatus::ERROR);
 }
 
 // Test actuator type
-TEST_F(BaseSensorTest, ActuatorType) {
+TEST_CASE("BaseSensor Actuator type", "[base_sensor]") {
     TestSensor actuatorSensor("ActuatorSensor", SensorType::ACTUATOR);
-    EXPECT_EQ(actuatorSensor.getType(), SensorType::ACTUATOR);
+    REQUIRE(actuatorSensor.getType() == SensorType::ACTUATOR);
+}
+
+// Test sensing type
+TEST_CASE("BaseSensor Sensing type", "[base_sensor]") {
+    TestSensor sensingSensor("SensingSensor", SensorType::SENSING);
+    REQUIRE(sensingSensor.getType() == SensorType::SENSING);
 }

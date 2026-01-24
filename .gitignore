@@ -4,6 +4,24 @@ cmake-build-*/
 CMakeFiles/
 out/
 bin/
+_deps/
+
+# Ninja build files
+.ninja*
+build.ninja
+rules.ninja
+
+# CTest files
+CTestTestfile.cmake
+Testing/
+
+# Test executables
+test_*
+
+# CMake cache
+CMakeCache.txt
+cmake_install.cmake
+*-b12d07c_*.cmake
 
 # C++ artifacts
 *.o

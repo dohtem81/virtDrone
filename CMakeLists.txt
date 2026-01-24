@@ -5,8 +5,8 @@ project(virtDrone)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find GTest (optional for testing)
-find_package(GTest)
+# Option to build tests
+option(VIRTD_BUILD_TESTS "Build unit tests" ON)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -33,9 +33,17 @@ add_library(common
     libs/common/math_utils.cpp
 )
 
-# Testing (only if GTest is found)
-if(GTEST_FOUND)
-    include_directories(${GTEST_INCLUDE_DIRS})
+# Testing with Catch2 (if enabled)
+if(VIRTD_BUILD_TESTS)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.5.0
+    )
+    FetchContent_MakeAvailable(Catch2)
+
     enable_testing()
 
     # Add test executables
@@ -44,11 +52,9 @@ if(GTEST_FOUND)
     )
     target_link_libraries(test_base_sensor
         drone
-        ${GTEST_LIBRARIES}
-        gtest_main
-        pthread
+        Catch2::Catch2WithMain
     )
-    add_test(NAME BaseSensorTest COMMAND test_base_sensor)
-endif()
 
-# For web (Python), no CMake needed
+    include(Catch)
+    catch_discover_tests(test_base_sensor)
+endif()
