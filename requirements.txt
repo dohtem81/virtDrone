@@ -1,0 +1,10 @@
+# Python dependencies for web component (FastAPI backend)
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# Optional for visualization (if using Python-based)
+# matplotlib>=3.8.0
+# plotly>=5.17.0
+
+# Note: Simulator and drone are in C++, so no Python deps for those

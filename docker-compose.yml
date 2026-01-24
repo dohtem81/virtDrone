@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  simulator:
+    build:
+      context: .
+      dockerfile: src/simulator/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - virtDrone-net
+
+  drone:
+    build:
+      context: .
+      dockerfile: src/drone/Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - virtDrone-net
+
+  web:
+    build:
+      context: .
+      dockerfile: src/web/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - virtDrone-net
+    depends_on:
+      - simulator
+      - drone
+
+networks:
+  virtDrone-net:
+    driver: bridge
