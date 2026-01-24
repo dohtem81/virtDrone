@@ -31,6 +31,32 @@ services:
       - simulator
       - drone
 
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    ports:
+      - "2222:22"  # SSH for remote dev
+    networks:
+      - virtDrone-net
+    command: sleep infinity  # Keep running for interactive use
+    stdin_open: true
+    tty: true    
+
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    networks:
+      - virtDrone-net
+    command: sh -c "cmake . -GNinja && ninja"
+
 networks:
   virtDrone-net:
     driver: bridge

@@ -1,0 +1,28 @@
+# Dockerfile for build environment
+FROM ubuntu:20.04
+
+# Avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build tools
+RUN apt-get update && apt-get install -y \
+    cmake \
+    g++ \
+    ninja-build \
+    libgtest-dev \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build and install GTest
+RUN cd /usr/src/gtest && cmake . -GNinja && ninja && cp lib/*.a /usr/lib/
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command (can be overridden)
+CMD ["sh", "-c", "mkdir -p build && cd build && cmake .. -GNinja && ninja && ctest"]

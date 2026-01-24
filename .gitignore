@@ -1,0 +1,69 @@
+# Build directories
+build/
+cmake-build-*/
+CMakeFiles/
+out/
+bin/
+
+# C++ artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.dll
+*.lib
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Temporary files
+*.tmp
+*.bak
+.cache/
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+
+# Secrets
+.env
+secrets/
