@@ -26,4 +26,4 @@ RUN pip3 install -r requirements.txt
 WORKDIR /workspace
 
 # Default command (can be overridden)
-CMD ["sh", "-c", "mkdir -p build && cd build && cmake .. -GNinja && ninja && ctest"]
+CMD ["/bin/bash"]

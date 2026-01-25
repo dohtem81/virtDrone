@@ -42,7 +42,6 @@ services:
       - "2222:22"  # SSH for remote dev
     networks:
       - virtDrone-net
-    command: sleep infinity  # Keep running for interactive use
     stdin_open: true
     tty: true    
 
