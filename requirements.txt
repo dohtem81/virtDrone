@@ -13,3 +13,7 @@ pytest-asyncio>=0.21.0  # For async tests if needed
 # plotly>=5.17.0
 
 # Note: Simulator and drone are in C++, so no Python deps for those
+
+flask
+requests
+pytest

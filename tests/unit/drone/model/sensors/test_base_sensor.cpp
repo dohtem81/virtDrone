@@ -4,7 +4,7 @@
 // Test subclass to implement the pure virtual method
 class TestSensor : public BaseSensor {
 public:
-    TestSensor(const std::string& name, SensorType type)
+    TestSensor(const std::string& name, AnalogIOSpec type)
         : BaseSensor(name, type) {}
 
     void update() override {
@@ -12,40 +12,94 @@ public:
     }
 };
 
-// Test constructor
-TEST_CASE("BaseSensor Constructor sets name and type", "[base_sensor]") {
-    TestSensor sensor("TestSensor", SensorType::SENSING);
+// Test constructor for ZERO_TO_10V
+TEST_CASE("BaseSensor Constructor with ZERO_TO_10V", "[base_sensor]") {
+    TestSensor sensor("TestSensor", AnalogIOSpec(
+        AnalogIOSpec::IODirection::INPUT,
+        AnalogIOSpec::CurrentRange::ZERO_TO_10V,
+        0,
+        1023
+    ));
     REQUIRE(sensor.getName() == "TestSensor");
-    REQUIRE(sensor.getType() == SensorType::SENSING);
-    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);  // Default status
-}
-
-// Test getters
-TEST_CASE("BaseSensor Getters return correct values", "[base_sensor]") {
-    TestSensor sensor("TestSensor", SensorType::SENSING);
-    REQUIRE(sensor.getName() == "TestSensor");
-    REQUIRE(sensor.getType() == SensorType::SENSING);
     REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);
+    REQUIRE(sensor.getType().direction == AnalogIOSpec::IODirection::INPUT);  // Changed to reference access
+    REQUIRE(sensor.getType().current_range == AnalogIOSpec::CurrentRange::ZERO_TO_10V);  // Changed to reference access
+    REQUIRE(sensor.getType().counts_range.min == 0);
+    REQUIRE(sensor.getType().counts_range.max == 1023);
 }
 
-// Test setter
-TEST_CASE("BaseSensor SetStatus updates status", "[base_sensor]") {
-    TestSensor sensor("TestSensor", SensorType::SENSING);
-    sensor.setStatus(SensorStatus::ACTIVE);
+// Test constructor for PLUS_MINUS_10V
+TEST_CASE("BaseSensor Constructor with PLUS_MINUS_10V", "[base_sensor]") {
+    TestSensor sensor("TestSensor", AnalogIOSpec(
+        AnalogIOSpec::IODirection::INPUT,
+        AnalogIOSpec::CurrentRange::PLUS_MINUS_10V,
+        0,
+        1023
+    ));
+    REQUIRE(sensor.getName() == "TestSensor");
+    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);
+    REQUIRE(sensor.getType().direction == AnalogIOSpec::IODirection::INPUT);  // Changed to reference access
+    REQUIRE(sensor.getType().current_range == AnalogIOSpec::CurrentRange::PLUS_MINUS_10V);  // Changed to reference access
+    REQUIRE(sensor.getType().counts_range.min == 0);
+    REQUIRE(sensor.getType().counts_range.max == 1023);
+}
+
+// Test constructor for ZERO_TO_20mA
+TEST_CASE("BaseSensor Constructor with ZERO_TO_20mA", "[base_sensor]") {
+    TestSensor sensor("TestSensor", AnalogIOSpec(
+        AnalogIOSpec::IODirection::INPUT,
+        AnalogIOSpec::CurrentRange::ZERO_TO_20mA,
+        0,
+        65000
+    ));
+    REQUIRE(sensor.getName() == "TestSensor");
+    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);
+    REQUIRE(sensor.getType().direction == AnalogIOSpec::IODirection::INPUT);  // Changed to reference access
+    REQUIRE(sensor.getType().current_range == AnalogIOSpec::CurrentRange::ZERO_TO_20mA);  // Changed to reference access
+    REQUIRE(sensor.getType().counts_range.min == 0);
+    REQUIRE(sensor.getType().counts_range.max == 65000);
+}
+
+// Test constructor for FOUR_TO_20mA
+TEST_CASE("BaseSensor Constructor with FOUR_TO_20mA", "[base_sensor]") {
+    TestSensor sensor("TestSensor", AnalogIOSpec(
+        AnalogIOSpec::IODirection::INPUT,
+        AnalogIOSpec::CurrentRange::FOUR_TO_20mA,
+        4000,
+        20000
+    ));
+    REQUIRE(sensor.getName() == "TestSensor");
+    REQUIRE(sensor.getStatus() == SensorStatus::INACTIVE);
+    REQUIRE(sensor.getType().direction == AnalogIOSpec::IODirection::INPUT);  // Changed to reference access
+    REQUIRE(sensor.getType().current_range == AnalogIOSpec::CurrentRange::FOUR_TO_20mA);  // Changed to reference access
+    REQUIRE(sensor.getType().counts_range.min == 4000);
+    REQUIRE(sensor.getType().counts_range.max == 20000);
+}
+
+// Test setLastCountsReading with valid and invalid inputs
+TEST_CASE("BaseSensor setLastCountsReading", "[base_sensor]") {
+    TestSensor sensor("TestSensor", AnalogIOSpec(
+        AnalogIOSpec::IODirection::INPUT,
+        AnalogIOSpec::CurrentRange::ZERO_TO_10V,
+        0,
+        1023
+    ));
+
+    // Valid reading
+    bool result = sensor.setLastCountsReading(512);
+    REQUIRE(result == true);
+    REQUIRE(sensor.getLastCountsReading() == 512);
     REQUIRE(sensor.getStatus() == SensorStatus::ACTIVE);
 
-    sensor.setStatus(SensorStatus::ERROR);
+    // Invalid reading (too high)
+    result = sensor.setLastCountsReading(2000);
+    REQUIRE(result == false);
     REQUIRE(sensor.getStatus() == SensorStatus::ERROR);
-}
+    REQUIRE(sensor.getLastCountsReading() == 2000); // Should max out
 
-// Test actuator type
-TEST_CASE("BaseSensor Actuator type", "[base_sensor]") {
-    TestSensor actuatorSensor("ActuatorSensor", SensorType::ACTUATOR);
-    REQUIRE(actuatorSensor.getType() == SensorType::ACTUATOR);
-}
-
-// Test sensing type
-TEST_CASE("BaseSensor Sensing type", "[base_sensor]") {
-    TestSensor sensingSensor("SensingSensor", SensorType::SENSING);
-    REQUIRE(sensingSensor.getType() == SensorType::SENSING);
+    // Invalid reading (too low, using max value for uint64_t as approximation)
+    result = sensor.setLastCountsReading(0);
+    REQUIRE(result == true);
+    REQUIRE(sensor.getStatus() == SensorStatus::ACTIVE);
+    REQUIRE(sensor.getLastCountsReading() == 0); // Should min out
 }

@@ -26,6 +26,7 @@ add_library(drone
     src/drone/control/control.cpp
     src/drone/telemetry/telemetry.cpp
     src/drone/model/sensors/base_sensor.cpp
+    src/drone/model/sensors/temperature_sensor.cpp  # Added to include TemperatureSensor implementation
 )
 
 # Common libs
@@ -46,15 +47,8 @@ if(VIRTD_BUILD_TESTS)
 
     enable_testing()
 
-    # Add test executables
-    add_executable(test_base_sensor
-        tests/unit/drone/model/sensors/test_base_sensor.cpp
-    )
-    target_link_libraries(test_base_sensor
-        drone
-        Catch2::Catch2WithMain
-    )
-
-    include(Catch)
-    catch_discover_tests(test_base_sensor)
+    # Tests are now handled in the tests/ subdirectory
 endif()
+
+# Add the tests subdirectory
+add_subdirectory(tests)

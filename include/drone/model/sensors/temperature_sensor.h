@@ -2,15 +2,20 @@
 #define TEMPERATURE_SENSOR_H
 
 #include "drone/model/sensors/base_sensor.h"
+#include <memory>
 
 struct TemperatureSensorRanges {
-    static constexpr double MIN_TEMPERATURE = -50.0; // Minimum temperature in Celsius
-    static constexpr double MAX_TEMPERATURE = 50.0;  // Maximum temperature in Celsius
+    double min_temperature;  // Minimum temperature in Celsius
+    double max_temperature;  // Maximum temperature in Celsius
+
+    TemperatureSensorRanges(double min = -50.0, double max = 50.0)
+        : min_temperature(min), max_temperature(max) {}
 };
 
 class TemperatureSensor : public BaseSensor {
 public:
-    TemperatureSensor(const std::string& name, const TemperatureSensorRanges* ranges);
+    TemperatureSensor(const std::string& name, 
+        const AnalogIOSpec& spec, const TemperatureSensorRanges& ranges = TemperatureSensorRanges());
     virtual ~TemperatureSensor() = default;
 
     // Implement the pure virtual update method
@@ -19,9 +24,13 @@ public:
     // Temperature-specific methods
     double getTemperature() const;
 
+    // get ranges
+    const TemperatureSensorRanges* getRanges() const { return &ranges_; }
+
 private:
     double temperature_;  // Current temperature reading
     TemperatureSensorRanges ranges_;
+    std::string units = "Celsius";
 };
 
 #endif // TEMPERATURE_SENSOR_H

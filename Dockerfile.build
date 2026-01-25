@@ -1,5 +1,5 @@
 # Dockerfile for build environment
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 # Avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,12 +18,15 @@ RUN apt-get update && apt-get install -y \
 # Build and install GTest
 RUN cd /usr/src/gtest && cmake . -GNinja && ninja && cp lib/*.a /usr/lib/
 
-# Install Python dependencies
+# Install Python dependencies for web development
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 # Set working directory
 WORKDIR /workspace
+
+# Build the project
+RUN mkdir build && cd build && cmake .. -GNinja && ninja
 
 # Default command (can be overridden)
 CMD ["/bin/bash"]

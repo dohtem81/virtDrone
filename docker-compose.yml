@@ -34,7 +34,7 @@ services:
   dev:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: ./docker/Dockerfile
     volumes:
       - .:/workspace
     working_dir: /workspace
@@ -48,7 +48,7 @@ services:
   build:
     build:
       context: .
-      dockerfile: Dockerfile.build
+      dockerfile: ./docker/Dockerfile
     volumes:
       - .:/workspace
     working_dir: /workspace

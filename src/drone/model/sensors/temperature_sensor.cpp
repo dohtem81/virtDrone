@@ -1,26 +1,31 @@
 #include "drone/model/sensors/temperature_sensor.h"
 #include <cstdlib>  // For rand()
 #include <ctime>   // For time()
+#include "drone/model/utils.h"
 
-TemperatureSensor::TemperatureSensor(const std::string& name, const TemperatureSensorRanges& ranges)
-    : BaseSensor(name, SensorType::SENSING), temperature_(20.0) {
+TemperatureSensor::TemperatureSensor(
+    const std::string& name, 
+    const AnalogIOSpec& spec, 
+    const TemperatureSensorRanges& ranges)
+        : BaseSensor(name, spec), ranges_(ranges), temperature_(0.0) {
     // Seed random number generator for simulated temperature readings
     std::srand(std::time(nullptr));
-    ranges_ = *ranges;
+    update();  // Initial update to set temperature
 }
 
 void TemperatureSensor::update() {
-    // Simulate temperature reading with some variation
-    // For a real sensor, this would read from hardware
-    double variation = (std::rand() % 200 - 100) / 100.0;  // Random variation between -1.0 and 1.0
-    temperature_ += variation;
+    // temperature calculation based on last reading
+    // get counts times unit per count plus min temperature
+    temperature_ = Utils::mapRange(
+        Utils::clamp<uint64_t>(last_reading_, type_->counts_range.min, type_->counts_range.max),
+        type_->counts_range.min,
+        type_->counts_range.max,
+        ranges_.min_temperature,
+        ranges_.max_temperature
+    );
 
-    // Keep temperature within reasonable bounds (e.g., -50 to 50 degrees Celsius)
-    if (temperature_ < ranges_.MIN_TEMPERATURE) temperature_ = ranges_.MIN_TEMPERATURE;
-    if (temperature_ > ranges_.MAX_TEMPERATURE) temperature_ = ranges_.MAX_TEMPERATURE;
-
-    // Set status to ACTIVE if update succeeds
-    setStatus(SensorStatus::ACTIVE);
+    // adjust for ranges
+    temperature_ = Utils::clamp<double>(temperature_, ranges_.min_temperature, ranges_.max_temperature);
 }
 
 double TemperatureSensor::getTemperature() const {
