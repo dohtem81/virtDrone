@@ -1,6 +1,6 @@
+# virtDrone
+
 ## Overview
-=======
-# Drone Simulation Platform aka virtDrone
 
 **virtDrone** is an early-stage, intentionally simplified drone simulation platform.
 
