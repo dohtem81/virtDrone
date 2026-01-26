@@ -1,184 +1,295 @@
 # virtDrone
 
-# Drone Simulation Platform
+## Overview
 
-This is a **hobby project** focused on building a simplified yet reasonably complete drone simulation environment. The goal is not high‑fidelity physics, but rather a clear demonstration of **system architecture**, **component abstraction**, and **testability** — with an eye toward eventually reusing parts of the system on real hardware.
+**virtDrone** is an early-stage, intentionally simplified drone simulation platform.
 
-## Project Goals
+The purpose of this project is **not** to build a high-fidelity flight simulator, but to demonstrate **systems-level thinking**, architectural decomposition, and explicit engineering tradeoffs when designing complex cyber‑physical systems.
 
-The project aims to simulate a drone and its surrounding ecosystem, including:
-
-* Drone state (position, speed, orientation)
-* Sensors (virtualized and abstracted)
-* Battery drain, efficiency, and basic thermal/loss modeling
-* Simplified physics and motion dynamics
-* Telemetry reporting back to a central "home base"
-
-The emphasis is on **how the system is structured**, not on perfect physical accuracy.
-
-## Architecture Overview
-
-The system is split into two major parts:
-
-### 1. Drone Simulator
-
-The simulator models the internal behavior of a drone:
-
-* Sensor simulation (IMU, GPS-like data, etc.)
-* Power consumption and battery state
-* Motion and speed calculation based on simplified physics
-* Hardware abstraction layers separating logic from implementation
-
-All components are designed to be:
-
-* Modular
-* Unit-testable
-* Replaceable with real hardware drivers in the future
-
-### 2. Home Base (Web Interface)
-
-The home base is a **web-based control and monitoring interface** that consists of two parts:
-
-#### Backend
-- Maintains communication with the simulated drone
-- Handles telemetry data exchange and command routing
-- Acts as the server-side logic for processing drone updates
-
-#### UI (Web with Real-Time Updates)
-- Provides a user interface for monitoring live parameters (battery, speed, position, sensor data)
-- Allows **manual control** of drone movement
-- Displays real-time updates via web technologies (e.g., WebSockets or polling for live data)
-
-This separation mirrors real-world drone and robotics systems.
-
-## Design Principles
-
-* **Simplified physics**: good enough to reason about behavior and system flow
-* **Clear abstractions**: hardware vs software boundaries are explicit
-* **Test-first mindset**: components are designed to be unit-tested in isolation
-* **Simulation-first**: the same interfaces should work with both simulated and real hardware
-* **Educational/demo focus**: architecture and approach matter more than realism
-
-## What This Project Is (and Isn’t)
-
-✅ A demo of:
-
-* Distributed system design
-* Simulation-driven development
-* Hardware abstraction patterns
-* Telemetry and control loops
-
-❌ Not:
-
-* A flight-accurate drone physics engine
-* A real-time flight controller replacement
-* Production-ready autopilot software
-
-## Why This Exists
-
-This project exists to explore and demonstrate:
-
-* How to design systems that scale from simulation to real hardware
-* How to structure code for testing complex, stateful systems
-* How simulation can accelerate development and validation
-
-If parts of this project eventually run on real hardware — that’s a success, not a requirement.
+This repository is meant to show *how I think* about problems such as simulation, control boundaries, abstraction layers, and failure handling — the kinds of concerns that matter in aerospace, robotics, and safety‑critical software.
 
 ---
 
-**Status:** Building foundation components. No backend or frontend yet. Experimental / hobby project
+## Problem Statement
 
-Contributions, feedback, and architectural discussions are welcome.
+Modern drone and flight software stacks are complex, slow to iterate on, and often hide software design issues behind heavy physics engines and tooling.
 
-A drone simulator project with three main components: simulator (physics), drone (model and control), and web-based control interface with visualization.
+The goal of virtDrone is to provide:
 
-## Technologies
+* A **lightweight simulation environment**
+* Fast iteration on **system architecture and control logic**
+* Clear separation between **plant**, **control**, and **interfaces**
 
-- **Simulator and Drone**: Implemented in C++ for performance.
-- **Web Interface**: Backend in Python using FastAPI, with potential frontend in JavaScript/React.
-- **Testing**: Catch2 for C++ unit tests, pytest for Python tests.
-- **Build System**: CMake with Ninja for C++, Docker for containerization.
+The emphasis is on *reasoning about the system*, not achieving perfect realism.
 
-## Components
+---
 
-- **Simulator**: Handles physics simulation including position, speed, tilt, etc. (C++).
-- **Drone**: Manages motor speeds, temperatures, and control algorithms (C++).
-- **Web Interface**: Provides control interface and visualization via web technologies (Python/FastAPI).
+## Design Goals
 
-## Folder Structure
+* Clear separation of responsibilities between components
+* Deterministic, easy-to-debug behavior
+* Testable modules with minimal coupling
+* Ability to evolve toward hardware‑in‑the‑loop (HIL) concepts later
+* Make tradeoffs explicit and visible in code and documentation
 
-- `src/`: Main source code
-  - `simulator/`: Physics simulation (C++)
-  - `drone/`: Drone logic (C++)
-  - `web/`: Web interface (Python)
-- `libs/`: Shared libraries (C++)
-- `docs/`: Documentation
-- `tools/`: Build and utility scripts (includes CMake for C++)
-- `tests/`: Unit and integration tests
-- `examples/`: Sample projects
-- `configs/`: Configuration files
+---
 
-## Getting Started
+## Non‑Goals (Intentional)
+
+The following are **explicit non‑goals** at this stage:
+
+* High‑fidelity aerodynamics
+* Accurate propeller or CFD‑based modeling
+* Detailed IMU / sensor noise simulation
+* Autopilot tuning or real flight performance prediction
+
+These omissions are intentional.
+
+High realism increases complexity, slows iteration, and obscures architectural and control‑logic issues that are the focus of this project.
+
+---
+
+## System Decomposition
+
+The system is decomposed into a small number of explicit components:
+
+### World / Environment
+
+* Owns simulation time
+* Defines reference frames
+* Advances the simulation deterministically
+
+### Drone (Plant)
+
+* Owns physical state (position, velocity, orientation)
+* Models energy consumption and basic dynamics
+* Exposes clear inputs and outputs
+
+### Control Interfaces
+
+* Abstract control inputs (throttle, attitude, etc.)
+* Decouple control logic from the underlying plant
+* Allow future swapping between simulated and real hardware
+
+### External Interfaces
+
+* Telemetry output
+* Control input sources (UI, scripts, tests)
+
+This mirrors real-world separation between **flight software**, **vehicle dynamics**, and **ground systems**.
+
+---
+
+## Modeling Philosophy
+
+Models are chosen to be:
+
+* Simple
+* Monotonic
+* Predictable
+
+For example:
+
+* Battery behavior is modeled to capture *relative* energy consumption trends, not absolute flight time
+* Motor response is simplified to make control relationships obvious
+* Environmental effects are minimal by design
+
+The guiding question is always:
+
+> *Does this model help reason about the system?*
+
+---
+
+## Tradeoffs & Intentional Simplifications
+
+This project intentionally accepts the following tradeoffs:
+
+* **Accuracy vs clarity**: clarity wins
+* **Speed of iteration vs realism**: iteration wins
+* **Explicit assumptions vs hidden complexity**: assumptions are documented
+
+Examples:
+
+* Linear or near‑linear models are preferred early
+* No attempt is made to perfectly match real hardware
+* Control loop timing is explicit and observable
+
+Each simplification is a placeholder, not a blind spot.
+
+---
+
+## Failure‑Mode Thinking (Planned)
+
+A core design goal is to support **fault injection** and degraded‑mode behavior.
+
+Planned examples include:
+
+* Battery voltage sag under load
+* Motor efficiency degradation
+* Delayed or dropped control updates
+
+The intent is to observe:
+
+* How control logic responds
+* Whether system boundaries are respected
+* Where assumptions break
+
+This reflects real-world aerospace and robotics failure analysis.
+
+---
+
+## Build & Run
+
+> **Note:** This project is intentionally lightweight. Build instructions favor clarity over tooling complexity.
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Git
+* C++17 compatible compiler (GCC / Clang)
+* CMake >= 3.16
+* Python 3.9+ (for tooling / UI components, if enabled)
+* Git
 
-### Building
+Optional:
 
-#### Using Docker (recommended)
+* Docker (for isolated builds)
+
+---
+
+### Clone Repository
+
 ```bash
-docker compose run --rm dev
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
+git clone https://github.com/dohtem81/virtDrone.git
+cd virtDrone
 ```
+
+---
+
+### Build (Native)
+
+```bash
+mkdir -p build
+cd build
+cmake ..
+cmake --build .
+```
+
+The resulting simulator binary will be placed in the build directory.
+
+---
+
+### Run Simulator
+
+```bash
+./virtDrone
+```
+
+By default, the simulator:
+
+* Starts with a single drone instance
+* Advances simulation time deterministically
+* Emits basic telemetry to stdout
+
+(Exact runtime behavior may evolve as the project grows.)
+
+---
+
+### Python / UI Components (Optional)
+
+If Python-based tooling or UI components are present:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run the backend or UI as documented in the relevant subdirectory.
+
+---
+
+### Docker (Optional)
+
+If a Dockerfile is provided:
+
+```bash
+docker build -t virtdrone .
+docker run --rm virtdrone
+```
+
+Docker is intended for reproducibility, not performance.
+
+---
+
+## Testing Philosophy
+
+Testing is treated as a **first‑class design tool**, not an afterthought.
+
+* Unit tests validate component‑level behavior
+* Tests focus on *interfaces and contracts*, not internal implementation
+* Deterministic simulation allows reproducible tests
 
 ### Running Tests
 
-The project uses Catch2 for C++ unit tests and pytest for Python tests.
+```bash
+ctest --test-dir build
+```
 
-1. Run C++ tests:
-   ```bash
-   docker compose run --rm dev ctest
-   ```
+---
 
-2. Run Python tests:
-   ```bash
-   docker compose run --rm dev python -m pytest tests/unit/web/
-   ```
+## Why Not Use Existing Simulators?
 
-### Running the Application
+Tools like Gazebo, AirSim, or PX4 SITL are powerful but heavy.
 
-1. Start all components:
-   ```bash
-   docker compose up --build
-   ```
+They are excellent for:
 
-2. Access the web interface at http://localhost:8000
+* Autopilot validation
+* High‑fidelity simulation
+* Sensor and perception work
 
-### Local Development
+virtDrone exists for a different purpose:
 
-For local development without Docker:
+* Architectural exploration
+* Control boundary design
+* System‑level reasoning
 
-1. Install dependencies:
-   - C++: CMake, Ninja, GCC/Clang
-   - Python: `pip install -r requirements.txt`
+This project can later integrate with heavier tools if needed.
 
-2. Build C++ components:
-   ```bash
-   mkdir build && cd build
-   cmake .. -GNinja
-   ninja
-   ```
+---
 
-3. Run tests:
-   ```bash
-   ctest  # For C++ tests
-   python -m pytest tests/unit/web/  # For Python tests
-   ```
+## Project Status
 
-4. Run components individually (refer to `docs/` for details).
+This repository represents an **early stage** of development.
+
+Incomplete areas are expected and intentional.
+
+The focus is on:
+
+* Getting the structure right
+* Making assumptions explicit
+* Creating a foundation that can evolve
+
+---
+
+## Future Directions
+
+Potential future work includes:
+
+* Hardware‑in‑the‑loop abstractions
+* Configurable fault injection
+* More detailed (optional) models
+* Clear separation between control algorithms and vehicle model
+
+None of these are required for the project to meet its primary goal.
+
+---
+
+## Final Note
+
+virtDrone is not about building the *best* drone simulator.
+
+It is about demonstrating **how complex engineering systems should be approached, decomposed, and reasoned about**.
+
+That mindset is the real deliverable.
 
 ## License
 
