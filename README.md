@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 # virtDrone
 
 ## Overview
+=======
+# Drone Simulation Platform
+>>>>>>> e2c907716ef4fb2e66f4f485bf676dc34fad96dd
 
 **virtDrone** is an early-stage, intentionally simplified drone simulation platform.
 
