@@ -1,8 +1,9 @@
 #ifndef ELEC_MOTOR_H
 #define ELEC_MOTOR_H
 
-#include "drone/model/sensors/base_sensor.h"
+#include "drone/model/sensors/temperature_sensor.h"
 #include <memory>
+#include <chrono>    // For time calculations
 
 /**
  * @brief Struct for electrical motor specifications.
@@ -46,6 +47,8 @@ public:
      */
     void update() override;
 
+    void update(uint64_t delta_time);
+
     // Motor-specific getters
     /**
      * @brief Gets the current speed in RPM.
@@ -64,6 +67,15 @@ public:
      * @return The temperature in °C.
      */
     double getTemperatureC() const { return temperature_c_; }
+
+    TemperatureSensorReading getTemperatureReading() const { 
+        TemperatureSensorReading temp_reading = {
+            temp_sensor_.getTemperature(),
+            temp_sensor_.getUnits(),
+            temp_sensor_.getStatus()
+        };
+        return temp_reading; 
+    }
     
     /**
      * @brief Gets the motor efficiency.
@@ -101,6 +113,7 @@ private:
     double losses_w_;          ///< Power losses in W.
     double ambient_temp_c_;    ///< Ambient temperature in °C (assumed constant).
     std::chrono::steady_clock::time_point last_update_time_; ///< Time point of the last update.
+    TemperatureSensor temp_sensor_; ///< Internal temperature sensor for motor.
 
     /**
      * @brief Calculates current based on speed and efficiency.
@@ -115,9 +128,9 @@ private:
     
     /**
      * @brief Updates temperature based on losses and thermal resistance. time in milliseconds.
-     * @param delta_time Pointer to time duration since last update.
+     * @param delta_ms Time duration since last update in milliseconds (default 1000ms if not provided).
      */
-    void updateTemperature(std::chrono::duration<double>* delta_time);
+    void updateTemperature(uint64_t delta_ms = 1000);
 };
 
 #endif // ELEC_MOTOR_H

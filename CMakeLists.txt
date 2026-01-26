@@ -27,6 +27,7 @@ add_library(drone
     src/drone/telemetry/telemetry.cpp
     src/drone/model/sensors/base_sensor.cpp
     src/drone/model/sensors/temperature_sensor.cpp  # Added to include TemperatureSensor implementation
+    src/drone/model/components/elect_motor.cpp
 )
 
 # Common libs

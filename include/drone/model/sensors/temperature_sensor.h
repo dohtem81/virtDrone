@@ -12,6 +12,16 @@ struct TemperatureSensorRanges {
         : min_temperature(min), max_temperature(max) {}
 };
 
+struct TemperatureSensorReading {
+    double temperature;  // Temperature in gieven units
+    std::string units;  // Units of measurement
+    SensorStatus status;  // Sensor status
+
+    // Constructor
+    TemperatureSensorReading(double temp = 0.0, const std::string& unit = "Celsius", SensorStatus stat = SensorStatus::INACTIVE)
+        : temperature(temp), units(unit), status(stat) {}
+};
+
 class TemperatureSensor : public BaseSensor {
 public:
     TemperatureSensor(const std::string& name, 
@@ -26,6 +36,9 @@ public:
 
     // get ranges
     const TemperatureSensorRanges* getRanges() const { return &ranges_; }
+
+    // get units
+    std::string getUnits() const { return units; }
 
 private:
     double temperature_;  // Current temperature reading
