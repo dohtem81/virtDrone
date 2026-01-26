@@ -1,5 +1,3 @@
-# virtDrone
-
 # Drone Simulation Platform
 
 This is a **hobby project** focused on building a simplified yet reasonably complete drone simulation environment. The goal is not high‑fidelity physics, but rather a clear demonstration of **system architecture**, **component abstraction**, and **testability** — with an eye toward eventually reusing parts of the system on real hardware.
