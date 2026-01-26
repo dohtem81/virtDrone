@@ -83,8 +83,8 @@ This mirrors the separation of **flight software**, **vehicle dynamics**, and **
 ---
 
 ## Tradeoffs & Intentional Simplifications
-* **Clarity > Accuracy**  
-* **Iteration speed > Realism**  
+* **Clarity > Accuracy**
+* **Iteration speed > Realism**
 * **Explicit assumptions > Hidden complexity**
 
 Linear/near-linear models and simplified dynamics are intentional placeholders for architectural exploration.
@@ -99,6 +99,32 @@ Testing is the **first-class feature currently available**.
 docker compose run --rm dev
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
+```
+
+### Directly on Host
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+```
+
+Tests are the only currently runnable component and demonstrate modular behavior.
+
+### Future Directions
+
+* Fault injection and degraded-mode scenarios
+
+* Optional higher-fidelity models
+
+* Minimal interactive CLI or UI
+
+* Hardware-in-the-loop abstractions
+
+These are planned, but the core design reasoning is already visible.
+
+### Final Note
+
+virtDrone is not about building the best drone simulator. It is about demonstrating how complex engineering systems can be approached, decomposed, and reasoned about — the mindset is the real deliverable.
 
 ## License
 
