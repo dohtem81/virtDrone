@@ -4,6 +4,8 @@
 #include "drone/model/sensors/base_sensor.h"
 #include <memory>
 
+namespace drone::model::sensors {
+
 struct TemperatureSensorRanges {
     double min_temperature;  // Minimum temperature in Celsius
     double max_temperature;  // Maximum temperature in Celsius
@@ -45,5 +47,7 @@ private:
     TemperatureSensorRanges ranges_;
     std::string units = "Celsius";
 };
+
+}  // namespace drone::model::sensors
 
 #endif // TEMPERATURE_SENSOR_H

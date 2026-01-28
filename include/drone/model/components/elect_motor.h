@@ -5,6 +5,8 @@
 #include <memory>
 #include <chrono>    // For time calculations
 
+namespace drone::model::components {
+
 /**
  * @brief Struct for electrical motor specifications.
  */
@@ -25,7 +27,7 @@ struct ElecMotorSpecs {
  * This class models motor behavior including speed, current consumption, efficiency,
  * losses, temperature, and battery drain calculations.
  */
-class ElecMotor : public BaseSensor {
+class ElecMotor : public drone::model::sensors::BaseSensor {
 public:
     /**
      * @brief Constructor for ElecMotor.
@@ -33,7 +35,7 @@ public:
      * @param spec The analog IO specification.
      * @param motor_specs The motor specifications.
      */
-    ElecMotor(const std::string& name, const AnalogIOSpec& spec, const ElecMotorSpecs& motor_specs = ElecMotorSpecs());
+    ElecMotor(const std::string& name, const drone::model::sensors::AnalogIOSpec& spec, const ElecMotorSpecs& motor_specs = ElecMotorSpecs());
     
     /**
      * @brief Virtual destructor.
@@ -46,8 +48,6 @@ public:
      * This method simulates speed, current, losses, temperature, and battery drain.
      */
     void update() override;
-
-    void update(uint64_t delta_time);
 
     // Motor-specific getters
     /**
@@ -68,8 +68,8 @@ public:
      */
     double getTemperatureC() const { return temperature_c_; }
 
-    TemperatureSensorReading getTemperatureReading() const { 
-        TemperatureSensorReading temp_reading = {
+    drone::model::sensors::TemperatureSensorReading getTemperatureReading() const { 
+        drone::model::sensors::TemperatureSensorReading temp_reading = {
             temp_sensor_.getTemperature(),
             temp_sensor_.getUnits(),
             temp_sensor_.getStatus()
@@ -96,6 +96,23 @@ public:
      */
     const ElecMotorSpecs& getSpecs() const { return specs_; }
 
+    // Additional getters for simulation state
+    double getDesiredSpeedRPM() const { return desired_speed_rpm_; }
+    double getVoltageV() const { return voltage_v_; }
+    double getLossesW() const { return losses_w_; }
+    double getAmbientTempC() const { return ambient_temp_c_; }
+    std::chrono::steady_clock::time_point getLastUpdateTime() const { return last_update_time_; }
+    drone::model::sensors::TemperatureSensor& getTempSensor() { return temp_sensor_; }
+
+    // Setters for simulation state
+    void setSpeedRPM(double speed) { speed_rpm_ = speed; }
+    void setCurrentA(double current) { current_a_ = current; }
+    void setTemperatureC(double temp) { temperature_c_ = temp; }
+    void setLossesW(double losses) { losses_w_ = losses; }
+    void setVoltageV(double voltage) { voltage_v_ = voltage; }
+    void setAmbientTempC(double temp) { ambient_temp_c_ = temp; }
+    void setLastUpdateTime(std::chrono::steady_clock::time_point time) { last_update_time_ = time; }
+
     // Setters for simulation inputs
     /**
      * @brief Sets the desired speed (input for simulation).
@@ -113,24 +130,9 @@ private:
     double losses_w_;          ///< Power losses in W.
     double ambient_temp_c_;    ///< Ambient temperature in °C (assumed constant).
     std::chrono::steady_clock::time_point last_update_time_; ///< Time point of the last update.
-    TemperatureSensor temp_sensor_; ///< Internal temperature sensor for motor.
-
-    /**
-     * @brief Calculates current based on speed and efficiency.
-     * Relationship: Current increases linearly with speed, adjusted by efficiency.
-     */
-    void calculateCurrent();
-    
-    /**
-     * @brief Calculates power losses.
-     */
-    void calculateLosses();
-    
-    /**
-     * @brief Updates temperature based on losses and thermal resistance. time in milliseconds.
-     * @param delta_ms Time duration since last update in milliseconds (default 1000ms if not provided).
-     */
-    void updateTemperature(uint64_t delta_ms = 1000);
+    drone::model::sensors::TemperatureSensor temp_sensor_; ///< Internal temperature sensor for motor.
 };
+
+}  // namespace drone::model::components
 
 #endif // ELEC_MOTOR_H

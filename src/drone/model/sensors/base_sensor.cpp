@@ -1,5 +1,7 @@
 #include "drone/model/sensors/base_sensor.h"
 
+namespace drone::model::sensors {
+
 /**
  * @brief Constructor implementation.
  * Initializes the sensor with the given name and type, setting status to INACTIVE.
@@ -59,3 +61,5 @@ bool BaseSensor::setLastCountsReading(uint64_t reading) {
 
     return true;
 }
+
+}  // namespace drone::model::sensors

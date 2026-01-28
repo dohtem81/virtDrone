@@ -3,6 +3,8 @@
 #include <ctime>   // For time()
 #include "drone/model/utils.h"
 
+namespace drone::model::sensors {
+
 TemperatureSensor::TemperatureSensor(
     const std::string& name, 
     const AnalogIOSpec& spec, 
@@ -31,3 +33,5 @@ void TemperatureSensor::update() {
 double TemperatureSensor::getTemperature() const {
     return temperature_;
 }
+
+}  // namespace drone::model::sensors

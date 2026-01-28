@@ -17,6 +17,14 @@ add_executable(test_motors
     unit/drone/model/component/test_elect_motor.cpp
 )
 
+add_executable(test_motor_physics
+    unit/simulator/physics/test_motor_physics.cpp
+)
+
+add_executable(test_gps_sensor
+    unit/drone/model/component/test_gps_sensor.cpp
+)
+
 # Link against Catch2 and the drone library
 target_link_libraries(test_base_sensor
     PRIVATE
@@ -43,14 +51,32 @@ target_link_libraries(test_motors
         drone  # Link to the drone library for dependencies
 )
 
+target_link_libraries(test_motor_physics
+    PRIVATE
+        Catch2::Catch2WithMain
+        drone  # Link to the drone library for dependencies
+        simulator  # Link to the simulator library for dependencies
+)
+
+target_link_libraries(test_gps_sensor
+    PRIVATE
+        Catch2::Catch2WithMain
+        drone  # Link to the drone library for dependencies
+)
+
 # Register the test with CTest
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_base_sensor COMMAND test_base_sensor)
 add_test(NAME test_temperature_sensor COMMAND test_temperature_sensor)
 add_test(NAME test_motors COMMAND test_motors)
+add_test(NAME test_motor_physics COMMAND test_motor_physics)
+add_test(NAME test_gps_sensor COMMAND test_gps_sensor)
+
 # Enable test discovery for Catch2
 include(Catch)
 catch_discover_tests(test_utils)
 catch_discover_tests(test_base_sensor)
 catch_discover_tests(test_temperature_sensor)
 catch_discover_tests(test_motors)
+catch_discover_tests(test_motor_physics)
+catch_discover_tests(test_gps_sensor)

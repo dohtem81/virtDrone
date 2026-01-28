@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>  // Added for std::unique_ptr
 
+namespace drone::model::sensors {
+
 /**
  * @brief Enumeration for sensor types.
  */
@@ -147,5 +149,7 @@ protected:
     void setStatus(SensorStatus status);  ///< Sets the sensor status.
     uint64_t last_reading_; ///< The last reading from the sensor.
 };
+
+}  // namespace drone::model::sensors
 
 #endif // BASE_SENSOR_H
