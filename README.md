@@ -72,6 +72,11 @@ This mirrors the separation of **flight software**, **vehicle dynamics**, and **
 
 ---
 
+## Model Components Reference
+For detailed documentation on classes, structs, enums, and usage examples based on unit tests, see [include/drone/model/README.MD](include/drone/model/README.MD).
+
+---
+
 ## Modeling Philosophy
 * Simple, predictable, and monotonic models
 * Battery modeled for relative trends, not exact flight time
@@ -107,6 +112,17 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ```
+
+## Running Tests
+
+```bash
+# Run all tests
+ctest --test-dir build --output-on-failure
+
+# Run specific test
+./build/tests/ionet_tests
+```
+
 
 Tests are the only currently runnable component and demonstrate modular behavior.
 

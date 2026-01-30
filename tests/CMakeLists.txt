@@ -58,7 +58,7 @@ target_link_libraries(test_motor_physics
         simulator  # Link to the simulator library for dependencies
 )
 
-target_link_libraries(test_gps_sensor
+target_link_libraries(test_gps_sensor   
     PRIVATE
         Catch2::Catch2WithMain
         drone  # Link to the drone library for dependencies
