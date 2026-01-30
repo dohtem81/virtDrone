@@ -38,7 +38,7 @@ public:
      * @brief Gets the current in amperes.
      * @return The current in A.
      */
-    virtual double getCurrentA() const = 0;
+    double getCurrentA() const { return 0; } // Placeholder implementation;
 
     /**
      * @brief Gets the remaining capacity in milliamp-hours.
@@ -52,7 +52,7 @@ public:
      * @brief Gets the state of charge as a percentage.
      * @return The state of charge in %.
      */
-    virtual double getStateOfChargePercent() const = 0;
+    double getStateOfChargePercent() const { return 100.0; } // Placeholder implementation;
 
 private:
     std::string cell_id_;

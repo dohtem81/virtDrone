@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "battery_cell.h"
 
 namespace drone::model::components {
@@ -14,9 +15,10 @@ struct BatterySpecs {
     double capacity_mah;      ///< Battery capacity in milliamp-hours.
     double nominal_voltage_v; ///< Nominal voltage in volts.
     double max_discharge_rate_c; ///< Maximum discharge rate in C (capacity multiplier).
+    int cells;               ///< Number of cells in the battery.
 
-    BatterySpecs(double cap = 5000.0, double nom_vol = 14.8, double max_disch = 1.0)
-        : capacity_mah(cap), nominal_voltage_v(nom_vol), max_discharge_rate_c(max_disch) {}
+    BatterySpecs(double cap = 6000.0, double nom_vol = 14.8, double max_disch = 1.0, int cells = 4)
+        : capacity_mah(cap), nominal_voltage_v(nom_vol), max_discharge_rate_c(max_disch), cells(cells) {}
 };
 
 /**
@@ -27,22 +29,18 @@ struct BatterySpecs {
  */
 class Battery_base {
 public:
-    /**
-     * @brief Constructor for Battery_base.
-     * @param name The name of the battery.
-     * @param specs The battery specifications.
-     */
-    Battery_base(const std::string& name, const BatterySpecs& specs);
-
-    /**
-     * @brief Virtual destructor.
-     */
+    Battery_base(const std::string& name, const BatterySpecs& specs)
+    {
+        name_ = name;
+        specs_ = specs;
+        for (int i = 0; i < specs.cells; ++i) {
+            std::shared_ptr<Battery_Cell> newCell = std::make_shared<Battery_Cell>("Cell_" + std::to_string(i + 1), specs.capacity_mah / specs.cells, specs.nominal_voltage_v / specs.cells);
+            cells_.push_back(*newCell);
+        }
+    };
     virtual ~Battery_base() = default;
-
     /**
-     * @brief Pure virtual update method for battery simulation.
-     * 
-     * Derived classes must implement this to update battery state.
+     * @brief Updates the battery state.
      */
     virtual void update() = 0;
 
@@ -63,13 +61,7 @@ public:
             total_voltage += cell.getNominalVoltageV();
         }
         return total_voltage;
-     }
-
-    /**
-     * @brief Gets the current discharge current in amperes.
-     * @return The current in A.
-     */
-    virtual double getCurrentA() const = 0;
+    }
 
     /**
      * @brief Gets the remaining capacity in milliamp-hours.
@@ -81,19 +73,37 @@ public:
             total_capacity += cell.getRemainingCapacityMah();
         }
         return total_capacity;
-    }
+    }    
 
-    /**
-     * @brief Gets the state of charge as a fraction (0.0 to 1.0).
-     * @return The SOC.
-     */
-    virtual double getStateOfCharge() const = 0;
+    // /**
+    //  * @brief Gets the current discharge current in amperes.
+    //  * @return The current in A.
+    //  */
+    // virtual double getCurrentA() const = 0;
 
-    /**
-     * @brief Gets the battery specifications.
-     * @return The specs.
-     */
-    BatterySpecs getSpecs() const { return specs_; }
+    // /**
+    //  * @brief Gets the remaining capacity in milliamp-hours.
+    //  * @return The capacity in mAh.
+    //  */
+    // double getRemainingCapacityMah(){
+    //     double total_capacity = 0.0;
+    //     for (const auto& cell : cells_) {
+    //         total_capacity += cell.getRemainingCapacityMah();
+    //     }
+    //     return total_capacity;
+    // }
+
+    // /**
+    //  * @brief Gets the state of charge as a fraction (0.0 to 1.0).
+    //  * @return The SOC.
+    //  */
+    // virtual double getStateOfCharge() const = 0;
+
+    // /**
+    //  * @brief Gets the battery specifications.
+    //  * @return The specs.
+    //  */
+    // BatterySpecs getSpecs() const { return specs_; }
 
 protected:
     std::string name_;
