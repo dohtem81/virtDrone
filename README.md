@@ -1,98 +1,163 @@
-# virtDrone — A Playground for System-Level Thinking 🚀
-
-## Tagline
-**virtDrone** is an early-stage, intentionally simplified drone simulation platform built to explore **architectural decomposition, tradeoffs, and systems-level reasoning**. Think of it as a sandbox for how a complex drone system *could* be structured — not a full simulator.
-
----
+# virtDrone  
+**Vehicle Subsystem Simulation & Control Framework (Work in Progress)**
 
 ## Overview
-The purpose of this project is **not** to build a high-fidelity flight simulator. Instead, virtDrone demonstrates:
+`virtDrone` is a modular simulation framework focused on **vehicle subsystem modeling, power/thrust closure, and incremental introduction of control loops**.
 
-* How to think about **simulation, control boundaries, and abstraction layers**
-* Explicit **engineering tradeoffs** when designing cyber-physical systems
-* Early-stage modular architecture for drones and control interfaces
+The goal of this project is **not** high-fidelity CFD or photorealistic simulation.  
+Instead, it demonstrates a **correct engineering workflow**:
 
-This repository shows *how I reason about systems*, with inspiration from aerospace, robotics, and safety-critical software design.
+> component modeling → subsystem validation → open-loop feasibility → closed-loop control → system-level behavior under constraints
 
----
-
-## Problem Statement
-Modern drone and flight software stacks are complex, slow to iterate on, and often hide software design issues behind heavy physics engines and tooling.
-
-virtDrone aims to provide:
-
-* A **lightweight, understandable simulation environment**
-* Fast iteration on **system architecture and control logic**
-* Clear separation between **plant**, **control**, and **interfaces**
-
-Focus is on *reasoning about the system*, not achieving perfect realism.
+While the initial target vehicle is a multirotor drone, the architecture is intentionally generic and can be extended to other vehicles (e.g., rockets, wheeled platforms).
 
 ---
 
-## Design Goals
-* Clear separation of responsibilities between components
-* Deterministic, easy-to-debug behavior
-* Testable modules with minimal coupling
-* Explicit tradeoffs visible in code and documentation
-* Foundation for future HIL (hardware-in-the-loop) exploration
+## Design Philosophy
+This project follows principles used in real aerospace and industrial control programs:
+
+- Physics before control
+- Open-loop feasibility before closed-loop tuning
+- Explicit assumptions over hidden magic
+- Known limitations documented
+- Component validation before system integration
+
+The simulator is built to answer **engineering questions**, not to “look realistic”.
 
 ---
 
-## Non‑Goals
-* High-fidelity aerodynamics
-* Accurate propeller or CFD-based modeling
-* Detailed IMU / sensor noise simulation
-* Autopilot tuning or real flight performance prediction
+## Current Project Status
+Development is intentionally structured into **phases**.
 
-These are intentional omissions to **prioritize clarity and architectural reasoning**.
+### Phase 1 — Component Modeling & Validation *(current)*
+Focus: validating individual subsystems in isolation before system integration.
 
----
+Implemented / in progress:
+- **Motor model**
+  - RPM ↔ torque ↔ current relationship
+  - Efficiency and losses
+  - Saturation limits
+- **Battery model**
+  - Voltage sag under load
+  - Internal resistance
+  - Capacity tracking
+- **Thermal model**
+  - Power loss → temperature rise
+  - Thermal time constants
+  - Temperature limits
 
-## System Decomposition
-### World / Environment
-* Owns simulation time
-* Defines reference frames
-* Advances the simulation deterministically
-
-### Drone (Plant)
-* Owns physical state (position, velocity, orientation)
-* Models energy consumption and basic dynamics
-* Exposes clear inputs and outputs
-
-### Control Interfaces
-* Abstract control inputs (throttle, attitude, etc.)
-* Decouple control logic from the underlying plant
-* Allow future swapping between simulated and real hardware
-
-### External Interfaces
-* Telemetry output
-* Control input sources (scripts, tests)
-
-This mirrors the separation of **flight software**, **vehicle dynamics**, and **ground systems**.
+Each component is tested independently before being coupled into a vehicle model.
 
 ---
 
-## Model Components Reference
-For detailed documentation on classes, structs, enums, and usage examples based on unit tests, see [include/drone/model/README.MD](include/drone/model/README.MD).
+### Phase 2 — Thrust & Power Closure *(next)*
+Focus: answering the most basic flight question.
+
+> *Can this vehicle hover at all?*
+
+Planned:
+- Thrust = f(RPM) mapping
+- Vehicle mass and gravity balance
+- Hover operating point calculation
+- Power margin and headroom analysis
+- Assertions such as:
+  - Max thrust > 1.3 × vehicle weight
+  - Battery voltage under hover load remains above cutoff
+  - Thermal limits are not exceeded during steady hover
+
+This phase remains **open-loop by design**.
 
 ---
 
-## Modeling Philosophy
-* Simple, predictable, and monotonic models
-* Battery modeled for relative trends, not exact flight time
-* Motor response simplified to make control relationships obvious
-* Environmental effects are minimal by design
+### Phase 3 — Attitude Dynamics (Single Axis)
+Focus: introducing rotational dynamics before position control.
 
-> *Does this model help reason about the system?*
+Planned:
+- Rigid-body rotational equations (moment → angular acceleration)
+- Inertia modeling
+- Single-axis (pitch or roll) response
+- Incremental control:
+  - P control
+  - PD control
+  - PID only if justified
+- Step response plots and stability analysis
 
 ---
 
-## Tradeoffs & Intentional Simplifications
-* **Clarity > Accuracy**
-* **Iteration speed > Realism**
-* **Explicit assumptions > Hidden complexity**
+### Phase 4 — Full Closed-Loop Control
+Focus: realistic control behavior under non-ideal conditions.
 
-Linear/near-linear models and simplified dynamics are intentional placeholders for architectural exploration.
+Planned:
+- Multi-axis control
+- Sensor noise and bias
+- Control loop timing vs sensor update rates
+- Actuator saturation and rate limits
+- Latency effects
+
+---
+
+### Phase 5 — System Robustness & Uncertainty
+Focus: understanding margins and failure modes.
+
+Planned:
+- Monte Carlo simulations
+- Parameter uncertainty (mass, thrust, drag, sensor noise)
+- Trajectory and attitude dispersion analysis
+- Identification of dominant contributors to failure
+
+---
+
+## Architecture Overview
+The system is split into clearly defined layers:
+
+- **Core simulation**
+  - Time stepping
+  - Numerical integration
+- **Subsystem models**
+  - Motors
+  - Battery
+  - Thermal
+  - Sensors (planned)
+- **Vehicle model**
+  - Aggregates subsystems
+  - Applies forces and moments
+- **Control logic**
+  - Open-loop commands
+  - Closed-loop controllers (incremental)
+- **Interface**
+  - Logging and visualization
+  - External control inputs (planned)
+
+This separation allows subsystems to be refined or replaced without rewriting the full simulator.
+
+---
+
+## Assumptions & Limitations
+- Aerodynamics are simplified (no CFD)
+- No structural flexibility
+- No environment modeling beyond basic gravity
+- Models favor clarity and traceability over fidelity
+
+These limitations are **intentional** and explicitly documented.
+
+---
+
+## Why This Project Exists
+This project is meant to demonstrate:
+- Incremental simulation development
+- Respect for physical constraints
+- How control authority emerges from hardware limits
+- How systems fail when assumptions are violated
+
+It is a learning and exploration platform, not a finished product.
+
+---
+
+## Future Extensions
+- Alternate vehicle configurations (rocket, fixed-wing)
+- Hardware-in-the-loop integration
+- Real sensor data playback
+- Higher-order dynamics where justified
 
 ---
 
