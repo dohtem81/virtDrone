@@ -16,7 +16,9 @@ CTestTestfile.cmake
 Testing/
 
 # Test executables
-test_*
+test_*.exe
+test_*.out
+test_*.bin
 
 # CMake cache
 CMakeCache.txt
