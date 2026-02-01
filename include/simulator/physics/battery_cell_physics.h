@@ -3,9 +3,8 @@
 
 #include "drone/model/components/battery_cell.h"
 
-using namespace drone::model::components;
-
 namespace drone::simulator::physics {
+using namespace drone::model::components;
 
 class BatteryCellPhysics {
 public:

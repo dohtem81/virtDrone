@@ -1,5 +1,6 @@
 #include "simulator/physics/battery_cell_physics.h"
-    
+   
+namespace drone::simulator::physics {
 /**
  * @brief Calculates the voltage drop based on the state of charge.
  * 
@@ -60,3 +61,5 @@ void BatteryCellPhysics::update(Battery_Cell& cell, int delta_time_ms = 1000) {
     
     return;
 }
+
+} // namespace drone::simulator::physics

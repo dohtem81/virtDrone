@@ -4,9 +4,8 @@
 #include <string>
 #include "simulator/physics/battery_cell_physics.h"
 
-using namespace drone::simulator::physics;
-
 namespace drone::model::components {
+using namespace drone::simulator::physics;
 
 struct CellSpecs {
     double capacity_mah;       // Capacity in milliamp-hours
