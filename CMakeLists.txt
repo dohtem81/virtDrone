@@ -19,6 +19,7 @@ add_library(simulator
     src/simulator/environment/environment.cpp
     src/simulator/integration/integration.cpp
     src/simulator/physics/motor_physics.cpp
+    src/simulator/physics/battery_cell_physics.cpp
 )
 
 # Drone library

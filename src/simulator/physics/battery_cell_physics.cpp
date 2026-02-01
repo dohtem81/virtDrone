@@ -42,3 +42,21 @@ void BatteryCellPhysics::calculateVoltageDrop(const Battery_Cell& cell) {
 void BatteryCellPhysics::setCurrentA(Battery_Cell& cell, double current_a) {
     cell.setCurrentA(current_a);
 }
+
+/**
+ * @brief Updates the battery cell state.
+ * @param delta_time_ms Time elapsed since last update in milliseconds.
+ */
+void BatteryCellPhysics::update(Battery_Cell& cell, int delta_time_ms = 1000) {
+    // depending on current, lower the state of charge, reclaculate voltage and state of charge
+
+    cell.capacity_mah_ -= (cell.getCurrentA() * (delta_time_ms / 3600000.0)) * 1000; // Convert ms to hours, mA
+    if (cell.capacity_mah_ < 0) {
+        cell.capacity_mah_ = 0;
+    }
+
+    // cell recalculate voltage within setting state of charge
+    cell.setStateOfChargePercent((cell.capacity_mah_ / cell.nominal_capacity_mah_) * 100.0);
+    
+    return;
+}

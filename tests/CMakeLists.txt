@@ -72,6 +72,7 @@ target_link_libraries(test_energy
     PRIVATE
         Catch2::Catch2WithMain
         drone  # Link to the drone library for dependencies
+        simulator  # Link to the simulator library for dependencies
 )
 
 # Register the test with CTest

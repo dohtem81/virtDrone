@@ -2,6 +2,9 @@
 #define BATTERY_CELL_H
 
 #include <string>
+#include "simulator/physics/battery_cell_physics.h"
+
+using namespace drone::simulator::physics;
 
 namespace drone::model::components {
 
@@ -92,24 +95,7 @@ public:
     virtual void setStateOfChargePercent(double soc_percent) {
         state_of_charge_percent_ = soc_percent;
         capacity_mah_ = (state_of_charge_percent_ / 100.0) * nominal_capacity_mah_;
-        calculateVoltageDrop();
-    }
-
-
-
-    /**
-     * @brief Updates the battery cell state.
-     * @param delta_time_ms Time elapsed since last update in milliseconds.
-     */
-    virtual void update(int delta_time_ms = 1000) {
-        // depending on current, lower the state of charge
-        capacity_mah_ -= (current_a_ * (delta_time_ms / 3600000.0)) * 1000; // Convert ms to hours, mA
-        if (capacity_mah_ < 0) {
-            capacity_mah_ = 0;
-        }
-        state_of_charge_percent_ = (capacity_mah_ / nominal_capacity_mah_) * 100.0;
-
-        return;
+        BatteryCellPhysics::calculateVoltageDrop(*this);
     }
 
 private:

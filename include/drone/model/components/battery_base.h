@@ -145,9 +145,9 @@ public:
     // BatterySpecs getSpecs() const { return specs_; }
 
     virtual void update(int delta_time_ms = 1000) {
-        for (auto& cell : cells_) {
-            cell.update(delta_time_ms);
-        }
+        // for (auto& cell : cells_) {
+        //     cell.update(delta_time_ms);
+        // }
     }
 
 protected:
