@@ -95,39 +95,7 @@ public:
         calculateVoltageDrop();
     }
 
-    /**
-     * @brief Calculates the voltage drop based on the state of charge.
-     */
-    virtual void calculateVoltageDrop() {
-        /**
-         * Top knee: 100 → ~85% (voltage falls fast)
-         * Flat plateau: ~85 → 30% (slow change) - voltage 3.9->3.5V
-         * Bottom knee: <30% (voltage collapses)
-         * 
-         *   4.2V ┐
-         *       │\        ← quick drop after takeoff
-         *       │ \
-         *   3.9V │  ────── plateau (most of flight)
-         *       │         \
-         *   3.5V │          \ ← cliff near empty
-         *       └────────────
-         *       0%        100%
-        */
-        // Simple linear approximation for demonstration purposes
-        voltage_v_ = 3.9;
-        if (state_of_charge_percent_ > 85.0) {
-            double deltaV = (4.2 - 3.9);
-            voltage_v_ = 3.9 + ((state_of_charge_percent_ - 85.0) / 15.0) * deltaV;   
-        }
-        else if (state_of_charge_percent_ <= 85.0 && state_of_charge_percent_ >= 30.0) {
-            double deltaV = (3.9 - 3.5);
-            voltage_v_ = 3.9 - ((85.0 - state_of_charge_percent_) / 55.0) * deltaV;
-        }        
-        else if (state_of_charge_percent_ < 30.0) {
-            double deltaV = (3.5 - 3.2);
-            voltage_v_ = 3.5 - ((30.0 - state_of_charge_percent_) / 30.0) * deltaV;
-        }
-    }
+
 
     /**
      * @brief Updates the battery cell state.
