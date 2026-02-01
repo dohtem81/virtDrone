@@ -19,7 +19,6 @@ add_library(simulator
     src/simulator/environment/environment.cpp
     src/simulator/integration/integration.cpp
     src/simulator/physics/motor_physics.cpp
-    # src/simulator/physics/gps_physics.cpp
 )
 
 # Drone library
@@ -30,9 +29,6 @@ add_library(drone
     src/drone/model/sensors/base_sensor.cpp
     src/drone/model/sensors/temperature_sensor.cpp  # Added to include TemperatureSensor implementation
     src/drone/model/components/elect_motor.cpp
-    # src/drone/model/sensors/gps_position_sensor.cpp
-    # src/drone/model/sensors/gps_velocity_sensor.cpp    
-    # src/drone/model/components/gps_sensor.cpp
 )
 
 # Common libs
