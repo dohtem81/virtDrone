@@ -2,10 +2,13 @@
 #define BATTERY_CELL_H
 
 #include <string>
-#include "simulator/physics/battery_cell_physics.h"
+
+namespace drone::simulator::physics {
+    class BatteryCellPhysics;  // Forward declaration
+}
 
 namespace drone::model::components {
-using namespace drone::simulator::physics;
+//using namespace drone::simulator::physics;
 
 struct CellSpecs {
     double capacity_mah;       // Capacity in milliamp-hours
@@ -34,6 +37,7 @@ public:
     Battery_Cell(const std::string& cell_id, const CellSpecs& specs)
         : cell_id_(cell_id), nominal_capacity_mah_(specs.capacity_mah), nominal_voltage_v_(specs.nominal_voltage_v), state_of_charge_percent_(100.0), current_a_(0.0), capacity_mah_(specs.capacity_mah), voltage_v_(specs.nominal_voltage_v) {}
     
+    // section of getters for static parameters of the cell
     /**
      * @brief Gets the cell identifier.
      * @return The cell ID as a string.
@@ -52,23 +56,26 @@ public:
      */
     double getNominalVoltageV() const { return nominal_voltage_v_; }
 
+
+    // section of getters for dynamic parameters of the cell - these functions must be implemented 
+    // based on the physics model of the battery cell, for now they are placeholders
     /**
      * @brief Gets the current voltage of the cell in volts.
      * @return The voltage in V.
      */
-    double getVoltageV() const { return voltage_v_; }
+    virtual double getVoltageV() const { return voltage_v_; }
 
     /**
      * @brief Gets the current in amperes.
      * @return The current in A.
      */
-    double getCurrentA() const { return current_a_; } // Placeholder implementation;
+    virtual double getCurrentA() const { return current_a_; } // Placeholder implementation;
 
     /**
      * @brief Gets the remaining capacity in milliamp-hours.
      * @return The remaining capacity in mAh.
      */
-    double getRemainingCapacityMah() const {
+    virtual double getRemainingCapacityMah() const {
         return capacity_mah_;
     }
 
@@ -76,8 +83,9 @@ public:
      * @brief Gets the state of charge as a percentage.
      * @return The state of charge in %.
      */
-    double getStateOfChargePercent() const { return state_of_charge_percent_; } // Placeholder implementation;
+    virtual double getStateOfChargePercent() const { return state_of_charge_percent_; } // Placeholder implementation;
 
+    // when simulating these setters must be implemented based on the physics model of the battery cell, for now they are placeholders
     /**
      * @brief Sets the current in amperes. It's virtual to avoid exposing this one in actual model implementation.
      * this should be used only by simulation/testing purposes.
@@ -94,13 +102,16 @@ public:
     virtual void setStateOfChargePercent(double soc_percent) {
         state_of_charge_percent_ = soc_percent;
         capacity_mah_ = (state_of_charge_percent_ / 100.0) * nominal_capacity_mah_;
-        BatteryCellPhysics::calculateVoltageDrop(*this);
+        // voltage_v_ = BatteryCellPhysics::calculateVoltageDrop(*(this->getStateOfChargePercent()));
     }
 
 private:
+    // parameters that describe battery cell
     std::string cell_id_;
     double nominal_capacity_mah_;
     double nominal_voltage_v_;
+
+    // dynamic parameters that change during operation - these are placeholders for now, actual implementation will depend on the physics model
     double voltage_v_;
     double current_a_;
     double state_of_charge_percent_;
