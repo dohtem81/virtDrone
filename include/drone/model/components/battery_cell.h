@@ -4,7 +4,7 @@
 #include <string>
 
 namespace drone::simulator::physics {
-    class BatteryCellPhysics;  // Forward declaration
+    class BatteryCellPhysics;
 }
 
 namespace drone::model::components {
@@ -63,19 +63,19 @@ public:
      * @brief Gets the current voltage of the cell in volts.
      * @return The voltage in V.
      */
-    virtual double getVoltageV() const { return voltage_v_; }
+    double getVoltageV() const { return voltage_v_; }
 
     /**
      * @brief Gets the current in amperes.
      * @return The current in A.
      */
-    virtual double getCurrentA() const { return current_a_; } // Placeholder implementation;
+    double getCurrentA() const { return current_a_; }
 
     /**
      * @brief Gets the remaining capacity in milliamp-hours.
      * @return The remaining capacity in mAh.
      */
-    virtual double getRemainingCapacityMah() const {
+    double getRemainingCapacityMah() const {
         return capacity_mah_;
     }
 
@@ -83,29 +83,20 @@ public:
      * @brief Gets the state of charge as a percentage.
      * @return The state of charge in %.
      */
-    virtual double getStateOfChargePercent() const { return state_of_charge_percent_; } // Placeholder implementation;
+    double getStateOfChargePercent() const { return state_of_charge_percent_; }
 
-    // when simulating these setters must be implemented based on the physics model of the battery cell, for now they are placeholders
-    /**
-     * @brief Sets the current in amperes. It's virtual to avoid exposing this one in actual model implementation.
-     * this should be used only by simulation/testing purposes.
-     * @param current_a The current in A.
-     */
-    virtual void setCurrentA(double current_a) {
+private:
+    friend class drone::simulator::physics::BatteryCellPhysics;
+
+    void setCurrentA(double current_a) {
         current_a_ = current_a;
     }
 
-    /**
-     * @brief Sets the state of charge as a percentage.
-     * @param soc_percent The state of charge in %.
-     */
-    virtual void setStateOfChargePercent(double soc_percent) {
+    void setStateOfChargePercent(double soc_percent) {
         state_of_charge_percent_ = soc_percent;
         capacity_mah_ = (state_of_charge_percent_ / 100.0) * nominal_capacity_mah_;
-        // voltage_v_ = BatteryCellPhysics::calculateVoltageDrop(*(this->getStateOfChargePercent()));
     }
 
-private:
     // parameters that describe battery cell
     std::string cell_id_;
     double nominal_capacity_mah_;

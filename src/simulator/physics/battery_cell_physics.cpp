@@ -1,5 +1,6 @@
+#include "drone/model/components/battery_cell.h"
 #include "simulator/physics/battery_cell_physics.h"
-   
+
 namespace drone::simulator::physics {
 /**
  * @brief Calculates the voltage drop based on the state of charge.
@@ -17,7 +18,7 @@ namespace drone::simulator::physics {
  *       └────────────
  *       0%        100%
 */
-void BatteryCellPhysics::calculateVoltageDrop(const Battery_Cell& cell) {
+void BatteryCellPhysics::calculateVoltageDrop(Battery_Cell& cell) {
     double voltage_v = 3.9;
     double state_of_charge_percent = cell.getStateOfChargePercent();
     if (state_of_charge_percent > 85.0) {
@@ -32,7 +33,9 @@ void BatteryCellPhysics::calculateVoltageDrop(const Battery_Cell& cell) {
         double deltaV = (3.5 - 3.2);
         voltage_v = 3.5 - ((30.0 - state_of_charge_percent) / 30.0) * deltaV;
     }
-    return voltage_v;
+
+    // update cell voltage
+    cell.voltage_v_ = voltage_v;
 }
 
 /**
@@ -45,10 +48,27 @@ void BatteryCellPhysics::setCurrentA(Battery_Cell& cell, double current_a) {
 }
 
 /**
+ * @brief Sets state of charge and recalculates voltage.
+ * @param cell The battery cell object.
+ * @param soc_percent The state of charge in percent.
+ */
+void BatteryCellPhysics::setStateOfChargePercent(Battery_Cell& cell, double soc_percent) {
+    if (soc_percent < 0.0) {
+        soc_percent = 0.0;
+    }
+    if (soc_percent > 100.0) {
+        soc_percent = 100.0;
+    }
+
+    cell.setStateOfChargePercent(soc_percent);
+    calculateVoltageDrop(cell);
+}
+
+/**
  * @brief Updates the battery cell state.
  * @param delta_time_ms Time elapsed since last update in milliseconds.
  */
-void BatteryCellPhysics::update(Battery_Cell& cell, int delta_time_ms = 1000) {
+void BatteryCellPhysics::update(Battery_Cell& cell, int delta_time_ms) {
     // depending on current, lower the state of charge, reclaculate voltage and state of charge
 
     cell.capacity_mah_ -= (cell.getCurrentA() * (delta_time_ms / 3600000.0)) * 1000; // Convert ms to hours, mA
@@ -56,10 +76,13 @@ void BatteryCellPhysics::update(Battery_Cell& cell, int delta_time_ms = 1000) {
         cell.capacity_mah_ = 0;
     }
 
-    // cell recalculate voltage within setting state of charge
-    cell.setStateOfChargePercent((cell.capacity_mah_ / cell.nominal_capacity_mah_) * 100.0);
-    
-    return;
+    double soc_percent = 0.0;
+    if (cell.nominal_capacity_mah_ > 0.0) {
+        soc_percent = (cell.capacity_mah_ / cell.nominal_capacity_mah_) * 100.0;
+    }
+
+    cell.state_of_charge_percent_ = soc_percent;
+    calculateVoltageDrop(cell);
 }
 
 } // namespace drone::simulator::physics

@@ -8,11 +8,10 @@ using namespace drone::model::components;
 
 class BatteryCellPhysics {
 public:
-    friend class Battery_Cell;
-
-    static void calculateVoltageDrop(const Battery_Cell& cell);
+    static void calculateVoltageDrop(Battery_Cell& cell);
     static void setCurrentA(Battery_Cell& cell, double current_a);
-    static void update(Battery_Cell& cell, int delta_time_ms);
+    static void setStateOfChargePercent(Battery_Cell& cell, double soc_percent);
+    static void update(Battery_Cell& cell, int delta_time_ms = 1000);
 
 };
 
