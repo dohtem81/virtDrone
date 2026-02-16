@@ -30,6 +30,11 @@ public:
         const AnalogIOSpec& spec, const TemperatureSensorRanges& ranges = TemperatureSensorRanges());
     virtual ~TemperatureSensor() = default;
 
+    TemperatureSensor(const TemperatureSensor&) = delete;
+    TemperatureSensor& operator=(const TemperatureSensor&) = delete;
+    TemperatureSensor(TemperatureSensor&&) noexcept = default;
+    TemperatureSensor& operator=(TemperatureSensor&&) noexcept = default;
+
     // Implement the pure virtual update method
     void update() override;
 

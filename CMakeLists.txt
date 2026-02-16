@@ -21,11 +21,23 @@ add_library(simulator
     src/simulator/physics/motor_physics.cpp
     src/simulator/physics/battery_cell_physics.cpp
     src/simulator/physics/battery_sim.cpp
+    src/simulator/simulation_base.cpp
+)
+
+# Simulator executable
+add_executable(simulator_app
+    src/simulator/main.cpp
+)
+target_link_libraries(simulator_app
+    PRIVATE
+    drone
+    simulator
 )
 
 # Drone library
 add_library(drone
     src/drone/model/model.cpp
+    src/drone/model/quadrocopter.cpp
     src/drone/control/control.cpp
     src/drone/telemetry/telemetry.cpp
     src/drone/model/sensors/base_sensor.cpp

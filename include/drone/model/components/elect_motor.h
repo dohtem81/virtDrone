@@ -42,6 +42,11 @@ public:
      */
     virtual ~ElecMotor() = default;
 
+    ElecMotor(const ElecMotor&) = delete;
+    ElecMotor& operator=(const ElecMotor&) = delete;
+    ElecMotor(ElecMotor&&) noexcept = default;
+    ElecMotor& operator=(ElecMotor&&) noexcept = default;
+
     /**
      * @brief Updates the motor state (simulates motor operation).
      * 

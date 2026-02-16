@@ -1,0 +1,34 @@
+#ifndef QUADROCOPTER_H
+#define QUADROCOPTER_H
+
+#include <memory>
+#include <string>
+
+#include "drone/model/drone_base.h"
+
+namespace drone::model {
+
+/**
+ * @brief Quadrocopter model with four motors.
+ */
+class Quadrocopter final : public DroneBase {
+public:
+    Quadrocopter(const std::string& name,
+                const components::ElecMotorSpecs& motor_specs,
+                const sensors::AnalogIOSpec& motor_io_spec,
+                std::unique_ptr<components::Battery_base> battery,
+                std::unique_ptr<sensors::TemperatureSensor> temperature_sensor);
+
+    static Quadrocopter createWithBatterySim(const std::string& name,
+                                            const components::ElecMotorSpecs& motor_specs,
+                                            const sensors::AnalogIOSpec& motor_io_spec,
+                                            const components::BatterySpecs& battery_specs,
+                                            const sensors::AnalogIOSpec& temp_io_spec,
+                                            const sensors::TemperatureSensorRanges& temp_ranges);
+
+    static constexpr size_t kMotorCount = 4;
+};
+
+}  // namespace drone::model
+
+#endif  // QUADROCOPTER_H

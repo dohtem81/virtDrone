@@ -100,6 +100,11 @@ public:
      */
     virtual ~BaseSensor() = default;
 
+    BaseSensor(const BaseSensor&) = delete;
+    BaseSensor& operator=(const BaseSensor&) = delete;
+    BaseSensor(BaseSensor&&) noexcept = default;
+    BaseSensor& operator=(BaseSensor&&) noexcept = default;
+
     // Getters
     /**
      * @brief Gets the sensor name.
