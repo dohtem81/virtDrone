@@ -50,10 +50,12 @@ protected:
         const uint64_t delta_ms = static_cast<uint64_t>(dt_s * 1000.0);
         double total_current_a = 0.0;
         double avg_rpm = 0.0;
+        double currentBattVoltageV = quad_.getBattery() ? quad_.getBattery()->getVoltageV() : 0.0;
 
         for (auto& motor : motors) {
-            motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm * ramp_ratio);
-            drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms);
+            motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm);
+            //drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, currentBattVoltageV);
+            drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, quad_.getBattery());
             total_current_a += motor.getCurrentA();
             avg_rpm += motor.getSpeedRPM();
         }
@@ -83,7 +85,8 @@ protected:
         std::cout << "t=" << elapsed_s_ << "s "
                   << "alt_m=" << altitude_m_
                   << " dt=" << dt_s << "s "
-                  << "battery_mAh=" << capacity_mah;
+                  << " b%=" << (battery ? battery->getStateOfChargePercent() : 0.0)
+                  << " bV=" << currentBattVoltageV;
 
         for (size_t i = 0; i < motors.size(); ++i) {
             const auto& motor = motors[i];

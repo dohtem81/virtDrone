@@ -83,7 +83,9 @@ public:
      * @brief Gets the state of charge as a percentage.
      * @return The state of charge in %.
      */
-    double getStateOfChargePercent() const { return state_of_charge_percent_; }
+    double getStateOfChargePercent() const { 
+        return capacity_mah_ / nominal_capacity_mah_ * 100.0; 
+    }
 
 private:
     friend class drone::simulator::physics::BatteryCellPhysics;

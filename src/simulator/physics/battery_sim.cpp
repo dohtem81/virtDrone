@@ -22,7 +22,7 @@ std::string BatterySim::getName() const {
 double BatterySim::getVoltageV() const {
     double total_voltage = 0.0;
     for (const auto& cell : cells_) {
-        total_voltage += cell.getVoltageV();
+        total_voltage += (cell.getCapacityMah() < 0.1 ? 0.0 : cell.getVoltageV()); // If capacity is very low, consider voltage to be 0 to simulate cutoff
     }
     return total_voltage;
 }

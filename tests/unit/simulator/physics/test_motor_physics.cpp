@@ -29,11 +29,11 @@ TEST_CASE("MotorPhysics updates state correctly", "[MotorPhysics]") {
     REQUIRE(motor.getCurrentA() == 0.0);
     REQUIRE(motor.getTemperatureC() == 25.0);
     motor.setDesiredSpeedRPM(5000.0); // Set desired speed
-    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(1000));
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(1000), specs.nominal_voltage_v);
     REQUIRE(motor.getSpeedRPM() == 1000.0);
     REQUIRE(motor.getCurrentA() > 0.0);
     REQUIRE(motor.getTemperatureC() >= 25.0); // Temperature should not decrease
-    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(4000));
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(4000), specs.nominal_voltage_v);
     REQUIRE(motor.getSpeedRPM() == 5000.0);
     REQUIRE(motor.getCurrentA() > 0.0);
     REQUIRE(motor.getTemperatureC() >= 25.0); // Temperature should not decrease
@@ -43,7 +43,7 @@ TEST_CASE("MotorPhysics updates state correctly", "[MotorPhysics]") {
 TEST_CASE("MotorPhysics temperature updates over time", "[MotorPhysics]") {
     ElecMotor motor("TestMotor", io_spec, specs);
     motor.setDesiredSpeedRPM(4000.0); // Set high desired speed to generate heat
-    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(30000)); // Update for 30 seconds
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(30000), specs.nominal_voltage_v); // Update for 30 seconds
     double temp_after_30s = motor.getTemperatureC();
     REQUIRE(temp_after_30s > 25.0);
     REQUIRE(temp_after_30s > 28.0); // Should not exceed reasonable limits
@@ -53,7 +53,7 @@ TEST_CASE("MotorPhysics temperature updates over time", "[MotorPhysics]") {
 TEST_CASE("MotorPhysics internal temperature sensor reading", "[MotorPhysics]") {
     ElecMotor motor("TestMotor", io_spec, specs);
     motor.setDesiredSpeedRPM(4000.0); // Set high desired speed to generate heat
-    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(30000)); // Update for 30 seconds
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(30000), specs.nominal_voltage_v); // Update for 30 seconds
     TemperatureSensorReading temp_reading = motor.getTemperatureReading();
     REQUIRE(temp_reading.temperature > 25.0);
     REQUIRE(temp_reading.status == SensorStatus::ACTIVE);

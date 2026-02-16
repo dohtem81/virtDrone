@@ -4,29 +4,45 @@
 
 namespace drone::simulator::physics {
 
-void MotorPhysics::updateSpeed(drone::model::components::ElecMotor& motor, uint64_t delta_ms) {
+void MotorPhysics::updateSpeed(drone::model::components::ElecMotor& motor, uint64_t delta_ms, double currentBattVoltageV) {
     double ramp_rate = 1000.0;  // RPM per second, adjustable
     double delta_s = delta_ms / 1000.0;
-    double desired = motor.getDesiredSpeedRPM();
-    double current = motor.getSpeedRPM();
-    if (current < desired) {
-        current += ramp_rate * delta_s;
-        if (current > desired) current = desired;
-    } else if (current > desired) {
-        current -= ramp_rate * delta_s;
-        if (current < desired) current = desired;
+    double desiredRPM = motor.getDesiredSpeedRPM();
+    double battDrainFactor = currentBattVoltageV / motor.getSpecs().nominal_voltage_v;
+    double max_rpm = motor.getSpecs().max_speed_rpm * battDrainFactor;  // Scale max RPM by battery voltage factor
+    desiredRPM = std::min(desiredRPM, max_rpm);  // Ensure desired RPM does not exceed scaled max RPM
+    double currentRPM = motor.getSpeedRPM();
+    if (currentRPM < desiredRPM) {
+        currentRPM += ramp_rate * delta_s * battDrainFactor;  // Scale ramp rate by battery voltage factor
+        if (currentRPM > desiredRPM) currentRPM = desiredRPM;
+    } else if (currentRPM > desiredRPM) {
+        currentRPM -= ramp_rate * delta_s * battDrainFactor;  // Scale ramp rate by battery voltage factor  
+        if (currentRPM < desiredRPM) currentRPM = desiredRPM;
     }
-    motor.setSpeedRPM(current);
+    motor.setSpeedRPM(currentRPM);
 }
 
 void MotorPhysics::calculateCurrent(drone::model::components::ElecMotor& motor) {
     // Simple linear relationship: current increases with desired speed, adjusted by efficiency
-    // Current = (desired_speed / max_speed) * max_current / efficiency
-    // Clamp to ensure it doesn't exceed max_current
     double normalized_speed = motor.getDesiredSpeedRPM() / motor.getSpecs().max_speed_rpm;
-    double current = std::clamp(normalized_speed * motor.getSpecs().max_current_a / motor.getSpecs().efficiency, 0.0, motor.getSpecs().max_current_a);
+    double current_speed = motor.getSpeedRPM();
+    double calculated_current = (current_speed / motor.getSpecs().max_speed_rpm) * motor.getSpecs().max_current_a / motor.getSpecs().efficiency;
+    double current = std::clamp(
+        calculated_current,
+        0.0,
+        motor.getSpecs().max_current_a
+    );
     motor.setCurrentA(current);
 }
+
+void MotorPhysics::calculateCurrent(drone::model::components::ElecMotor& motor, drone::model::components::Battery_base* battery) {
+    if (battery->getStateOfChargePercent() < 1.0) {
+        motor.setCurrentA(0.0);
+    } else {
+        MotorPhysics::calculateCurrent(motor);
+    }
+}
+
 
 void MotorPhysics::calculateLosses(drone::model::components::ElecMotor& motor) {
     // Losses = Input power - Output power
@@ -67,11 +83,31 @@ double MotorPhysics::calculateBatteryDrain(const drone::model::components::ElecM
     return motor.getVoltageV() * motor.getCurrentA() * time_s;
 }
 
-void MotorPhysics::updateMotorPhysics(drone::model::components::ElecMotor& motor, uint64_t delta_ms) {
+void MotorPhysics::updateMotorPhysics(
+        drone::model::components::ElecMotor& motor, 
+        uint64_t delta_ms, 
+        double currentBattVoltageV) {
+
     MotorPhysics::calculateCurrent(motor);
     MotorPhysics::calculateLosses(motor);
     MotorPhysics::updateTemperature(motor, delta_ms);
-    MotorPhysics::updateSpeed(motor, delta_ms);
+    MotorPhysics::updateSpeed(motor, delta_ms, currentBattVoltageV);
+}
+
+void MotorPhysics::updateMotorPhysics(
+        drone::model::components::ElecMotor& motor, 
+        uint64_t delta_ms, 
+        drone::model::components::Battery_base* battery) {
+
+    if (battery->getStateOfChargePercent() < 1.0) {
+        motor.setCurrentA(0.0);
+        motor.setSpeedRPM(0.0);
+        motor.setLossesW(0.0);
+    }
+    MotorPhysics::updateSpeed(motor, delta_ms, battery->getVoltageV());
+    MotorPhysics::calculateCurrent(motor, battery);
+    MotorPhysics::calculateLosses(motor);
+    MotorPhysics::updateTemperature(motor, delta_ms);
 }
 
 }  // namespace drone::simulator::physics
