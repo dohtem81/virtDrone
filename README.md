@@ -161,8 +161,32 @@ It is a learning and exploration platform, not a finished product.
 
 ---
 
+## Simulation
+You can now run a simple quadcopter simulation via the `simulator_app` executable.
+
+Key behavior:
+- Step-based simulation with a fixed $dt$.
+- Motors ramp from 0% to 100% max RPM over 2 seconds.
+- Each step prints one line: battery capacity, motor temperature, current, and RPM.
+
+Build and run (Docker):
+```bash
+docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+docker compose run --rm dev cmake --build build --target simulator_app
+docker compose run --rm dev ./build/simulator_app [steps] [dt_s]
+```
+
+Build and run (Host):
+```bash
+cmake -S . -B build
+cmake --build build --target simulator_app
+./build/simulator_app [steps] [dt_s]
+```
+
+---
+
 ## Testing (Runnable Part)
-Testing is the **first-class feature currently available**.
+Testing is a **first-class feature currently available**.
 
 ### Using Docker (Recommended)
 ```bash
@@ -189,7 +213,7 @@ ctest --test-dir build --output-on-failure
 ```
 
 
-Tests are the only currently runnable component and demonstrate modular behavior.
+Tests demonstrate modular behavior alongside the simulator app.
 
 ### Future Directions
 
