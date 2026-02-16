@@ -16,9 +16,12 @@ struct ElecMotorSpecs {
     double max_current_a;     ///< Maximum current in amperes.
     double efficiency;        ///< Efficiency as a fraction (0.0 to 1.0).
     double thermal_resistance; ///< Thermal resistance in °C/W for temperature calculation.
+    double weight_kg;         ///< Motor weight in kilograms.
 
-    ElecMotorSpecs(double max_speed = 10000.0, double nom_vol = 12.0, double max_curr = 10.0, double eff = 0.85, double therm_res = 0.5)
-        : max_speed_rpm(max_speed), nominal_voltage_v(nom_vol), max_current_a(max_curr), efficiency(eff), thermal_resistance(therm_res) {}
+    ElecMotorSpecs(double max_speed = 10000.0, double nom_vol = 12.0, double max_curr = 10.0,
+                  double eff = 0.85, double therm_res = 0.5, double weight_kg = 0.0)
+        : max_speed_rpm(max_speed), nominal_voltage_v(nom_vol), max_current_a(max_curr), efficiency(eff),
+          thermal_resistance(therm_res), weight_kg(weight_kg) {}
 };
 
 /**
@@ -87,6 +90,12 @@ public:
      * @return The efficiency as a fraction.
      */
     double getEfficiency() const { return specs_.efficiency; }
+
+    /**
+     * @brief Gets the motor weight in kilograms.
+     * @return The motor weight in kg.
+     */
+    double getWeightKg() const { return specs_.weight_kg; }
     
     /**
      * @brief Calculates battery drain (energy consumed in Joules) over a given time.

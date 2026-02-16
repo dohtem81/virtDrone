@@ -8,7 +8,8 @@ TemperatureSensor sensor("TempSensor", AnalogIOSpec(
     AnalogIOSpec::CurrentRange::FOUR_TO_20mA,
         4000,
         20000), 
-    TemperatureSensorRanges(-50.0, 150.0));
+    TemperatureSensorRanges(-50.0, 150.0),
+    0.02);
 
 // Test constructor for FOUR_TO_20mA
 TEST_CASE("TemperatureSensor Constructor with FOUR_TO_20mA", "[temperature_sensor]") {

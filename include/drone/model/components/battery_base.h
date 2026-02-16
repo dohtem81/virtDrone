@@ -15,9 +15,10 @@ struct BatterySpecs {
     double max_discharge_rate_c; ///< Maximum discharge rate in C (capacity multiplier).
     int cells;               ///< Number of cells in the battery.
     CellSpecs cell_specs;  ///< Specifications for individual cells.
+    double weight_kg;        ///< Battery weight in kilograms.
 
-    BatterySpecs(int cells = 4, CellSpecs cell_specs = CellSpecs())
-        : cells(cells), cell_specs(cell_specs), max_discharge_rate_c(1.0) {
+    BatterySpecs(int cells = 4, CellSpecs cell_specs = CellSpecs(), double weight_kg = 0.0)
+        : cells(cells), cell_specs(cell_specs), max_discharge_rate_c(1.0), weight_kg(weight_kg) {
         
             // assumption is that cells are in series
             capacity_mah = cell_specs.capacity_mah;
@@ -41,6 +42,7 @@ public:
     virtual double getStateOfChargePercent() const = 0;
     virtual double getRemainingCapacityMah() const = 0;
     virtual double getRemainingEnergyWh() const = 0;
+    virtual double getWeightKg() const = 0;
 };
 
 }  // namespace drone::model::components

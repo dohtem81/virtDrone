@@ -8,8 +8,9 @@ namespace drone::model::sensors {
 TemperatureSensor::TemperatureSensor(
     const std::string& name, 
     const AnalogIOSpec& spec, 
-    const TemperatureSensorRanges& ranges)
-        : BaseSensor(name, spec), ranges_(ranges), temperature_(0.0) {
+    const TemperatureSensorRanges& ranges,
+    double weight_kg)
+        : BaseSensor(name, spec), ranges_(ranges), temperature_(0.0), weight_kg_(weight_kg) {
     // Seed random number generator for simulated temperature readings
     std::srand(std::time(nullptr));
     update();  // Initial update to set temperature

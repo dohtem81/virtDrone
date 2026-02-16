@@ -4,7 +4,7 @@
 using namespace drone::model::components;
 
 // Assuming these are defined elsewhere or add them here if needed
-GPSSensorSpecs gps_specs(5.0, 10.0, 0.5, 5, 8);
+GPSSensorSpecs gps_specs(5.0, 10.0, 0.5, 5, 8, 0.05);
 
 class GPSensor_test : public GPSModule_base {
 public:

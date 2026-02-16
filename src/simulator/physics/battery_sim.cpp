@@ -66,6 +66,10 @@ double BatterySim::getRemainingEnergyWh() const {
     return total_energy_wh;
 }
 
+double BatterySim::getWeightKg() const {
+    return specs_.weight_kg;
+}
+
 void BatterySim::setCurrentA(double current_a) {
     for (auto& cell : cells_) {
         BatteryCellPhysics::setCurrentA(cell, current_a);

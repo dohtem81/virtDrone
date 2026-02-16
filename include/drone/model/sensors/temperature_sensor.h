@@ -27,7 +27,7 @@ struct TemperatureSensorReading {
 class TemperatureSensor : public BaseSensor {
 public:
     TemperatureSensor(const std::string& name, 
-        const AnalogIOSpec& spec, const TemperatureSensorRanges& ranges = TemperatureSensorRanges());
+        const AnalogIOSpec& spec, const TemperatureSensorRanges& ranges = TemperatureSensorRanges(), double weight_kg = 0.02);
     virtual ~TemperatureSensor() = default;
 
     TemperatureSensor(const TemperatureSensor&) = delete;
@@ -47,10 +47,14 @@ public:
     // get units
     std::string getUnits() const { return units; }
 
+    // get weight
+    double getWeightKg() const { return weight_kg_; }
+
 private:
     double temperature_;  // Current temperature reading
     TemperatureSensorRanges ranges_;
     std::string units = "Celsius";
+    double weight_kg_;
 };
 
 }  // namespace drone::model::sensors

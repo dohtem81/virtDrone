@@ -21,6 +21,7 @@ add_library(simulator
     src/simulator/physics/motor_physics.cpp
     src/simulator/physics/battery_cell_physics.cpp
     src/simulator/physics/battery_sim.cpp
+    src/simulator/physics/gps_sim.cpp
     src/simulator/simulation_base.cpp
 )
 

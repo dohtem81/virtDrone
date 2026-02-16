@@ -19,6 +19,7 @@ public:
     double getStateOfChargePercent() const override;
     double getRemainingCapacityMah() const override;
     double getRemainingEnergyWh() const override;
+    double getWeightKg() const override;
 
     void setCurrentA(double current_a);
     void setStateOfChargePercent(double soc_percent);

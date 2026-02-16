@@ -17,14 +17,19 @@ public:
                 const components::ElecMotorSpecs& motor_specs,
                 const sensors::AnalogIOSpec& motor_io_spec,
                 std::unique_ptr<components::Battery_base> battery,
-                std::unique_ptr<sensors::TemperatureSensor> temperature_sensor);
+                std::unique_ptr<sensors::TemperatureSensor> temperature_sensor,
+                std::unique_ptr<components::GPSModule_base> gps,
+                double body_weight_kg);
 
     static Quadrocopter createWithBatterySim(const std::string& name,
                                             const components::ElecMotorSpecs& motor_specs,
                                             const sensors::AnalogIOSpec& motor_io_spec,
                                             const components::BatterySpecs& battery_specs,
                                             const sensors::AnalogIOSpec& temp_io_spec,
-                                            const sensors::TemperatureSensorRanges& temp_ranges);
+                                            const sensors::TemperatureSensorRanges& temp_ranges,
+                                            double temp_sensor_weight_kg = 0.02,
+                                            const components::GPSSensorSpecs& gps_specs = components::GPSSensorSpecs(),
+                                            double body_weight_kg = 0.0);
 
     static constexpr size_t kMotorCount = 4;
 };

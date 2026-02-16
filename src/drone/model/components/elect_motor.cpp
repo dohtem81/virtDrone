@@ -19,7 +19,8 @@ ElecMotor::ElecMotor(const std::string& name, const drone::model::sensors::Analo
                    drone::model::sensors::AnalogIOSpec(drone::model::sensors::AnalogIOSpec::IODirection::INPUT,
                                  drone::model::sensors::AnalogIOSpec::CurrentRange::FOUR_TO_20mA,
                                  4000, 20000),
-                   drone::model::sensors::TemperatureSensorRanges(0.0, 50.0))
+                   drone::model::sensors::TemperatureSensorRanges(0.0, 50.0),
+                   0.0)
 {
     // No additional initialization needed
 }

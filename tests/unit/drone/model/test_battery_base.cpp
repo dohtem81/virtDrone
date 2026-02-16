@@ -70,7 +70,7 @@ TEST_CASE("Battery_Cell calculates voltage drop correctly", "[Battery_Cell]") {
 }
 
 TEST_CASE("Battery_Cell initializes correctly with CellSpecs, 1 cell", "[Battery_Cell]") {
-    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs));
+    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs, 0.35));
 
     REQUIRE(battery.getName() == "TestBattery");
     REQUIRE(battery.getVoltageV() == Approx(4.2));
@@ -78,7 +78,7 @@ TEST_CASE("Battery_Cell initializes correctly with CellSpecs, 1 cell", "[Battery
 }
 
 TEST_CASE("Battery_Cell initializes correctly with CellSpecs, 4 cell", "[Battery_Cell]") {
-    BatterySim battery("TestBattery", BatterySpecs(4, *cellSpecs));
+    BatterySim battery("TestBattery", BatterySpecs(4, *cellSpecs, 0.35));
 
     REQUIRE(battery.getName() == "TestBattery");
     REQUIRE(battery.getVoltageV() == Approx(16.8));
@@ -87,7 +87,7 @@ TEST_CASE("Battery_Cell initializes correctly with CellSpecs, 4 cell", "[Battery
 
 //battery test - capacity decrease over time
 TEST_CASE("Battery_base updates cells correctly, 1 cell", "[Battery_base]") {
-    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs));
+    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs, 0.35));
     REQUIRE(battery.getName() == "TestBattery");
     REQUIRE(battery.getVoltageV() == Approx(4.2));
     REQUIRE(battery.getRemainingCapacityMah() == Approx(1500.0));
@@ -100,7 +100,7 @@ TEST_CASE("Battery_base updates cells correctly, 1 cell", "[Battery_base]") {
 
 // Test volatge drop calculation at levels 100, 85, 50, 30, 0
 TEST_CASE("Battery_Cell calculates voltage drop correctly, 1 cell", "[Battery_Cell]") {
-    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs));
+    BatterySim battery("TestBattery", BatterySpecs(1, *cellSpecs, 0.35));
 
     battery.setStateOfChargePercent(100.0);
     REQUIRE(battery.getStateOfChargePercent() == 100.0);
@@ -125,7 +125,7 @@ TEST_CASE("Battery_Cell calculates voltage drop correctly, 1 cell", "[Battery_Ce
 
 // Test volatge drop calculation at levels 100, 85, 50, 30, 0
 TEST_CASE("Battery_Cell calculates voltage drop correctly, 4 cells", "[Battery_Cell]") {
-    BatterySim battery("TestBattery", BatterySpecs(4, *cellSpecs));
+    BatterySim battery("TestBattery", BatterySpecs(4, *cellSpecs, 0.35));
 
     battery.setStateOfChargePercent(100.0);
     REQUIRE(battery.getStateOfChargePercent() == 100.0);

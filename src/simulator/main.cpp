@@ -5,6 +5,7 @@
 
 #include "drone/model/quadrocopter.h"
 #include "simulator/physics/battery_sim.h"
+#include "simulator/physics/gps_sim.h"
 #include "simulator/physics/motor_physics.h"
 #include "simulator/simulation_base.h"
 
@@ -15,17 +16,20 @@ public:
     SimulationApp()
         : quad_(drone::model::Quadrocopter::createWithBatterySim(
               "Quad",
-              drone::model::components::ElecMotorSpecs(15000.0, 14.8, 20.0, 0.9, 0.4),
+              drone::model::components::ElecMotorSpecs(15000.0, 14.8, 20.0, 0.9, 0.4, 0.12),
               drone::model::sensors::AnalogIOSpec(
                   drone::model::sensors::AnalogIOSpec::IODirection::OUTPUT,
                   drone::model::sensors::AnalogIOSpec::CurrentRange::ZERO_TO_10V,
                   0, 10000),
-              drone::model::components::BatterySpecs(4, drone::model::components::CellSpecs(1500.0, 4.2)),
+              drone::model::components::BatterySpecs(4, drone::model::components::CellSpecs(1500.0, 4.2), 0.35),
               drone::model::sensors::AnalogIOSpec(
                   drone::model::sensors::AnalogIOSpec::IODirection::INPUT,
                   drone::model::sensors::AnalogIOSpec::CurrentRange::FOUR_TO_20mA,
                   4000, 20000),
-              drone::model::sensors::TemperatureSensorRanges(-50.0, 150.0))),
+              drone::model::sensors::TemperatureSensorRanges(-50.0, 150.0),
+              0.02,
+              drone::model::components::GPSSensorSpecs(),
+              1.2)),
           elapsed_s_(0.0) {}
 
 protected:
@@ -45,10 +49,26 @@ protected:
         auto& motors = quad_.getMotors();
         const uint64_t delta_ms = static_cast<uint64_t>(dt_s * 1000.0);
         double total_current_a = 0.0;
+        double avg_rpm = 0.0;
+
         for (auto& motor : motors) {
             motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm * ramp_ratio);
             drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms);
             total_current_a += motor.getCurrentA();
+            avg_rpm += motor.getSpeedRPM();
+        }
+
+        if (!motors.empty()) {
+            avg_rpm /= static_cast<double>(motors.size());
+        }
+
+        const double max_rpm = motors.empty() ? 1.0 : motors[0].getSpecs().max_speed_rpm;
+        const double rpm_ratio = std::clamp(avg_rpm / max_rpm, 0.0, 1.0);
+        const double climb_rate_mps = (rpm_ratio - 0.5) * 2.0;
+        altitude_m_ = std::max(0.0, altitude_m_ + climb_rate_mps * dt_s);
+
+        if (auto* gps_sim = dynamic_cast<drone::simulator::physics::GPSSim*>(quad_.getGPS())) {
+            gps_sim->setAltitudeM(altitude_m_);
         }
 
         auto* battery = quad_.getBattery();
@@ -56,10 +76,13 @@ protected:
             battery_sim->setCurrentA(total_current_a);
             battery_sim->update(delta_ms);
         }
+
         const double capacity_mah = battery ? battery->getRemainingCapacityMah() : 0.0;
 
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "dt=" << dt_s << "s "
+        std::cout << "t=" << elapsed_s_ << "s "
+                  << "alt_m=" << altitude_m_
+                  << " dt=" << dt_s << "s "
                   << "battery_mAh=" << capacity_mah;
 
         for (size_t i = 0; i < motors.size(); ++i) {
@@ -75,6 +98,7 @@ protected:
 private:
     drone::model::Quadrocopter quad_;
     double elapsed_s_;
+    double altitude_m_{0.0};
 };
 
 bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s) {

@@ -15,9 +15,11 @@ struct GPSSensorSpecs {
     double velocity_accuracy_mps;  ///< Velocity accuracy in meters per second.
     int update_rate_hz;            ///< Update rate in Hertz.
     int max_satellites;            ///< Maximum number of satellites the GPS can track.
-    GPSSensorSpecs(double horiz_acc = 5.0, double vert_acc = 10.0, double vel_acc = 0.5, int upd_rate = 5, int max_sats = 8)
+    double weight_kg;              ///< GPS module weight in kilograms.
+    GPSSensorSpecs(double horiz_acc = 5.0, double vert_acc = 10.0, double vel_acc = 0.5,
+                   int upd_rate = 5, int max_sats = 8, double weight_kg = 0.05)
         : horizontal_accuracy_m(horiz_acc), vertical_accuracy_m(vert_acc), velocity_accuracy_mps(vel_acc),
-          update_rate_hz(upd_rate), max_satellites(max_sats) {}
+          update_rate_hz(upd_rate), max_satellites(max_sats), weight_kg(weight_kg) {}
 };
 
 // we use that class to make testing easier - update method will be implemented in derived classes
@@ -44,6 +46,7 @@ public:
     Velocity3D getVelocity() const { return velocity_; }
     std::string getName() const { return name_; }
     GPSSensorSpecs getSpecs() const { return specs_; }  
+    double getWeightKg() const { return specs_.weight_kg; }
 private:
     Position3D position_;
     Velocity3D velocity_;

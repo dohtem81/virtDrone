@@ -8,8 +8,9 @@ ElecMotorSpecs specs(
     15000.0,    // max_speed_rpm
     14.8,       // nominal_voltage_v
     20.0,       // max_current_a
-     0.9,        // efficiency
-     0.4         // thermal_resistance
+    0.9,        // efficiency
+    0.4,        // thermal_resistance
+    0.12        // weight_kg
 );
 AnalogIOSpec io_spec(
     AnalogIOSpec::IODirection::OUTPUT,
