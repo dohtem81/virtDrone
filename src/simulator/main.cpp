@@ -16,7 +16,7 @@ public:
     SimulationApp()
         : quad_(drone::model::Quadrocopter::createWithBatterySim(
               "Quad",
-              drone::model::components::ElecMotorSpecs(15000.0, 14.8, 20.0, 0.9, 0.4, 0.12),
+              drone::model::components::ElecMotorSpecs(40000.0, 14.8, 20.0, 0.9, 0.4, 0.12),
               drone::model::sensors::AnalogIOSpec(
                   drone::model::sensors::AnalogIOSpec::IODirection::OUTPUT,
                   drone::model::sensors::AnalogIOSpec::CurrentRange::ZERO_TO_10V,
@@ -30,7 +30,7 @@ public:
               0.02,
               drone::model::components::GPSSensorSpecs(),
               0.2,
-              0.127, // blade diameter in meters
+              0.09, // blade diameter in meters
               1.0   // blade shape coefficient
               )),
           elapsed_s_(0.0) {}
@@ -75,12 +75,10 @@ protected:
         double total_lift = 0.0;
         for (const auto& motor : motors) {
             double D = motor.getSpecs().blade_diameter_m;
-            double n = motor.getSpeedRPM() / 60.0;  // rev/s
-            double omega = 2.0 * M_PI * n;  // rad/s
+            double n = motor.getSpeedRPM() / 60.0;
 
-            double A = M_PI * D * D / 4.0;  // disk area (m²)
-            double Ct = 0.2 * motor.getSpecs().blade_shape_coeff;
-            double thrust = 2.0 * rho * A * Ct * omega * omega * D * D / 4.0;
+            double Ct = 0.115;  // Thrust coefficient, adjustable based on blade shape and efficiency
+            double thrust = Ct * rho * n * n * pow(D, 4);
 
             total_lift += thrust;
         }
@@ -90,7 +88,7 @@ protected:
         double mass_kg = quad_.getTotalWeightKg();
         double gravity_mps2 = 9.81;
 
-        double kv = 5.0;  // Vertical drag coefficient, adjustable
+        double kv = 0.5;  // Vertical drag coefficient, adjustable
         double weight_n = mass_kg * gravity_mps2;
         double vertical_drag = -kv * vertical_speed_mps_;
         double net_force_n = total_lift - weight_n + vertical_drag;
@@ -119,7 +117,8 @@ protected:
         std::cout << std::fixed << std::setprecision(2);
         std::cout << "t=" << elapsed_s_ << "s "
                   << "alt_m=" << altitude_m_
-                  << " dt=" << dt_s << "s "
+                  << " V=" << vertical_speed_mps_ << "m/s "
+                  << " netF=" << net_force_n << "N "
                   << " b%=" << (battery ? battery->getStateOfChargePercent() : 0.0)
                   << " bV=" << currentBattVoltageV;
 
