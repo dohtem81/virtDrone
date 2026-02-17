@@ -5,20 +5,20 @@
 namespace drone::simulator::physics {
 
 void MotorPhysics::updateSpeed(drone::model::components::ElecMotor& motor, uint64_t delta_ms, double currentBattVoltageV) {
-    double ramp_rate = 1000.0;  // RPM per second, adjustable
     double delta_s = delta_ms / 1000.0;
     double desiredRPM = motor.getDesiredSpeedRPM();
     double battDrainFactor = currentBattVoltageV / motor.getSpecs().nominal_voltage_v;
     double max_rpm = motor.getSpecs().max_speed_rpm * battDrainFactor;  // Scale max RPM by battery voltage factor
     desiredRPM = std::min(desiredRPM, max_rpm);  // Ensure desired RPM does not exceed scaled max RPM
     double currentRPM = motor.getSpeedRPM();
-    if (currentRPM < desiredRPM) {
-        currentRPM += ramp_rate * delta_s * battDrainFactor;  // Scale ramp rate by battery voltage factor
-        if (currentRPM > desiredRPM) currentRPM = desiredRPM;
-    } else if (currentRPM > desiredRPM) {
-        currentRPM -= ramp_rate * delta_s * battDrainFactor;  // Scale ramp rate by battery voltage factor  
-        if (currentRPM < desiredRPM) currentRPM = desiredRPM;
-    }
+
+    // calculate delta RPMs
+    double delta_rpm = desiredRPM - currentRPM;
+    // delta RPM change based on max ramp rate and time, scaled by battery voltage factor
+    double delta_rpm_allowed = motor.getMaxRampRateRPMPerS() * delta_s;
+
+    double currentRPMChange = std::clamp(delta_rpm, -delta_rpm_allowed, delta_rpm_allowed);
+    currentRPM += currentRPMChange;
     motor.setSpeedRPM(currentRPM);
 }
 
@@ -99,12 +99,12 @@ void MotorPhysics::updateMotorPhysics(
         uint64_t delta_ms, 
         drone::model::components::Battery_base* battery) {
 
-    if (battery->getStateOfChargePercent() < 1.0) {
-        motor.setCurrentA(0.0);
-        motor.setSpeedRPM(0.0);
-        motor.setLossesW(0.0);
-    }
-    MotorPhysics::updateSpeed(motor, delta_ms, battery->getVoltageV());
+    // if (battery->getStateOfChargePercent() < 1.0) {
+    //     motor.setCurrentA(0.0);
+    //     motor.setSpeedRPM(0.0);
+    //     motor.setLossesW(0.0);
+    // }
+    MotorPhysics::updateSpeed(motor, delta_ms, battery->getStateOfChargePercent() < 1.0 ? 0.0 : battery->getVoltageV());
     MotorPhysics::calculateCurrent(motor, battery);
     MotorPhysics::calculateLosses(motor);
     MotorPhysics::updateTemperature(motor, delta_ms);

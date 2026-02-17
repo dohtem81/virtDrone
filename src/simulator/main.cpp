@@ -29,7 +29,10 @@ public:
               drone::model::sensors::TemperatureSensorRanges(-50.0, 150.0),
               0.02,
               drone::model::components::GPSSensorSpecs(),
-              1.2)),
+              0.2,
+              0.127, // blade diameter in meters
+              1.0   // blade shape coefficient
+              )),
           elapsed_s_(0.0) {}
 
 protected:
@@ -54,7 +57,6 @@ protected:
 
         for (auto& motor : motors) {
             motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm);
-            //drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, currentBattVoltageV);
             drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, quad_.getBattery());
             total_current_a += motor.getCurrentA();
             avg_rpm += motor.getSpeedRPM();
@@ -64,10 +66,43 @@ protected:
             avg_rpm /= static_cast<double>(motors.size());
         }
 
-        const double max_rpm = motors.empty() ? 1.0 : motors[0].getSpecs().max_speed_rpm;
-        const double rpm_ratio = std::clamp(avg_rpm / max_rpm, 0.0, 1.0);
-        const double climb_rate_mps = (rpm_ratio - 0.5) * 2.0;
-        altitude_m_ = std::max(0.0, altitude_m_ + climb_rate_mps * dt_s);
+        // for each motor calculate vector of lifting force based on blade diameter, shape coefficient, and RPM
+        // then sum the vertical components of the forces to get total lift
+        // for simplicity, assume lift is proportional to RPM^2, blade area, and shape coefficient
+        // each motor should produce 18N
+        double rho = 1.225;  // air density (kg/m^3)
+
+        double total_lift = 0.0;
+        for (const auto& motor : motors) {
+            double D = motor.getSpecs().blade_diameter_m;
+            double n = motor.getSpeedRPM() / 60.0;  // rev/s
+            double omega = 2.0 * M_PI * n;  // rad/s
+
+            double A = M_PI * D * D / 4.0;  // disk area (m²)
+            double Ct = 0.2 * motor.getSpecs().blade_shape_coeff;
+            double thrust = 2.0 * rho * A * Ct * omega * omega * D * D / 4.0;
+
+            total_lift += thrust;
+        }
+
+
+        // now calculate net force and update altitude
+        double mass_kg = quad_.getTotalWeightKg();
+        double gravity_mps2 = 9.81;
+
+        double kv = 5.0;  // Vertical drag coefficient, adjustable
+        double weight_n = mass_kg * gravity_mps2;
+        double vertical_drag = -kv * vertical_speed_mps_;
+        double net_force_n = total_lift - weight_n + vertical_drag;
+
+        double acceleration_mps2 = net_force_n / mass_kg;
+        // update vertical speed and altitude
+        vertical_speed_mps_ += acceleration_mps2 * dt_s;
+        altitude_m_ += vertical_speed_mps_ * dt_s;
+        if (altitude_m_ < 0.0) {
+            altitude_m_ = 0.0;
+            vertical_speed_mps_ = 0.0;
+        }   
 
         if (auto* gps_sim = dynamic_cast<drone::simulator::physics::GPSSim*>(quad_.getGPS())) {
             gps_sim->setAltitudeM(altitude_m_);
@@ -102,6 +137,7 @@ private:
     drone::model::Quadrocopter quad_;
     double elapsed_s_;
     double altitude_m_{0.0};
+    double vertical_speed_mps_{0.0};
 };
 
 bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s) {

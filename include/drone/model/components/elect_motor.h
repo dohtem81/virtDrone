@@ -17,6 +17,8 @@ struct ElecMotorSpecs {
     double efficiency;        ///< Efficiency as a fraction (0.0 to 1.0).
     double thermal_resistance; ///< Thermal resistance in °C/W for temperature calculation.
     double weight_kg;         ///< Motor weight in kilograms.
+    double blade_diameter_m{0.0}; ///< Blade diameter in meters.
+    double blade_shape_coeff{1.0}; ///< Blade shape coefficient.
 
     ElecMotorSpecs(double max_speed = 10000.0, double nom_vol = 12.0, double max_curr = 10.0,
                   double eff = 0.85, double therm_res = 0.5, double weight_kg = 0.0)
@@ -110,6 +112,12 @@ public:
      */
     const ElecMotorSpecs& getSpecs() const { return specs_; }
 
+    /**
+     * @brief Gets the maximum ramp rate in RPM/s for speed changes.
+     * @return The maximum ramp rate in RPM/s.
+     */
+    const double getMaxRampRateRPMPerS() const { return max_ramp_rate_rpm_per_s_; }
+
     // Additional getters for simulation state
     double getDesiredSpeedRPM() const { return desired_speed_rpm_; }
     double getVoltageV() const { return voltage_v_; }
@@ -145,6 +153,7 @@ private:
     double ambient_temp_c_;    ///< Ambient temperature in °C (assumed constant).
     std::chrono::steady_clock::time_point last_update_time_; ///< Time point of the last update.
     drone::model::sensors::TemperatureSensor temp_sensor_; ///< Internal temperature sensor for motor.
+    double max_ramp_rate_rpm_per_s_ = 5000.0; ///< Maximum ramp rate in RPM/s for speed changes.
 };
 
 }  // namespace drone::model::components
