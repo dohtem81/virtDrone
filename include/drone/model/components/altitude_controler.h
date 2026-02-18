@@ -45,7 +45,7 @@ public:
 
     double getAltitudeRefInUse() const {
         return altitude_ref_inuse_;
-    }  
+    }
 
 private:
     double target_altitude_m_ = 0.0; // Target altitude in meters

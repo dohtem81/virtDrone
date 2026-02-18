@@ -23,7 +23,7 @@ public:
                 double body_weight_kg,
                 double blade_diameter_m,
                 double blade_shape_coeff,
-                std::unique_ptr<components::AltitudeController> alt_ctrl = std::make_unique<components::AltitudeController>());
+                std::unique_ptr<components::AltitudeController> alt_ctrl = nullptr);
 
     static Quadrocopter createWithBatterySim(const std::string& name,
                                             const components::ElecMotorSpecs& motor_specs,
@@ -39,6 +39,11 @@ public:
                                             const components::AltitudeController& alt_ctrl = components::AltitudeController());
 
     static constexpr size_t kMotorCount = 4;
+
+    components::AltitudeController* getAltitudeController() const { return alt_ctrl_.get(); }
+    
+private:
+    std::unique_ptr<components::AltitudeController> alt_ctrl_;
 };
 
 }  // namespace drone::model

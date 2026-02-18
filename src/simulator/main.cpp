@@ -21,7 +21,7 @@ public:
                   drone::model::sensors::AnalogIOSpec::IODirection::OUTPUT,
                   drone::model::sensors::AnalogIOSpec::CurrentRange::ZERO_TO_10V,
                   0, 10000),
-              drone::model::components::BatterySpecs(4, drone::model::components::CellSpecs(1500.0, 4.2), 0.35),
+              drone::model::components::BatterySpecs(4, drone::model::components::CellSpecs(15000.0, 4.2), 0.35),
               drone::model::sensors::AnalogIOSpec(
                   drone::model::sensors::AnalogIOSpec::IODirection::INPUT,
                   drone::model::sensors::AnalogIOSpec::CurrentRange::FOUR_TO_20mA,
@@ -31,13 +31,17 @@ public:
               drone::model::components::GPSSensorSpecs(),
               0.2,
               0.09, // blade diameter in meters
-              1.0   // blade shape coefficient
+              1.0,   // blade shape coefficient
+              drone::model::components::AltitudeController(5.0, 1.0, 50000.0, 5.0)
               )),
           elapsed_s_(0.0) {}
 
 protected:
     void onStart() override {
         std::cout << "Simulation started" << std::endl;
+        quad_.getAltitudeController()->setTargetAltitude(200.0); // Set target altitude to 10 meters
+        altitude_m_ = 0.0;
+        vertical_speed_mps_ = 0.0;
     }
 
     void onStop() override {
@@ -56,7 +60,12 @@ protected:
         double currentBattVoltageV = quad_.getBattery() ? quad_.getBattery()->getVoltageV() : 0.0;
 
         for (auto& motor : motors) {
-            motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm);
+            // controller calculates desired speed based on altitude error, for simplicity we will just ramp up to max speed over time
+            double rpm_ref_out = 0.0;
+            double ref_altitude_in_use = quad_.getAltitudeController()->getAltitudeRefInUse();
+            quad_.getAltitudeController()->update(altitude_m_, ref_altitude_in_use, motor.getSpeedRPM(), rpm_ref_out, dt_s);
+            motor.setDesiredSpeedRPM(rpm_ref_out);
+            //motor.setDesiredSpeedRPM(motor.getSpecs().max_speed_rpm);
             drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, quad_.getBattery());
             total_current_a += motor.getCurrentA();
             avg_rpm += motor.getSpeedRPM();
@@ -125,6 +134,7 @@ protected:
         for (size_t i = 0; i < motors.size(); ++i) {
             const auto& motor = motors[i];
             std::cout << " | M" << (i + 1)
+                      << " tgtRPM=" << motor.getDesiredSpeedRPM()
                       << " tempC=" << motor.getTemperatureC()
                       << " currentA=" << motor.getCurrentA()
                       << " rpm=" << motor.getSpeedRPM();
