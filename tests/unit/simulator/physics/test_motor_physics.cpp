@@ -1,7 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include "simulator/physics/motor_physics.h"
+#include "simulator/physics/battery_sim.h"
 // #include "simulator/physics/physics.h"
 #include "drone/model/components/elect_motor.h"
+#include <memory>
 
 using namespace drone::model::components;
 using namespace drone::model::sensors;
@@ -13,7 +15,8 @@ ElecMotorSpecs specs(
     20.0,       // max_current_a
     0.9,        // efficiency
     0.4,        // thermal_resistance
-    0.12        // weight_kg
+    0.12,       // weight_kg
+    1000.0     // max_ramp_rate_rpm_per_s
 );
 AnalogIOSpec io_spec(
     AnalogIOSpec::IODirection::OUTPUT,
@@ -57,4 +60,26 @@ TEST_CASE("MotorPhysics internal temperature sensor reading", "[MotorPhysics]") 
     TemperatureSensorReading temp_reading = motor.getTemperatureReading();
     REQUIRE(temp_reading.temperature > 25.0);
     REQUIRE(temp_reading.status == SensorStatus::ACTIVE);
+}
+
+
+// Test MotorPhysics simulation logic with battery simulation
+TEST_CASE("MotorPhysics updates state correctly with battery simulation", "[MotorPhysics]") {
+    ElecMotor motor("TestMotor", io_spec, specs);
+    drone::model::components::BatterySpecs batterySpec(4, drone::model::components::CellSpecs(1500.0, 4.2), 0.35);
+    auto battery = std::make_unique<drone::simulator::physics::BatterySim>("Sim_Battery", batterySpec);
+
+    // Simulate multiple updates to allow speed ramping
+    REQUIRE(motor.getSpeedRPM() == 0.0);
+    REQUIRE(motor.getCurrentA() == 0.0);
+    REQUIRE(motor.getTemperatureC() == 25.0);
+    motor.setDesiredSpeedRPM(5000.0); // Set desired speed
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(1000), battery->getVoltageV());
+    REQUIRE(motor.getSpeedRPM() == 1000.0);
+    REQUIRE(motor.getCurrentA() > 0.0);
+    REQUIRE(motor.getTemperatureC() >= 25.0); // Temperature should not decrease
+    MotorPhysics::updateMotorPhysics(motor, static_cast<uint64_t>(4000), battery->getVoltageV());
+    REQUIRE(motor.getSpeedRPM() == 5000.0);
+    REQUIRE(motor.getCurrentA() > 0.0);
+    REQUIRE(motor.getTemperatureC() >= 25.0); // Temperature should not decrease
 }

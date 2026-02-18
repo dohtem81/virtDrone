@@ -37,6 +37,14 @@ add_executable(test_drone_base
     unit/drone/model/test_drone_base.cpp
 )
 
+add_executable(test_esc_logic
+    unit/drone/model/component/test_esc_logic.cpp
+)
+
+add_executable(test_alt_ctrl_logic
+    unit/drone/model/component/test_alt_controller.cpp
+)
+
 # Link against Catch2 and the drone library
 target_link_libraries(test_base_sensor
     PRIVATE
@@ -96,6 +104,17 @@ target_link_libraries(test_drone_base
         simulator  # Link to the simulator library for dependencies
 )
 
+target_link_libraries(test_esc_logic
+    PRIVATE
+        Catch2::Catch2WithMain
+ )
+
+ target_link_libraries(test_alt_ctrl_logic
+     PRIVATE
+        Catch2::Catch2WithMain
+ )
+
+
 # Register the test with CTest
 add_test(NAME test_utils COMMAND test_utils)
 add_test(NAME test_base_sensor COMMAND test_base_sensor)
@@ -106,7 +125,8 @@ add_test(NAME test_simulation_base COMMAND test_simulation_base)
 add_test(NAME test_gps_sensor COMMAND test_gps_sensor)
 add_test(NAME test_energy COMMAND test_energy)
 add_test(NAME test_drone_base COMMAND test_drone_base)
-
+add_test(NAME test_esc_logic COMMAND test_esc_logic)
+add_test(NAME test_alt_ctrl_logic COMMAND test_alt_ctrl_logic)
 # Enable test discovery for Catch2
 include(Catch)
 catch_discover_tests(test_utils)
@@ -118,3 +138,5 @@ catch_discover_tests(test_simulation_base)
 catch_discover_tests(test_gps_sensor)
 catch_discover_tests(test_energy)
 catch_discover_tests(test_drone_base)
+catch_discover_tests(test_esc_logic)
+catch_discover_tests(test_alt_ctrl_logic)

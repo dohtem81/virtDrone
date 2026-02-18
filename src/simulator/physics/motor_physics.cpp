@@ -88,10 +88,10 @@ void MotorPhysics::updateMotorPhysics(
         uint64_t delta_ms, 
         double currentBattVoltageV) {
 
+    MotorPhysics::updateSpeed(motor, delta_ms, currentBattVoltageV);
     MotorPhysics::calculateCurrent(motor);
     MotorPhysics::calculateLosses(motor);
-    MotorPhysics::updateTemperature(motor, delta_ms);
-    MotorPhysics::updateSpeed(motor, delta_ms, currentBattVoltageV);
+    MotorPhysics::updateTemperature(motor, delta_ms);    
 }
 
 void MotorPhysics::updateMotorPhysics(
@@ -99,11 +99,6 @@ void MotorPhysics::updateMotorPhysics(
         uint64_t delta_ms, 
         drone::model::components::Battery_base* battery) {
 
-    // if (battery->getStateOfChargePercent() < 1.0) {
-    //     motor.setCurrentA(0.0);
-    //     motor.setSpeedRPM(0.0);
-    //     motor.setLossesW(0.0);
-    // }
     MotorPhysics::updateSpeed(motor, delta_ms, battery->getStateOfChargePercent() < 1.0 ? 0.0 : battery->getVoltageV());
     MotorPhysics::calculateCurrent(motor, battery);
     MotorPhysics::calculateLosses(motor);
