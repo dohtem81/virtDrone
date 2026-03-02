@@ -1,0 +1,17 @@
+# Alternative Altitude Controller Configuration
+# More aggressive control for faster response
+
+altitude_controller:
+  # Target altitude in meters
+  target_altitude_m: 100.0
+  
+  # Altitude reference tracking parameters
+  altitude_param_p: 3.0           # Higher P gain for faster tracking
+  max_altitude_delta_mps: 10.0    # Allow faster altitude changes
+  
+  # RPM control parameters (PI controller)
+  control_param_p: 150.0          # Higher P gain
+  control_param_i: 20.0           # Higher I gain
+  
+  # Hover RPM estimate
+  neutral_rpm: 11400.0

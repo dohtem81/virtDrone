@@ -8,10 +8,32 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Option to build tests
 option(VIRTD_BUILD_TESTS "Build unit tests" ON)
 
+# Find yaml-cpp
+find_package(yaml-cpp QUIET)
+if(NOT yaml-cpp_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        yaml-cpp
+        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+        GIT_TAG 0.8.0
+    )
+    FetchContent_MakeAvailable(yaml-cpp)
+endif()
+
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/libs)
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Core drone library (without simulator dependencies)
+add_library(drone
+    src/drone/model/model.cpp
+    src/drone/control/control.cpp
+    src/drone/telemetry/telemetry.cpp
+    src/drone/model/sensors/base_sensor.cpp
+    src/drone/model/sensors/temperature_sensor.cpp
+    src/drone/model/components/elect_motor.cpp
+)
 
 # Simulator library
 add_library(simulator
@@ -22,7 +44,26 @@ add_library(simulator
     src/simulator/physics/battery_cell_physics.cpp
     src/simulator/physics/battery_sim.cpp
     src/simulator/physics/gps_sim.cpp
+    src/simulator/physics/thrust_model.cpp
     src/simulator/simulation_base.cpp
+    src/simulator/quadrosimulator.cpp
+)
+
+# Link simulator to drone
+target_link_libraries(simulator
+    PRIVATE
+    drone
+)
+
+# Drone-Simulator integration (depends on both drone and simulator)
+add_library(drone_sim
+    src/drone/model/quadrocopter.cpp
+)
+
+target_link_libraries(drone_sim
+    PRIVATE
+    drone
+    simulator
 )
 
 # Simulator executable
@@ -33,17 +74,8 @@ target_link_libraries(simulator_app
     PRIVATE
     drone
     simulator
-)
-
-# Drone library
-add_library(drone
-    src/drone/model/model.cpp
-    src/drone/model/quadrocopter.cpp
-    src/drone/control/control.cpp
-    src/drone/telemetry/telemetry.cpp
-    src/drone/model/sensors/base_sensor.cpp
-    src/drone/model/sensors/temperature_sensor.cpp  # Added to include TemperatureSensor implementation
-    src/drone/model/components/elect_motor.cpp
+    drone_sim
+    yaml-cpp::yaml-cpp
 )
 
 # Common libs

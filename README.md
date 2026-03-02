@@ -162,25 +162,100 @@ It is a learning and exploration platform, not a finished product.
 ---
 
 ## Simulation
-You can now run a simple quadcopter simulation via the `simulator_app` executable.
+You can now run a quadcopter simulation with altitude control via the `simulator_app` executable.
 
-Key behavior:
-- Step-based simulation with a fixed $dt$.
-- Motors ramp from 0% to 100% max RPM over 2 seconds.
-- Each step prints one line: battery capacity, motor temperature, current, and RPM.
+### Key Features
+- **Physics-based simulation**: Motor dynamics, thrust calculation, battery discharge, altitude integration
+- **PI altitude controller**: Maintains target altitude using sensor feedback (GPS)
+- **YAML configuration**: Controller parameters loaded from config files
+- **Architecture separation**:
+  - **Physical drone side**: Controller reads GPS altitude, computes RPM reference
+  - **Simulation side**: Applies motor physics, thrust forces, altitude updates
+  - **Sensor bridge**: GPS updated from simulated altitude
 
-Build and run (Docker):
+### Usage
+
+**Basic usage:**
+```bash
+./build/simulator_app [steps] [dt_s] [config_file]
+```
+
+**Parameters:**
+- `steps`: Number of simulation steps (default: 10)
+- `dt_s`: Time step in seconds (default: 0.01)
+- `config_file`: Path to YAML config file (default: config/altitude_controller.yaml)
+
+**Examples:**
+```bash
+# Run with default config (50m target altitude)
+./build/simulator_app 1000 0.01
+
+# Run with custom config (100m target, aggressive control)
+./build/simulator_app 1000 0.01 config/altitude_controller_fast.yaml
+
+# Long simulation with output to file
+./build/simulator_app 10000 0.01 > flight_data.txt
+```
+
+### Configuration Files
+
+Controller parameters are defined in YAML files under `config/`:
+
+**config/altitude_controller.yaml** (default):
+```yaml
+altitude_controller:
+  target_altitude_m: 50.0        # Target altitude
+  altitude_param_p: 2.0          # Altitude tracking P gain
+  max_altitude_delta_mps: 5.0    # Max altitude change rate
+  control_param_p: 100.0         # RPM control P gain
+  control_param_i: 10.0          # RPM control I gain
+  neutral_rpm: 11400.0           # Hover RPM estimate
+```
+
+**config/altitude_controller_fast.yaml** (more aggressive):
+```yaml
+altitude_controller:
+  target_altitude_m: 100.0
+  altitude_param_p: 3.0
+  max_altitude_delta_mps: 10.0
+  control_param_p: 150.0
+  control_param_i: 20.0
+  neutral_rpm: 11400.0
+```
+
+You can create custom config files to tune controller behavior.
+
+### Output Format
+
+Each simulation step prints telemetry data:
+```
+T:    5.00s | Alt:    26.14m | RefRPM: 11407.50 | RPM: 11407.50 | Curr:  16.90A | Batt: 1409.60mAh | SOC:  93.97% | V: 16.32V | T:  28.82C
+```
+
+- **T**: Simulation time (seconds)
+- **Alt**: Current altitude from GPS sensor (meters)
+- **RefRPM**: RPM reference from controller
+- **RPM**: Actual motor RPM
+- **Curr**: Motor current draw (Amperes)
+- **Batt**: Battery remaining capacity (mAh)
+- **SOC**: State of charge (%)
+- **V**: Battery voltage (Volts)
+- **T**: Motor temperature (Celsius)
+
+### Build and Run
+
+**Using Docker (Recommended):**
 ```bash
 docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 docker compose run --rm dev cmake --build build --target simulator_app
-docker compose run --rm dev ./build/simulator_app [steps] [dt_s]
+docker compose run --rm dev ./build/simulator_app 1000 0.01
 ```
 
-Build and run (Host):
+**On Host:**
 ```bash
 cmake -S . -B build
 cmake --build build --target simulator_app
-./build/simulator_app [steps] [dt_s]
+./build/simulator_app 1000 0.01
 ```
 
 ---

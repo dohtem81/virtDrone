@@ -1,0 +1,19 @@
+# Altitude Controller Configuration
+# This file contains parameters for the PI altitude controller
+
+altitude_controller:
+  # Target altitude in meters
+  target_altitude_m: 50.0
+  
+  # Altitude reference tracking parameters
+  altitude_param_p: 2.0           # Proportional gain for altitude reference tracking
+  max_altitude_delta_mps: 5.0     # Maximum altitude reference change rate (m/s)
+  
+  # RPM control parameters (PI controller)
+  control_param_p: 100.0          # Proportional gain for RPM control
+  control_param_i: 10.0           # Integral gain for RPM control
+  
+  # Hover RPM estimate (RPM needed to maintain steady altitude)
+  # This depends on drone weight and propeller characteristics
+  # For a 2.1kg drone with 0.3m props: ~11400 RPM
+  neutral_rpm: 11400.0

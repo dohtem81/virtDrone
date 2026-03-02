@@ -44,9 +44,8 @@ Quadrocopter::Quadrocopter(const std::string& name,
                 std::move(battery),
                 std::move(temperature_sensor),
                 std::move(gps),
-                body_weight_kg) {
-                    alt_ctrl_ = std::move(alt_ctrl);
-                }
+                body_weight_kg),
+      alt_ctrl_(std::move(alt_ctrl)) {}
 
 Quadrocopter Quadrocopter::createWithBatterySim(const std::string& name,
                                                 const components::ElecMotorSpecs& motor_specs,

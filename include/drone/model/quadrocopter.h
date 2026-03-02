@@ -25,6 +25,7 @@ public:
                 double blade_shape_coeff,
                 std::unique_ptr<components::AltitudeController> alt_ctrl = nullptr);
 
+    // factory to create quadrocopter with simulated battery and GPS modules
     static Quadrocopter createWithBatterySim(const std::string& name,
                                             const components::ElecMotorSpecs& motor_specs,
                                             const sensors::AnalogIOSpec& motor_io_spec,

@@ -12,9 +12,6 @@ public:
 
     void update() override {}
     void setAltitudeM(double altitude_m);
-
-private:
-    double altitude_m_{0.0};
 };
 
 }  // namespace drone::simulator::physics
