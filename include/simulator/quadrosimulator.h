@@ -56,6 +56,11 @@ private:
     double p_component_rpm_{0.0};
     double i_component_rpm_{0.0};
     double d_component_rpm_{0.0};
+    double sensed_altitude_m_{0.0};
+    double sensed_battery_voltage_v_{0.0};
+    double sensed_battery_soc_percent_{0.0};
+    double sensed_motor_temperature_c_{0.0};
+    double sensed_motor_rpm_{0.0};
     bool is_running_ = false;
 };
 

@@ -33,6 +33,11 @@ void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuat
     p_component_rpm_ = actuator_frame.p_component_rpm;
     i_component_rpm_ = actuator_frame.i_component_rpm;
     d_component_rpm_ = actuator_frame.d_component_rpm;
+    sensed_altitude_m_ = actuator_frame.sensed_altitude_m;
+    sensed_battery_voltage_v_ = actuator_frame.sensed_battery_voltage_v;
+    sensed_battery_soc_percent_ = actuator_frame.sensed_battery_soc_percent;
+    sensed_motor_temperature_c_ = actuator_frame.sensed_motor_temperature_c;
+    sensed_motor_rpm_ = actuator_frame.sensed_motor_rpm;
 }
 
 void QuaroSimulation::onStart() {
@@ -56,11 +61,16 @@ void QuaroSimulation::onStep(double delta_time_s) {
         // SIMULATION SIDE: Apply desired RPM to motors and compute physics
         auto& motors = quad_->getMotors();
         double battery_voltage = quad_->getBattery() ? quad_->getBattery()->getVoltageV() : 0.0;
+        auto* battery = quad_->getBattery();
         
         for (auto& motor : motors) {
             motor.setDesiredSpeedRPM(desired_rpm_);
-            // Use physics engine to update motor
-            drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, battery_voltage);
+            // Use battery-aware physics engine to update motor (includes depletion cutoff)
+            if (battery) {
+                drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, battery);
+            } else {
+                drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, battery_voltage);
+            }
         }
         
         // Calculate total current draw and update battery
@@ -149,15 +159,15 @@ void QuaroSimulation::onStep(double delta_time_s) {
         // Print telemetry with all data
         std::cout << std::fixed << std::setprecision(2)
                   << "T: " << std::setw(7) << elapsed_s_ << "s"
-                  << " | Alt: " << std::setw(8) << altitude_m << "m"
-                  << " | TgtAlt: " << std::setw(8) << target_altitude_m_ << "m"
-                  << " | RefRPM: " << std::setw(8) << desired_rpm_
-                  << " | RPM: " << std::setw(8) << motor_rpm
-                  << " | Curr: " << std::setw(6) << motor_current << "A"
-                  << " | Batt: " << std::setw(7) << battery_capacity << "mAh"
-                  << " | SOC: " << std::setw(6) << battery_soc << "%"
-                  << " | V: " << std::setw(5) << battery_voltage << "V"
-                  << " | T: " << std::setw(6) << motor_temp << "C"
+              << " | S/P Alt: " << std::setw(8) << sensed_altitude_m_ << " / " << std::setw(8) << altitude_m << "m"
+              << " | S/P RPM: " << std::setw(8) << sensed_motor_rpm_ << " / " << std::setw(8) << motor_rpm
+              << " | S/P SOC: " << std::setw(6) << sensed_battery_soc_percent_ << " / " << std::setw(6) << battery_soc << "%"
+              << " | S/P V: " << std::setw(5) << sensed_battery_voltage_v_ << " / " << std::setw(5) << battery_voltage << "V"
+              << " | S/P T: " << std::setw(6) << sensed_motor_temperature_c_ << " / " << std::setw(6) << motor_temp << "C"
+              << " | Curr: " << std::setw(6) << motor_current << "A"
+              << " | Batt: " << std::setw(7) << battery_capacity << "mAh"
+              << " | TgtAlt: " << std::setw(8) << target_altitude_m_ << "m"
+              << " | RefRPM: " << std::setw(8) << desired_rpm_
                   << " | TgtErr: " << std::setw(8) << target_error_m_ << "m"
                   << " | P: " << std::setw(8) << p_component_rpm_
                   << " | I: " << std::setw(8) << i_component_rpm_

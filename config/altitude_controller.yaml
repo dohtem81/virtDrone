@@ -11,8 +11,8 @@ altitude_controller:
   
   # RPM control parameters (PI controller)
   control_param_p: 100.0          # Proportional gain for RPM control
-  control_param_i: 10.0           # Integral gain for RPM control
-  control_param_d: 10.0            # Derivative gain for RPM control
+  control_param_i: 5.0           # Integral gain for RPM control
+  control_param_d: 5.0            # Derivative gain for RPM control
   enable_i_component: true        # Enable integral component
   enable_d_component: true       # Enable derivative component
   activation_error_band_m: 10.0    # I and D active only when |error| < this band

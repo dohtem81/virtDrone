@@ -4,7 +4,22 @@
 
 namespace drone::simulator::physics {
 
+namespace {
+bool isBatteryDepleted(const drone::model::components::Battery_base* battery) {
+    if (!battery) {
+        return true;
+    }
+    return battery->getRemainingCapacityMah() <= 0.0 || battery->getStateOfChargePercent() <= 0.0;
+}
+}
+
 void MotorPhysics::updateSpeed(drone::model::components::ElecMotor& motor, uint64_t delta_ms, double currentBattVoltageV) {
+    motor.setVoltageV(std::max(0.0, currentBattVoltageV));
+    if (currentBattVoltageV <= 0.0) {
+        motor.setSpeedRPM(0.0);
+        return;
+    }
+
     double delta_s = delta_ms / 1000.0;
     double desiredRPM = motor.getDesiredSpeedRPM();
     double battDrainFactor = currentBattVoltageV / motor.getSpecs().nominal_voltage_v;
@@ -36,7 +51,7 @@ void MotorPhysics::calculateCurrent(drone::model::components::ElecMotor& motor) 
 }
 
 void MotorPhysics::calculateCurrent(drone::model::components::ElecMotor& motor, drone::model::components::Battery_base* battery) {
-    if (battery->getStateOfChargePercent() < 1.0) {
+    if (isBatteryDepleted(battery)) {
         motor.setCurrentA(0.0);
     } else {
         MotorPhysics::calculateCurrent(motor);
@@ -99,7 +114,8 @@ void MotorPhysics::updateMotorPhysics(
         uint64_t delta_ms, 
         drone::model::components::Battery_base* battery) {
 
-    MotorPhysics::updateSpeed(motor, delta_ms, battery->getStateOfChargePercent() < 1.0 ? 0.0 : battery->getVoltageV());
+    const double available_voltage = isBatteryDepleted(battery) ? 0.0 : battery->getVoltageV();
+    MotorPhysics::updateSpeed(motor, delta_ms, available_voltage);
     MotorPhysics::calculateCurrent(motor, battery);
     MotorPhysics::calculateLosses(motor);
     MotorPhysics::updateTemperature(motor, delta_ms);

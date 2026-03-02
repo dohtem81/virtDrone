@@ -20,6 +20,11 @@ struct ActuatorFrame {
     double p_component_rpm = 0.0;
     double i_component_rpm = 0.0;
     double d_component_rpm = 0.0;
+    double sensed_altitude_m = 0.0;
+    double sensed_battery_voltage_v = 0.0;
+    double sensed_battery_soc_percent = 0.0;
+    double sensed_motor_temperature_c = 0.0;
+    double sensed_motor_rpm = 0.0;
 };
 
 class SensorSource {
@@ -57,7 +62,12 @@ public:
             altitude_controller_.getLastTargetErrorM(),
             altitude_controller_.getLastPComponentRPM(),
             altitude_controller_.getLastIComponentRPM(),
-            altitude_controller_.getLastDComponentRPM()});
+            altitude_controller_.getLastDComponentRPM(),
+            sensors.altitude_m,
+            sensors.battery_voltage_v,
+            sensors.battery_soc_percent,
+            sensors.motor_temperature_c,
+            sensors.motor_rpm});
     }
 
 private:

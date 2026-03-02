@@ -10,6 +10,7 @@
 #include "simulator/physics/gps_sim.h"
 #include "simulator/physics/motor_physics.h"
 #include "simulator/quadrosimulator.h"
+#include "simulator/runtime/noisy_sensor_source.h"
 
 namespace {
 
@@ -131,8 +132,9 @@ int main(int argc, char** argv) {
     );
 
     sim->start();
+    drone::simulator::runtime::NoisySensorSource noisy_sensor_source(*sim);
     for (uint64_t i = 0; i < steps; ++i) {
-        real_drone.update(dt_s, *sim, *sim);
+        real_drone.update(dt_s, noisy_sensor_source, *sim);
         sim->step(dt_s);
     }
     sim->stop();
