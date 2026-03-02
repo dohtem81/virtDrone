@@ -2,58 +2,16 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <yaml-cpp/yaml.h>
 
+#include "drone/config/altitude_controller_config.h"
 #include "drone/model/quadrocopter.h"
+#include "drone/runtime/real_drone.h"
 #include "simulator/physics/battery_sim.h"
 #include "simulator/physics/gps_sim.h"
 #include "simulator/physics/motor_physics.h"
 #include "simulator/quadrosimulator.h"
 
 namespace {
-
-struct AltitudeControllerConfig {
-    double target_altitude_m = 50.0;
-    double altitude_param_p = 2.0;
-    double max_altitude_delta_mps = 5.0;
-    double control_param_p = 100.0;
-    double control_param_i = 10.0;
-    double neutral_rpm = 11400.0;
-};
-
-bool loadAltitudeControllerConfig(const std::string& config_file, AltitudeControllerConfig& config) {
-    try {
-        YAML::Node yaml_config = YAML::LoadFile(config_file);
-        
-        if (yaml_config["altitude_controller"]) {
-            auto alt_ctrl = yaml_config["altitude_controller"];
-            
-            if (alt_ctrl["target_altitude_m"]) {
-                config.target_altitude_m = alt_ctrl["target_altitude_m"].as<double>();
-            }
-            if (alt_ctrl["altitude_param_p"]) {
-                config.altitude_param_p = alt_ctrl["altitude_param_p"].as<double>();
-            }
-            if (alt_ctrl["max_altitude_delta_mps"]) {
-                config.max_altitude_delta_mps = alt_ctrl["max_altitude_delta_mps"].as<double>();
-            }
-            if (alt_ctrl["control_param_p"]) {
-                config.control_param_p = alt_ctrl["control_param_p"].as<double>();
-            }
-            if (alt_ctrl["control_param_i"]) {
-                config.control_param_i = alt_ctrl["control_param_i"].as<double>();
-            }
-            if (alt_ctrl["neutral_rpm"]) {
-                config.neutral_rpm = alt_ctrl["neutral_rpm"].as<double>();
-            }
-        }
-        return true;
-    } catch (const YAML::Exception& e) {
-        std::cerr << "Error loading config file: " << e.what() << std::endl;
-        return false;
-    }
-}
 
 bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s, std::string& config_file) {
     if (argc >= 2) {
@@ -92,8 +50,8 @@ int main(int argc, char** argv) {
     }
 
     // Load altitude controller configuration
-    AltitudeControllerConfig alt_config;
-    if (!loadAltitudeControllerConfig(config_file, alt_config)) {
+    drone::config::AltitudeControllerConfig alt_config;
+    if (!alt_config.loadFromFile(config_file)) {
         std::cerr << "Warning: Could not load config file '" << config_file << "', using defaults" << std::endl;
     } else {
         std::cout << "Loaded altitude controller config from: " << config_file << std::endl;
@@ -132,9 +90,28 @@ int main(int argc, char** argv) {
         alt_config.max_altitude_delta_mps,
         alt_config.control_param_p,
         alt_config.control_param_i,
-        alt_config.neutral_rpm
+        alt_config.neutral_rpm,
+        alt_config.control_param_d,
+        alt_config.enable_i_component,
+        alt_config.enable_d_component,
+        alt_config.activation_error_band_m
     );
-    alt_ctrl.setTargetAltitude(alt_config.target_altitude_m);
+
+    drone::runtime::RealDrone real_drone(alt_ctrl);
+    real_drone.setTargetAltitude(alt_config.target_altitude_m);
+
+    std::cout << "\n=== ALTITUDE CONTROLLER PARAMETERS ===" << std::endl;
+    std::cout << "target_altitude_m: " << alt_config.target_altitude_m << std::endl;
+    std::cout << "altitude_param_p: " << alt_config.altitude_param_p << std::endl;
+    std::cout << "max_altitude_delta_mps: " << alt_config.max_altitude_delta_mps << std::endl;
+    std::cout << "control_param_p: " << alt_config.control_param_p << std::endl;
+    std::cout << "control_param_i: " << alt_config.control_param_i << std::endl;
+    std::cout << "control_param_d: " << alt_config.control_param_d << std::endl;
+    std::cout << "enable_i_component: " << (alt_config.enable_i_component ? "true" : "false") << std::endl;
+    std::cout << "enable_d_component: " << (alt_config.enable_d_component ? "true" : "false") << std::endl;
+    std::cout << "activation_error_band_m: " << alt_config.activation_error_band_m << std::endl;
+    std::cout << "neutral_rpm: " << alt_config.neutral_rpm << std::endl;
+    std::cout << "======================================\n" << std::endl;
 
     // Create simulation using factory
     auto sim = drone::simulator::QuadroSimulationFactory(
@@ -149,13 +126,15 @@ int main(int argc, char** argv) {
         1.2,   // body_weight_kg
         0.3,   // blade_diameter_m
         1.0,   // blade_shape_coeff
-        alt_ctrl,
         steps,
         dt_s
     );
 
     sim->start();
-    sim->runForSteps(steps, dt_s);
+    for (uint64_t i = 0; i < steps; ++i) {
+        real_drone.update(dt_s, *sim, *sim);
+        sim->step(dt_s);
+    }
     sim->stop();
 
     return 0;

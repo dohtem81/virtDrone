@@ -10,6 +10,31 @@
 
 namespace drone::simulator {
 
+drone::runtime::SensorFrame QuaroSimulation::readSensors() const {
+    drone::runtime::SensorFrame sensor_frame;
+    if (!quad_) {
+        return sensor_frame;
+    }
+
+    sensor_frame.altitude_m = quad_->getAltitudeM();
+    sensor_frame.battery_voltage_v = quad_->getBatteryVoltageV();
+    sensor_frame.battery_soc_percent = quad_->getBatterySOC();
+    sensor_frame.motor_temperature_c = quad_->getTemperatureC();
+
+    const auto& motors = quad_->getMotors();
+    sensor_frame.motor_rpm = motors.empty() ? 0.0 : motors[0].getSpeedRPM();
+    return sensor_frame;
+}
+
+void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) {
+    desired_rpm_ = actuator_frame.desired_motor_rpm;
+    target_altitude_m_ = actuator_frame.target_altitude_m;
+    target_error_m_ = actuator_frame.target_error_m;
+    p_component_rpm_ = actuator_frame.p_component_rpm;
+    i_component_rpm_ = actuator_frame.i_component_rpm;
+    d_component_rpm_ = actuator_frame.d_component_rpm;
+}
+
 void QuaroSimulation::onStart() {
     if (!is_running_) {
         is_running_ = true;
@@ -27,34 +52,13 @@ void QuaroSimulation::onStep(double delta_time_s) {
     if (is_running_ && quad_) {
         elapsed_s_ += delta_time_s;
         uint64_t delta_ms = static_cast<uint64_t>(delta_time_s * 1000.0);
-        
-        // PHYSICAL DRONE SIDE: Altitude controller computes desired RPM based on sensor readings
-        double desired_rpm = 0.0;
-        auto* alt_ctrl = quad_->getAltitudeController();
-        if (alt_ctrl) {
-            // Read current altitude from GPS sensor (physical drone perspective)
-            double current_altitude_m = quad_->getAltitudeM();
-            
-            // Read current motor RPM
-            auto& motors = quad_->getMotors();
-            double current_rpm = motors.empty() ? 0.0 : motors[0].getSpeedRPM();
-            
-            // Controller computes RPM reference to maintain target altitude
-            alt_ctrl->update(current_altitude_m, alt_ctrl->getAltitudeRefInUse(), 
-                           current_rpm, desired_rpm, delta_time_s);
-        } else {
-            // Fallback: Ramp motors from 0% to 100% over 2 seconds (no controller)
-            double ramp_time_s = 2.0;
-            double throttle = std::min(1.0, elapsed_s_ / ramp_time_s);
-            desired_rpm = throttle * 15000.0;  // Max RPM from motor specs
-        }
-        
+
         // SIMULATION SIDE: Apply desired RPM to motors and compute physics
         auto& motors = quad_->getMotors();
         double battery_voltage = quad_->getBattery() ? quad_->getBattery()->getVoltageV() : 0.0;
         
         for (auto& motor : motors) {
-            motor.setDesiredSpeedRPM(desired_rpm);
+            motor.setDesiredSpeedRPM(desired_rpm_);
             // Use physics engine to update motor
             drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, battery_voltage);
         }
@@ -88,9 +92,11 @@ void QuaroSimulation::onStep(double delta_time_s) {
         
         // Calculate net force and acceleration
         const double GRAVITY_MS2 = 9.81;
+        const double VERTICAL_DAMPING_N_PER_MPS = 1.2;
         double total_weight_kg = quad_->getTotalWeightKg();
         double weight_n = total_weight_kg * GRAVITY_MS2;
-        double net_force_n = total_thrust_n - weight_n;
+        double damping_force_n = VERTICAL_DAMPING_N_PER_MPS * vertical_speed_mps_;
+        double net_force_n = total_thrust_n - weight_n - damping_force_n;
         double acceleration_ms2 = net_force_n / total_weight_kg;
         
         // Update vertical velocity and altitude
@@ -144,13 +150,18 @@ void QuaroSimulation::onStep(double delta_time_s) {
         std::cout << std::fixed << std::setprecision(2)
                   << "T: " << std::setw(7) << elapsed_s_ << "s"
                   << " | Alt: " << std::setw(8) << altitude_m << "m"
-                  << " | RefRPM: " << std::setw(8) << desired_rpm
+                  << " | TgtAlt: " << std::setw(8) << target_altitude_m_ << "m"
+                  << " | RefRPM: " << std::setw(8) << desired_rpm_
                   << " | RPM: " << std::setw(8) << motor_rpm
                   << " | Curr: " << std::setw(6) << motor_current << "A"
                   << " | Batt: " << std::setw(7) << battery_capacity << "mAh"
                   << " | SOC: " << std::setw(6) << battery_soc << "%"
                   << " | V: " << std::setw(5) << battery_voltage << "V"
                   << " | T: " << std::setw(6) << motor_temp << "C"
+                  << " | TgtErr: " << std::setw(8) << target_error_m_ << "m"
+                  << " | P: " << std::setw(8) << p_component_rpm_
+                  << " | I: " << std::setw(8) << i_component_rpm_
+                  << " | D: " << std::setw(8) << d_component_rpm_
                   << std::endl;
     }
 }
@@ -167,9 +178,10 @@ std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
     double body_weight_kg,
     double blade_diameter_m,
     double blade_shape_coefficient,
-    drone::model::components::AltitudeController altitudeController,
     uint64_t steps,
     double dt_s) {
+    (void)steps;
+    (void)dt_s;
     
     // Create simulation object using new (since make_shared can't access protected constructor)
     auto sim = std::shared_ptr<QuaroSimulation>(new QuaroSimulation());
@@ -179,7 +191,7 @@ std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
         drone::model::Quadrocopter::createWithBatterySim(
             name, emSpecs, aIOSpec, batterySpecs, tempIOSpec, tempSensorRanges, 
             temp_sensor_weight_kg, gpsSpecs, body_weight_kg, blade_diameter_m, 
-            blade_shape_coefficient, altitudeController));
+            blade_shape_coefficient));
 
     return sim;
 }

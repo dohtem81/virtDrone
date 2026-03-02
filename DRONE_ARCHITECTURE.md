@@ -1,105 +1,79 @@
-# Drone Architecture Refactoring
+# Drone Architecture
 
 ## Overview
 
-The drone model architecture has been refactored to separate concerns between **simulation perspective** and **drone perspective**.
+The runtime is now explicitly split into two sides:
 
-## Class Hierarchy
+- **Real drone side (`drone/`)**: control logic and configuration
+- **Simulation side (`simulator/`)**: physics and environment evolution
 
-```
-DronePhysical (Sensor Data Interface)
-    └── DroneBase (Simulator with Physics Calculations)
-            └── Quadrocopter (Concrete Quadrocopter Implementation)
-```
+This separation ensures that control code does not directly execute physics internals, and simulator code does not make control decisions.
 
-## Class Descriptions
+## Runtime Components
 
-### DronePhysical
-**Purpose:** Represents the drone from the drone's own perspective  
-**Location:** `include/drone/model/drone_physical.h`
+### Real Drone (`drone/runtime`)
 
-This is the "drone sensor interface" - it provides **only** the data that actual drone sensors can measure:
-- **Battery:** voltage, state of charge
-- **Temperature:** sensor reading in Celsius
-- **GPS:** position and altitude
-- **Name/ID:** drone identifier
+**Location:** `include/drone/runtime/real_drone.h`
 
-This class is read-only from a sensor perspective - the drone sees these endpoints and can only read sensor values through them.
+- `RealDrone`
+  - owns `AltitudeController`
+  - reads sensor data through `SensorSource`
+  - writes motor command through `ActuatorSink`
+- `SensorFrame`
+  - altitude, battery, motor temperature, motor RPM
+- `ActuatorFrame`
+  - desired motor RPM command
+- `SensorSource` / `ActuatorSink`
+  - interface contracts between control and plant
 
-### DroneBase
-**Purpose:** Simulator class with full physics calculations  
-**Location:** `include/drone/model/drone_base.h`
+### Simulation (`simulator`)
 
-This extends `DronePhysical` and adds:
-- **Motor Management:** Owns and manages all electric motors
-- **Physics Calculations:** 
-  - Total weight calculation (body + motors + components)
-  - Component weight aggregation
-- **Simulation Lifecycle:** Can update/replace components for testing
-- **Public APIs:** Component setters for simulation scenarios
+**Location:** `include/simulator/quadrosimulator.h`, `src/simulator/quadrosimulator.cpp`
 
-This is the "simulator view" - where all physical calculations happen and components are managed.
+- `QuaroSimulation`
+  - implements `SensorSource` and `ActuatorSink`
+  - stores last actuator command (`desired_rpm_`)
+  - advances plant physics in `onStep()`
+    - motor dynamics
+    - thrust and altitude integration
+    - battery drain
+    - temperature and GPS updates
 
-### Quadrocopter
-**Purpose:** Concrete quadrocopter drone implementation  
-**Location:** `include/drone/model/quadrocopter.h`
+## Two-Drone Mental Model
 
-Inherits from `DroneBase` and adds:
-- **Altitude Controller:** Specializes the base drone with altitude control logic
-- **Factory Methods:** `createWithBatterySim()` - convenience constructor with simulated battery/GPS
-- **Motor Count:** Enforces exactly 4 motors
+- **Real drone (controller model)**: what firmware would do
+  - read sensors
+  - compute command
+- **Simulated drone (plant model)**: what physics does
+  - apply command
+  - update physical state
 
-## Data Flow
+Both are run in the same process in `simulator_app`, but responsibilities are separated by interface boundaries.
 
-### Drone Firmware/Software Perspective
-```
-Drone Firmware
-    ↓
-DronePhysical (reads sensor data)
-    ├─ getBatteryVoltageV()
-    ├─ getTemperatureC()
-    ├─ getAltitudeM()
-    └─ getGPS()
-```
+## Step Loop
 
-### Simulator Perspective
-```
-Flight Simulator
-    ↓
-DroneBase (manages components and calculations)
-    ├─ Motors (getMotors/setMotors)
-    ├─ Physics (getTotalWeightKg())
-    ├─ Battery Management (setBattery/getBattery)
-    └─ Sensor Management (setTemperatureSensor/setGPS)
-```
+Implemented in `src/simulator/main.cpp`:
 
-## Backward Compatibility
+1. `real_drone.update(dt, *sim, *sim)`
+   - reads `SensorFrame` from simulator
+   - computes control output
+   - writes `ActuatorFrame` to simulator
+2. `sim->step(dt)`
+   - applies command and advances physics
 
-- Existing code using `DroneBase` continues to work unchanged
-- `Quadrocopter` inherits all functionality from `DroneBase`
-- Tests remain compatible and pass without modification
+This ordering gives a deterministic closed-loop simulation while preserving separation of concerns.
 
-## Usage Examples
+## Configuration
 
-### From Simulator (Physics/Calculation)
-```cpp
-DroneBase drone = Quadrocopter::createWithBatterySim(...);
-double total_weight = drone.getTotalWeightKg();  // Physics calculation
-drone.getMotors()[0].setThrottle(0.5);  // Motor control
-```
+Controller YAML loading is in the drone module:
 
-### From Drone Perspective (Sensor Readings)
-```cpp
-DronePhysical* sensor_view = &drone;
-double altitude = sensor_view->getAltitudeM();     // GPS reading
-double voltage = sensor_view->getBatteryVoltageV(); // Battery reading
-double temp = sensor_view->getTemperatureC();      // Thermal reading
-```
+- `include/drone/config/config_base.h` (abstract base)
+- `include/drone/config/altitude_controller_config.h` (derived altitude controller config)
 
-## Benefits
+The simulator consumes only configured controller outputs, not config parsing internals.
 
-1. **Clear Separation of Concerns:** Simulation logic separate from sensor interface
-2. **Extensibility:** Easy to add more drone types extending `DroneBase`
-3. **Realism:** Drone software only sees what sensors provide
-4. **Testability:** Can mock `DronePhysical` for pure firmware testing
-5. **Documentation:** Class names clearly indicate their purpose
+## Notes
+
+- `Quadrocopter` no longer owns an altitude controller.
+- Altitude control execution has been moved out of simulator physics and into `drone/runtime::RealDrone`.
+- Existing physical models (RPM, battery, temperature, altitude) remain in `simulator/`.

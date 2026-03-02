@@ -10,8 +10,12 @@ altitude_controller:
   max_altitude_delta_mps: 10.0    # Allow faster altitude changes
   
   # RPM control parameters (PI controller)
-  control_param_p: 150.0          # Higher P gain
+  control_param_p: 1500.0          # Higher P gain
   control_param_i: 20.0           # Higher I gain
+  control_param_d: 20.0            # Derivative gain
+  enable_i_component: true        # Enable integral component
+  enable_d_component: true       # Enable derivative component
+  activation_error_band_m: 3.0    # I and D active only when |error| < this band
   
   # Hover RPM estimate
   neutral_rpm: 11400.0

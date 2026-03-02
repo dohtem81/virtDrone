@@ -37,15 +37,13 @@ Quadrocopter::Quadrocopter(const std::string& name,
                            std::unique_ptr<components::GPSModule_base> gps,
                            double body_weight_kg,
                            double blade_diameter_m,
-                           double blade_shape_coeff,
-                           std::unique_ptr<components::AltitudeController> alt_ctrl)
+                           double blade_shape_coeff)
     : DroneBase(name,
                 buildMotors(name, motor_specs, motor_io_spec, blade_diameter_m, blade_shape_coeff),
                 std::move(battery),
                 std::move(temperature_sensor),
                 std::move(gps),
-                body_weight_kg),
-      alt_ctrl_(std::move(alt_ctrl)) {}
+                body_weight_kg) {}
 
 Quadrocopter Quadrocopter::createWithBatterySim(const std::string& name,
                                                 const components::ElecMotorSpecs& motor_specs,
@@ -57,13 +55,11 @@ Quadrocopter Quadrocopter::createWithBatterySim(const std::string& name,
                                                 const components::GPSSensorSpecs& gps_specs,
                                                 double body_weight_kg,
                                                 double blade_diameter_m,
-                                                double blade_shape_coeff,
-                                                const components::AltitudeController& alt_ctrl) {
+                                                double blade_shape_coeff) {
     auto battery = std::make_unique<simulator::physics::BatterySim>(name + "_Battery", battery_specs);
     auto temperature_sensor = std::make_unique<sensors::TemperatureSensor>(
         name + "_TempSensor", temp_io_spec, temp_ranges, temp_sensor_weight_kg);
     auto gps = std::make_unique<simulator::physics::GPSSim>(name + "_GPS", gps_specs);
-    auto altitude_controller = std::make_unique<components::AltitudeController>(alt_ctrl);
 
     return Quadrocopter(name,
                         motor_specs,
@@ -73,8 +69,7 @@ Quadrocopter Quadrocopter::createWithBatterySim(const std::string& name,
                         std::move(gps),
                         body_weight_kg,
                         blade_diameter_m,
-                        blade_shape_coeff,
-                        std::move(altitude_controller));
+                        blade_shape_coeff);
 }
 
 }  // namespace drone::model

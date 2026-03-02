@@ -166,12 +166,21 @@ You can now run a quadcopter simulation with altitude control via the `simulator
 
 ### Key Features
 - **Physics-based simulation**: Motor dynamics, thrust calculation, battery discharge, altitude integration
-- **PI altitude controller**: Maintains target altitude using sensor feedback (GPS)
+- **Real-drone control loop**: Altitude controller runs in `drone/runtime` and uses only sensor readings + actuator outputs
 - **YAML configuration**: Controller parameters loaded from config files
 - **Architecture separation**:
-  - **Physical drone side**: Controller reads GPS altitude, computes RPM reference
-  - **Simulation side**: Applies motor physics, thrust forces, altitude updates
-  - **Sensor bridge**: GPS updated from simulated altitude
+  - **Real drone (`drone/`)**: Reads sensors and computes actuator commands
+  - **Simulation (`simulator/`)**: Simulates physical response (RPM, thrust, battery, temperature, altitude)
+  - **Bridge contract**: Runtime interfaces connect real-drone logic to simulation
+
+### Runtime Loop (Separated)
+
+`simulator_app` now executes a two-side loop each step:
+
+1. **Real side**: `drone::runtime::RealDrone::update()` reads a sensor frame and writes a motor RPM command.
+2. **Simulation side**: `drone::simulator::QuaroSimulation::step()` applies that command and advances physics.
+
+This keeps control decisions out of the simulation physics engine.
 
 ### Usage
 
@@ -209,6 +218,9 @@ altitude_controller:
   max_altitude_delta_mps: 5.0    # Max altitude change rate
   control_param_p: 100.0         # RPM control P gain
   control_param_i: 10.0          # RPM control I gain
+  control_param_d: 0.0           # RPM control D gain
+  enable_i_component: true       # Enable I term
+  enable_d_component: false      # Enable D term
   neutral_rpm: 11400.0           # Hover RPM estimate
 ```
 
@@ -220,6 +232,9 @@ altitude_controller:
   max_altitude_delta_mps: 10.0
   control_param_p: 150.0
   control_param_i: 20.0
+  control_param_d: 0.0
+  enable_i_component: true
+  enable_d_component: false
   neutral_rpm: 11400.0
 ```
 
