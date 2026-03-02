@@ -166,7 +166,7 @@ You can now run a quadcopter simulation with altitude control via the `simulator
 
 ### Key Features
 - **Physics-based simulation**: Motor dynamics, thrust calculation, battery discharge, altitude integration
-- **Real-drone control loop**: Altitude controller runs in `drone/runtime` and uses only sensor readings + actuator outputs
+- **Real-drone control loop**: Altitude PID controller runs in `drone/runtime` and uses only sensor readings + actuator outputs
 - **YAML configuration**: Controller parameters loaded from config files
 - **Architecture separation**:
   - **Real drone (`drone/`)**: Reads sensors and computes actuator commands
@@ -218,10 +218,11 @@ altitude_controller:
   max_altitude_delta_mps: 5.0    # Max altitude change rate
   control_param_p: 100.0         # RPM control P gain
   control_param_i: 10.0          # RPM control I gain
-  control_param_d: 0.0           # RPM control D gain
+  control_param_d: 10.0          # RPM control D gain
   enable_i_component: true       # Enable I term
-  enable_d_component: false      # Enable D term
-  neutral_rpm: 11400.0           # Hover RPM estimate
+  enable_d_component: true       # Enable D term
+  activation_error_band_m: 10.0  # I/D active when |altitude error| is within this band
+  neutral_rpm: 10200.0           # Hover RPM estimate
 ```
 
 **config/altitude_controller_fast.yaml** (more aggressive):
@@ -230,11 +231,12 @@ altitude_controller:
   target_altitude_m: 100.0
   altitude_param_p: 3.0
   max_altitude_delta_mps: 10.0
-  control_param_p: 150.0
+  control_param_p: 1500.0
   control_param_i: 20.0
-  control_param_d: 0.0
+  control_param_d: 20.0
   enable_i_component: true
-  enable_d_component: false
+  enable_d_component: true
+  activation_error_band_m: 3.0
   neutral_rpm: 11400.0
 ```
 
@@ -244,11 +246,12 @@ You can create custom config files to tune controller behavior.
 
 Each simulation step prints telemetry data:
 ```
-T:    5.00s | Alt:    26.14m | RefRPM: 11407.50 | RPM: 11407.50 | Curr:  16.90A | Batt: 1409.60mAh | SOC:  93.97% | V: 16.32V | T:  28.82C
+T:    5.00s | Alt:    26.14m | TgtAlt:   50.00m | RefRPM: 11407.50 | RPM: 11407.50 | Curr:  16.90A | Batt: 1409.60mAh | SOC:  93.97% | V: 16.32V | T:  28.82C | TgtErr:   23.86m | P:  2386.00 | I:   120.00 | D:   -45.00
 ```
 
 - **T**: Simulation time (seconds)
 - **Alt**: Current altitude from GPS sensor (meters)
+- **TgtAlt**: Target altitude configured for controller (meters)
 - **RefRPM**: RPM reference from controller
 - **RPM**: Actual motor RPM
 - **Curr**: Motor current draw (Amperes)
@@ -256,6 +259,8 @@ T:    5.00s | Alt:    26.14m | RefRPM: 11407.50 | RPM: 11407.50 | Curr:  16.90A 
 - **SOC**: State of charge (%)
 - **V**: Battery voltage (Volts)
 - **T**: Motor temperature (Celsius)
+- **TgtErr**: Target altitude error, `target_altitude_m - current_altitude_m`
+- **P / I / D**: Controller component contributions to RPM command
 
 ### Build and Run
 
@@ -299,7 +304,7 @@ make
 ctest --test-dir build --output-on-failure
 
 # Run specific test
-./build/tests/ionet_tests
+ctest --test-dir build -R alt_ctrl --output-on-failure
 ```
 
 
