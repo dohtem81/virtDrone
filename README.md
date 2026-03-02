@@ -11,6 +11,8 @@ Instead, it demonstrates a **correct engineering workflow**:
 
 While the initial target vehicle is a multirotor drone, the architecture is intentionally generic and can be extended to other vehicles (e.g., rockets, wheeled platforms).
 
+Current runtime behavior uses **simplified, first-order approximations** intended for control-development exploration, not for high-accuracy flight prediction.
+
 ---
 
 ## Design Philosophy
@@ -136,6 +138,8 @@ This separation allows subsystems to be refined or replaced without rewriting th
 - Aerodynamics are simplified (no CFD)
 - No structural flexibility
 - No environment modeling beyond basic gravity
+- Vertical motion model is intentionally simplified (coarse thrust + damping approximation)
+- Parameters are not calibrated to a real airframe
 - Models favor clarity and traceability over fidelity
 
 These limitations are **intentional** and explicitly documented.
@@ -165,12 +169,12 @@ It is a learning and exploration platform, not a finished product.
 You can now run a quadcopter simulation with altitude control via the `simulator_app` executable.
 
 ### Key Features
-- **Physics-based simulation**: Motor dynamics, thrust calculation, battery discharge, altitude integration
+- **Simplified plant simulation**: First-order motor, thrust, battery, and altitude approximations for closed-loop testing
 - **Real-drone control loop**: Altitude PID controller runs in `drone/runtime` and uses only sensor readings + actuator outputs
 - **YAML configuration**: Controller parameters loaded from config files
 - **Architecture separation**:
   - **Real drone (`drone/`)**: Reads sensors and computes actuator commands
-  - **Simulation (`simulator/`)**: Simulates physical response (RPM, thrust, battery, temperature, altitude)
+  - **Simulation (`simulator/`)**: Simulates simplified physical response (RPM, thrust, battery, temperature, altitude)
   - **Bridge contract**: Runtime interfaces connect real-drone logic to simulation
 
 ### Runtime Loop (Separated)
