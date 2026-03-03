@@ -1,18 +1,17 @@
 # Roadmap
 
-## Near-term
+## In progress
 
 - Improve thrust/power closure consistency across full operating envelope
-- Add more explicit sensor noise configuration (per sensor, per profile)
-- Add minimal scenario definitions for repeatable tuning experiments
-- Add stronger test coverage around closed-loop behavior under saturation/noise
+- Expand closed-loop behavior tests under saturation/noise/weather combinations
+- Refine chart/report views for faster run-to-run diagnosis
 
 ## Mid-term
 
-- Introduce richer rigid-body dynamics (beyond current vertical-dynamics focus)
+- Introduce richer rigid-body dynamics (beyond current translational + commanded-attitude model)
 - Expand controller stack for multi-axis control paths
+- Add explicit scenario definitions for repeatable tuning experiments
 - Add fault/degradation scenarios for robustness testing
-- Improve charting/reporting for run-to-run comparison
 
 ## Longer-term
 

@@ -10,6 +10,29 @@ This changelog tracks major architecture, runtime, and documentation updates.
 
 ## 2026-03-02
 
+### Dynamics and control pipeline
+- Added ENU translational force integration with yaw/pitch/roll thrust projection.
+- Added common + differential (`yaw/pitch/roll`) motor mixing path and related telemetry.
+
+### GPS and sensing
+- Added perfect ENU-to-geodetic GPS propagation in simulation.
+- Added GPS noise injection on the sim-to-real sensor connection path.
+- Extended telemetry with sensed/perfect GPS position and velocity pairs.
+
+### Weather and constraints
+- Added configurable weather model (steady + gust + turbulence) and runtime integration.
+- Added weather telemetry fields (`WTotAcc`, `WSteady`, `WGust`, `WTurb`).
+- Added ground-lock behavior to prevent movement while altitude is clamped to ground.
+
+### Tests
+- Added coverage for force dynamics, mixer logic, GPS mapping, GPS noise, weather model/config, and ground-lock behavior.
+
+### Tooling and charts
+- Extended chart parser and full dashboard for optional weather telemetry fields.
+- Added UTF-8/UTF-16 decoding fallback in parser.
+- Updated full dashboard energy/temperature panel to dual-axis scaling.
+- Added dedicated Docker Compose `chart-test` workflow for parser tests.
+
 ### Runtime and architecture
 - Separated real-drone control logic from simulation plant physics.
 - Moved sensor noise modeling to the sim-to-real connection path.

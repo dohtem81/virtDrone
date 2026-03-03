@@ -14,6 +14,7 @@ Detailed documentation lives in the `docs/` folder:
 - [Documentation Index](docs/README.md)
 - [Architecture](docs/architecture.md)
 - [How to Use](docs/how-to-use.md)
+- [Simulation ↔ Real Drone Interaction (Beginner Guide)](docs/tutorials/simulation-real-drone-interaction.md)
 - [Current State](docs/current-state.md)
 - [Roadmap](docs/roadmap.md)
 - [Changelog](docs/changelog.md)
@@ -44,13 +45,28 @@ Default chart output:
 
 - `docs/tutorials/charts/flight_dashboard.png`
 
-## Current Scope Notes
+## Status Snapshot
 
-- Plant model is first-order and simplified
-- Control and simulation are split (real-drone logic vs plant physics)
-- ENU force-vector translation is implemented with yaw/pitch/roll thrust projection
-- Motor commands use common + differential split (per-motor mixing)
-- Sensor noise is applied on the sim-to-real connection path
+### Completed
+
+- Split control/simulation runtime architecture
+- ENU translational dynamics with yaw/pitch/roll thrust projection
+- Common + differential motor mixing (`common_motor_rpm` + yaw/pitch/roll terms)
+- Battery-aware motor behavior (including depletion cutoff), plus thermal/current telemetry
+- GPS perfect-state propagation from ENU to geodetic + noisy GPS sensing path
+- Configurable weather disturbance model (steady, gust, turbulence)
+- Ground-lock constraint to prevent movement while clamped on ground
+- Extended telemetry and charts (weather panel + dual-axis energy/temperature view)
+
+### In Progress
+
+- Multi-axis control expansion beyond altitude-centric loop
+- Richer rigid-body rotational dynamics
+- Scenario-driven comparison workflows and broader robustness/fault coverage
+
+### Scope Note
+
+The simulator intentionally remains simplified for control-development workflow iteration rather than high-fidelity digital-twin prediction.
 
 ## License
 

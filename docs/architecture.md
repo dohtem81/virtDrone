@@ -18,6 +18,14 @@ Each simulation step:
 2. **RealDrone** computes actuator command from sensed values
 3. **Simulation** applies command and advances plant state
 
+Simulation step currently includes:
+
+- battery-aware motor update
+- thrust accumulation and ENU force integration
+- weather disturbance sampling and injection
+- ground lock clamp at contact (`z <= 0`)
+- perfect GPS state propagation from ENU -> geodetic/NED
+
 ## Main Interfaces
 
 - `drone::runtime::SensorSource`
@@ -71,6 +79,33 @@ Noise is modeled on the **sim-to-real connection** (sensor transport), not in pl
 - Plant state remains internally consistent for physics
 - Real-drone control receives noisy measurements
 
+Noise currently covers altitude, GPS (horizontal/vertical position + velocity), battery voltage, and motor temperature.
+
+## GPS State Pipeline
+
+- Plant integrates ENU position/velocity
+- `GPSSim` converts ENU position to geodetic latitude/longitude/altitude using a configurable reference
+- `GPSSim` maps ENU velocity to GPS north/east/down velocity fields
+- Connection layer adds measurement noise before controller consumption
+
+## Weather Disturbance Model
+
+Weather disturbance is configured from YAML and sampled each step as acceleration in ENU:
+
+- steady component
+- sinusoidal gust component
+- seeded Gaussian turbulence component
+
+Total weather acceleration is converted to force and injected into net force integration.
+
+## Ground Contact Handling
+
+Ground behavior is explicitly constrained:
+
+- if integrated altitude reaches/falls below ground, state clamps to `z = 0`
+- velocity and acceleration are reset while grounded
+- horizontal drift is suppressed while grounded (position lock)
+
 ## Controller Configuration
 
 Controller config is loaded from YAML using drone config classes:
@@ -92,5 +127,7 @@ Telemetry output includes:
 - Actuator/controller state (`RefRPM`, `TgtErr`, `P`, `I`, `D`)
 - Appended ENU/YPR state (`PosENU`, `VelENU`, `YPR`)
 - Mixer state (`ComRPM`, `MixYPR`, `MRef`)
+- GPS sensed/perfect position and velocity pairs
+- Weather components (`WTotAcc`, `WSteady`, `WGust`, `WTurb`)
 
 This supports debugging both plant behavior and control behavior in one run.

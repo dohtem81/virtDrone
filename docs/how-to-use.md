@@ -34,6 +34,12 @@ Run with explicit config file:
 ./build/simulator_app 1000 0.01 config/altitude_controller_fast.yaml
 ```
 
+Run with explicit altitude + weather config files:
+
+```bash
+./build/simulator_app 1000 0.01 config/altitude_controller.yaml config/weather.yaml
+```
+
 ## Tests
 
 Run all tests:
@@ -86,3 +92,10 @@ docker compose run --rm chart-test
 ```
 
 Telemetry now also appends mixer and ENU/attitude fields (`ComRPM`, `MixYPR`, `MRef`, `PosENU`, `VelENU`, `YPR`) while preserving existing chart-compatible core fields.
+
+Telemetry now also includes:
+
+- sensed/perfect GPS position + velocity pairs
+- weather terms (`WTotAcc`, `WSteady`, `WGust`, `WTurb`)
+
+Full dashboard currently includes a dual-axis energy/temperature panel and weather plots.
