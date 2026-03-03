@@ -3,6 +3,7 @@
 #include "simulator/physics/battery_sim.h"
 #include "simulator/physics/thrust_model.h"
 #include "simulator/physics/gps_sim.h"
+#include "simulator/physics/force_dynamics.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -17,33 +18,71 @@ drone::runtime::SensorFrame QuaroSimulation::readSensors() const {
     }
 
     sensor_frame.altitude_m = quad_->getAltitudeM();
+    if (quad_->getGPS()) {
+        const auto gps_position = quad_->getGPS()->getPosition();
+        const auto gps_velocity = quad_->getGPS()->getVelocity();
+        sensor_frame.gps_latitude_deg = gps_position.latitude_deg;
+        sensor_frame.gps_longitude_deg = gps_position.longitude_deg;
+        sensor_frame.gps_altitude_m = gps_position.altitude_m;
+        sensor_frame.gps_velocity_north_mps = gps_velocity.north_mps;
+        sensor_frame.gps_velocity_east_mps = gps_velocity.east_mps;
+        sensor_frame.gps_velocity_down_mps = gps_velocity.down_mps;
+    }
     sensor_frame.battery_voltage_v = quad_->getBatteryVoltageV();
     sensor_frame.battery_soc_percent = quad_->getBatterySOC();
     sensor_frame.motor_temperature_c = quad_->getTemperatureC();
+    sensor_frame.yaw_rad = attitude_ypr_rad_.yaw_rad;
+    sensor_frame.pitch_rad = attitude_ypr_rad_.pitch_rad;
+    sensor_frame.roll_rad = attitude_ypr_rad_.roll_rad;
 
     const auto& motors = quad_->getMotors();
     sensor_frame.motor_rpm = motors.empty() ? 0.0 : motors[0].getSpeedRPM();
+    for (std::size_t i = 0; i < motors.size() && i < sensor_frame.motor_rpm_each.size(); ++i) {
+        sensor_frame.motor_rpm_each[i] = motors[i].getSpeedRPM();
+        sensor_frame.motor_temperature_c_each[i] = motors[i].getTemperatureC();
+    }
     return sensor_frame;
 }
 
 void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) {
     desired_rpm_ = actuator_frame.desired_motor_rpm;
+    common_motor_rpm_ = actuator_frame.common_motor_rpm;
+    desired_motor_rpm_each_ = actuator_frame.desired_motor_rpm_each;
+    yaw_control_rpm_ = actuator_frame.yaw_control_rpm;
+    pitch_control_rpm_ = actuator_frame.pitch_control_rpm;
+    roll_control_rpm_ = actuator_frame.roll_control_rpm;
+    attitude_ypr_rad_.yaw_rad = actuator_frame.desired_yaw_rad;
+    attitude_ypr_rad_.pitch_rad = actuator_frame.desired_pitch_rad;
+    attitude_ypr_rad_.roll_rad = actuator_frame.desired_roll_rad;
     target_altitude_m_ = actuator_frame.target_altitude_m;
     target_error_m_ = actuator_frame.target_error_m;
     p_component_rpm_ = actuator_frame.p_component_rpm;
     i_component_rpm_ = actuator_frame.i_component_rpm;
     d_component_rpm_ = actuator_frame.d_component_rpm;
     sensed_altitude_m_ = actuator_frame.sensed_altitude_m;
+    sensed_gps_latitude_deg_ = actuator_frame.sensed_gps_latitude_deg;
+    sensed_gps_longitude_deg_ = actuator_frame.sensed_gps_longitude_deg;
+    sensed_gps_altitude_m_ = actuator_frame.sensed_gps_altitude_m;
+    sensed_gps_velocity_north_mps_ = actuator_frame.sensed_gps_velocity_north_mps;
+    sensed_gps_velocity_east_mps_ = actuator_frame.sensed_gps_velocity_east_mps;
+    sensed_gps_velocity_down_mps_ = actuator_frame.sensed_gps_velocity_down_mps;
     sensed_battery_voltage_v_ = actuator_frame.sensed_battery_voltage_v;
     sensed_battery_soc_percent_ = actuator_frame.sensed_battery_soc_percent;
     sensed_motor_temperature_c_ = actuator_frame.sensed_motor_temperature_c;
     sensed_motor_rpm_ = actuator_frame.sensed_motor_rpm;
 }
 
+void QuaroSimulation::setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config) {
+    weather_model_.setConfig(weather_config);
+}
+
 void QuaroSimulation::onStart() {
     if (!is_running_) {
         is_running_ = true;
         elapsed_s_ = 0.0;
+        position_enu_m_ = drone::Vector3(0.0, 0.0, altitude_m_);
+        velocity_enu_mps_ = drone::Vector3(0.0, 0.0, vertical_speed_mps_);
+        acceleration_enu_ms2_ = drone::Vector3();
     }
 }
 
@@ -62,9 +101,22 @@ void QuaroSimulation::onStep(double delta_time_s) {
         auto& motors = quad_->getMotors();
         double battery_voltage = quad_->getBattery() ? quad_->getBattery()->getVoltageV() : 0.0;
         auto* battery = quad_->getBattery();
+
+        bool has_per_motor_refs = false;
+        for (double rpm_ref : desired_motor_rpm_each_) {
+            if (rpm_ref > 0.0) {
+                has_per_motor_refs = true;
+                break;
+            }
+        }
         
-        for (auto& motor : motors) {
-            motor.setDesiredSpeedRPM(desired_rpm_);
+        for (std::size_t i = 0; i < motors.size(); ++i) {
+            auto& motor = motors[i];
+            const double motor_rpm_ref = (has_per_motor_refs && i < desired_motor_rpm_each_.size())
+                ? desired_motor_rpm_each_[i]
+                : desired_rpm_;
+
+            motor.setDesiredSpeedRPM(motor_rpm_ref);
             // Use battery-aware physics engine to update motor (includes depletion cutoff)
             if (battery) {
                 drone::simulator::physics::MotorPhysics::updateMotorPhysics(motor, delta_ms, battery);
@@ -100,30 +152,48 @@ void QuaroSimulation::onStep(double delta_time_s) {
             total_thrust_n += drone::simulator::physics::ThrustModel::computeThrustN(&motor, thrust_params);
         }
         
-        // Calculate net force and acceleration
+        // Calculate net force and acceleration in ENU coordinates
         const double GRAVITY_MS2 = 9.81;
-        const double VERTICAL_DAMPING_N_PER_MPS = 1.2;
+        const double DAMPING_N_PER_MPS = 1.2;
         double total_weight_kg = quad_->getTotalWeightKg();
-        double weight_n = total_weight_kg * GRAVITY_MS2;
-        double damping_force_n = VERTICAL_DAMPING_N_PER_MPS * vertical_speed_mps_;
-        double net_force_n = total_thrust_n - weight_n - damping_force_n;
-        double acceleration_ms2 = net_force_n / total_weight_kg;
-        
-        // Update vertical velocity and altitude
-        vertical_speed_mps_ += acceleration_ms2 * delta_time_s;
-        altitude_m_ += vertical_speed_mps_ * delta_time_s;
-        
-        // Prevent going below ground
-        if (altitude_m_ < 0.0) {
-            altitude_m_ = 0.0;
-            vertical_speed_mps_ = 0.0;
+        const drone::Vector3 thrust_body_n(0.0, 0.0, total_thrust_n);
+        const drone::Vector3 net_force_enu_n = drone::simulator::physics::computeNetForceEnu(
+            thrust_body_n,
+            attitude_ypr_rad_,
+            total_weight_kg,
+            velocity_enu_mps_,
+            DAMPING_N_PER_MPS,
+            GRAVITY_MS2);
+
+        weather_sample_ = weather_model_.sample(elapsed_s_);
+        const drone::Vector3 weather_force_enu_n = weather_sample_.total_accel_enu_ms2 * total_weight_kg;
+        const drone::Vector3 net_force_with_weather_enu_n = net_force_enu_n + weather_force_enu_n;
+
+        acceleration_enu_ms2_ = net_force_with_weather_enu_n * (1.0 / total_weight_kg);
+
+        // Integrate translational dynamics
+        const drone::Vector3 prev_position_enu_m = position_enu_m_;
+        velocity_enu_mps_ += acceleration_enu_ms2_ * delta_time_s;
+        position_enu_m_ += velocity_enu_mps_ * delta_time_s;
+
+        // Ground clamp and lock (z=0): no movement allowed while grounded
+        if (position_enu_m_.z <= 0.0) {
+            position_enu_m_.x = prev_position_enu_m.x;
+            position_enu_m_.y = prev_position_enu_m.y;
+            position_enu_m_.z = 0.0;
+            velocity_enu_mps_ = drone::Vector3(0.0, 0.0, 0.0);
+            acceleration_enu_ms2_ = drone::Vector3(0.0, 0.0, 0.0);
         }
+
+        // Legacy compatibility mirrors
+        altitude_m_ = position_enu_m_.z;
+        vertical_speed_mps_ = velocity_enu_mps_.z;
         
-        // Update GPS altitude
+        // Update GPS from perfect simulator state
         if (quad_->getGPS()) {
             auto* gps_sim = dynamic_cast<drone::simulator::physics::GPSSim*>(quad_->getGPS());
             if (gps_sim) {
-                gps_sim->setAltitudeM(altitude_m_);
+                gps_sim->setPerfectEnuState(position_enu_m_, velocity_enu_mps_);
             }
         }
         
@@ -153,8 +223,14 @@ void QuaroSimulation::onStep(double delta_time_s) {
         double battery_soc = quad_->getBattery() ? quad_->getBattery()->getStateOfChargePercent() : 0.0;
         // battery_voltage already declared above
         
-        // Get altitude from GPS
+        // Get altitude and velocity from GPS
         double altitude_m = quad_->getAltitudeM();
+        drone::Position3D gps_position;
+        drone::Velocity3D gps_velocity;
+        if (quad_->getGPS()) {
+            gps_position = quad_->getGPS()->getPosition();
+            gps_velocity = quad_->getGPS()->getVelocity();
+        }
         
         // Print telemetry with all data
         std::cout << std::fixed << std::setprecision(2)
@@ -168,10 +244,51 @@ void QuaroSimulation::onStep(double delta_time_s) {
               << " | Batt: " << std::setw(7) << battery_capacity << "mAh"
               << " | TgtAlt: " << std::setw(8) << target_altitude_m_ << "m"
               << " | RefRPM: " << std::setw(8) << desired_rpm_
+                  << " | ComRPM: " << std::setw(8) << common_motor_rpm_
+                  << " | MixYPR: (" << std::setw(7) << yaw_control_rpm_
+                  << ", " << std::setw(7) << pitch_control_rpm_
+                  << ", " << std::setw(7) << roll_control_rpm_ << ")"
+                  << " | MRef: (" << std::setw(8) << desired_motor_rpm_each_[0]
+                  << ", " << std::setw(8) << desired_motor_rpm_each_[1]
+                  << ", " << std::setw(8) << desired_motor_rpm_each_[2]
+                  << ", " << std::setw(8) << desired_motor_rpm_each_[3] << ")"
                   << " | TgtErr: " << std::setw(8) << target_error_m_ << "m"
                   << " | P: " << std::setw(8) << p_component_rpm_
                   << " | I: " << std::setw(8) << i_component_rpm_
                   << " | D: " << std::setw(8) << d_component_rpm_
+                  << " | PosENU: (" << std::setw(8) << position_enu_m_.x
+                  << ", " << std::setw(8) << position_enu_m_.y
+                  << ", " << std::setw(8) << position_enu_m_.z << ")m"
+                  << " | VelENU: (" << std::setw(8) << velocity_enu_mps_.x
+                  << ", " << std::setw(8) << velocity_enu_mps_.y
+                  << ", " << std::setw(8) << velocity_enu_mps_.z << ")m/s"
+                  << " | YPR: (" << std::setw(7) << attitude_ypr_rad_.yaw_rad
+                  << ", " << std::setw(7) << attitude_ypr_rad_.pitch_rad
+                  << ", " << std::setw(7) << attitude_ypr_rad_.roll_rad << ")rad"
+                  << " | S/P GPSPos: (" << std::setw(9) << sensed_gps_latitude_deg_
+                  << ", " << std::setw(9) << sensed_gps_longitude_deg_
+                  << ", " << std::setw(8) << sensed_gps_altitude_m_ << ") / ("
+                  << std::setw(9) << gps_position.latitude_deg
+                  << ", " << std::setw(9) << gps_position.longitude_deg
+                  << ", " << std::setw(8) << gps_position.altitude_m << ")"
+                  << " | S/P GPSVel: (" << std::setw(7) << sensed_gps_velocity_north_mps_
+                  << ", " << std::setw(7) << sensed_gps_velocity_east_mps_
+                  << ", " << std::setw(7) << sensed_gps_velocity_down_mps_ << ") / ("
+                  << std::setw(7) << gps_velocity.north_mps
+                  << ", " << std::setw(7) << gps_velocity.east_mps
+                  << ", " << std::setw(7) << gps_velocity.down_mps << ")m/s"
+                  << " | WTotAcc: (" << std::setw(7) << weather_sample_.total_accel_enu_ms2.x
+                  << ", " << std::setw(7) << weather_sample_.total_accel_enu_ms2.y
+                  << ", " << std::setw(7) << weather_sample_.total_accel_enu_ms2.z << ")m/s2"
+                  << " | WSteady: (" << std::setw(7) << weather_sample_.steady_accel_enu_ms2.x
+                  << ", " << std::setw(7) << weather_sample_.steady_accel_enu_ms2.y
+                  << ", " << std::setw(7) << weather_sample_.steady_accel_enu_ms2.z << ")"
+                  << " | WGust: (" << std::setw(7) << weather_sample_.gust_accel_enu_ms2.x
+                  << ", " << std::setw(7) << weather_sample_.gust_accel_enu_ms2.y
+                  << ", " << std::setw(7) << weather_sample_.gust_accel_enu_ms2.z << ")"
+                  << " | WTurb: (" << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.x
+                  << ", " << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.y
+                  << ", " << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.z << ")"
                   << std::endl;
     }
 }
@@ -202,6 +319,13 @@ std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
             name, emSpecs, aIOSpec, batterySpecs, tempIOSpec, tempSensorRanges, 
             temp_sensor_weight_kg, gpsSpecs, body_weight_kg, blade_diameter_m, 
             blade_shape_coefficient));
+
+    if (sim->quad_ && sim->quad_->getGPS()) {
+        auto* gps_sim = dynamic_cast<drone::simulator::physics::GPSSim*>(sim->quad_->getGPS());
+        if (gps_sim) {
+            gps_sim->setReferenceGeodetic(drone::Position3D(0.0, 0.0, 0.0));
+        }
+    }
 
     return sim;
 }

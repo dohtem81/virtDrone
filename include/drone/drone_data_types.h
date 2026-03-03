@@ -5,6 +5,46 @@
 
 namespace drone {
 
+// Cartesian vector in ENU (x=east, y=north, z=up)
+struct Vector3 {
+    double x;
+    double y;
+    double z;
+
+    Vector3() : x(0.0), y(0.0), z(0.0) {}
+    Vector3(double x_in, double y_in, double z_in) : x(x_in), y(y_in), z(z_in) {}
+
+    Vector3 operator+(const Vector3& other) const {
+        return Vector3(x + other.x, y + other.y, z + other.z);
+    }
+
+    Vector3 operator-(const Vector3& other) const {
+        return Vector3(x - other.x, y - other.y, z - other.z);
+    }
+
+    Vector3 operator*(double scalar) const {
+        return Vector3(x * scalar, y * scalar, z * scalar);
+    }
+
+    Vector3& operator+=(const Vector3& other) {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return *this;
+    }
+};
+
+// Euler attitude (yaw, pitch, roll) in radians
+struct AttitudeYPR {
+    double yaw_rad;
+    double pitch_rad;
+    double roll_rad;
+
+    AttitudeYPR() : yaw_rad(0.0), pitch_rad(0.0), roll_rad(0.0) {}
+    AttitudeYPR(double yaw_in, double pitch_in, double roll_in)
+        : yaw_rad(yaw_in), pitch_rad(pitch_in), roll_rad(roll_in) {}
+};
+
 // Structure for 3D position (geospatial: lat/lon/alt in degrees/meters)
 struct Position3D {
     double latitude_deg;   // Latitude in degrees (-90 to 90)

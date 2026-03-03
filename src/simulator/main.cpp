@@ -6,6 +6,7 @@
 #include "drone/config/altitude_controller_config.h"
 #include "drone/model/quadrocopter.h"
 #include "drone/runtime/real_drone.h"
+#include "simulator/config/weather_config.h"
 #include "simulator/physics/battery_sim.h"
 #include "simulator/physics/gps_sim.h"
 #include "simulator/physics/motor_physics.h"
@@ -14,7 +15,13 @@
 
 namespace {
 
-bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s, std::string& config_file) {
+bool parseArgs(
+    int argc,
+    char** argv,
+    uint64_t& steps,
+    double& dt_s,
+    std::string& altitude_config_file,
+    std::string& weather_config_file) {
     if (argc >= 2) {
         try {
             steps = static_cast<uint64_t>(std::stoull(argv[1]));
@@ -30,7 +37,10 @@ bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s, std::string
         }
     }
     if (argc >= 4) {
-        config_file = argv[3];
+        altitude_config_file = argv[3];
+    }
+    if (argc >= 5) {
+        weather_config_file = argv[4];
     }
     return true;
 }
@@ -40,24 +50,33 @@ bool parseArgs(int argc, char** argv, uint64_t& steps, double& dt_s, std::string
 int main(int argc, char** argv) {
     uint64_t steps = 10;
     double dt_s = 0.01;
-    std::string config_file = "config/altitude_controller.yaml";
+    std::string altitude_config_file = "config/altitude_controller.yaml";
+    std::string weather_config_file = "config/weather.yaml";
 
-    if (!parseArgs(argc, argv, steps, dt_s, config_file)) {
-        std::cerr << "Usage: " << argv[0] << " [steps] [dt_s] [config_file]" << std::endl;
+    if (!parseArgs(argc, argv, steps, dt_s, altitude_config_file, weather_config_file)) {
+        std::cerr << "Usage: " << argv[0] << " [steps] [dt_s] [altitude_config_file] [weather_config_file]" << std::endl;
         std::cerr << "  steps: number of simulation steps (default: 10)" << std::endl;
         std::cerr << "  dt_s: time step in seconds (default: 0.01)" << std::endl;
-        std::cerr << "  config_file: YAML config file path (default: config/altitude_controller.yaml)" << std::endl;
+        std::cerr << "  altitude_config_file: YAML config file path (default: config/altitude_controller.yaml)" << std::endl;
+        std::cerr << "  weather_config_file: YAML config file path (default: config/weather.yaml)" << std::endl;
         return 1;
     }
 
     // Load altitude controller configuration
     drone::config::AltitudeControllerConfig alt_config;
-    if (!alt_config.loadFromFile(config_file)) {
-        std::cerr << "Warning: Could not load config file '" << config_file << "', using defaults" << std::endl;
+    if (!alt_config.loadFromFile(altitude_config_file)) {
+        std::cerr << "Warning: Could not load config file '" << altitude_config_file << "', using defaults" << std::endl;
     } else {
-        std::cout << "Loaded altitude controller config from: " << config_file << std::endl;
+        std::cout << "Loaded altitude controller config from: " << altitude_config_file << std::endl;
         std::cout << "  Target altitude: " << alt_config.target_altitude_m << " m" << std::endl;
         std::cout << "  Neutral RPM: " << alt_config.neutral_rpm << std::endl;
+    }
+
+    drone::simulator::config::WeatherConfig weather_config;
+    if (!weather_config.loadFromFile(weather_config_file)) {
+        std::cerr << "Warning: Could not load weather config file '" << weather_config_file << "', using defaults" << std::endl;
+    } else {
+        std::cout << "Loaded weather config from: " << weather_config_file << std::endl;
     }
 
     // Create default motor specs
@@ -130,6 +149,8 @@ int main(int argc, char** argv) {
         steps,
         dt_s
     );
+
+    sim->setWeatherConfig(weather_config);
 
     sim->start();
     drone::simulator::runtime::NoisySensorSource noisy_sensor_source(*sim);

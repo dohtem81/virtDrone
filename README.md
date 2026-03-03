@@ -34,6 +34,12 @@ docker compose run --rm dev ./build/simulator_app 1000 0.01
 docker compose run --rm chart
 ```
 
+### Run Chart Parser Tests
+
+```bash
+docker compose run --rm chart-test
+```
+
 Default chart output:
 
 - `docs/tutorials/charts/flight_dashboard.png`
@@ -42,6 +48,8 @@ Default chart output:
 
 - Plant model is first-order and simplified
 - Control and simulation are split (real-drone logic vs plant physics)
+- ENU force-vector translation is implemented with yaw/pitch/roll thrust projection
+- Motor commands use common + differential split (per-motor mixing)
 - Sensor noise is applied on the sim-to-real connection path
 
 ## License

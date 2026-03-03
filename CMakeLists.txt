@@ -39,12 +39,14 @@ add_library(drone
 add_library(simulator
     src/simulator/physics/physics.cpp
     src/simulator/environment/environment.cpp
+    src/simulator/environment/weather_model.cpp
     src/simulator/integration/integration.cpp
     src/simulator/physics/motor_physics.cpp
     src/simulator/physics/battery_cell_physics.cpp
     src/simulator/physics/battery_sim.cpp
     src/simulator/physics/gps_sim.cpp
     src/simulator/physics/thrust_model.cpp
+    src/simulator/physics/force_dynamics.cpp
     src/simulator/simulation_base.cpp
     src/simulator/quadrosimulator.cpp
 )
