@@ -73,6 +73,18 @@ add_executable(test_real_drone_mixer
     unit/drone/model/component/test_real_drone_mixer.cpp
 )
 
+add_executable(test_position_controller
+    unit/drone/control/test_position_controller.cpp
+)
+
+add_executable(test_mission_loader
+    unit/drone/mission/test_mission_loader.cpp
+)
+
+add_executable(test_mission_executor_transitions
+    integration/drone/mission/test_mission_executor_transitions.cpp
+)
+
 # Link against Catch2 and the drone library
 target_link_libraries(test_base_sensor
     PRIVATE
@@ -192,6 +204,25 @@ target_link_libraries(test_real_drone_mixer
         drone
 )
 
+target_link_libraries(test_position_controller
+    PRIVATE
+        Catch2::Catch2WithMain
+        drone
+)
+
+target_link_libraries(test_mission_loader
+    PRIVATE
+        Catch2::Catch2WithMain
+        simulator
+)
+
+target_link_libraries(test_mission_executor_transitions
+    PRIVATE
+        Catch2::Catch2WithMain
+        drone
+        simulator
+)
+
 
 # Register the test with CTest
 add_test(NAME test_utils COMMAND test_utils)
@@ -212,6 +243,9 @@ add_test(NAME test_drone_base COMMAND test_drone_base)
 add_test(NAME test_esc_logic COMMAND test_esc_logic)
 add_test(NAME test_alt_ctrl_logic COMMAND test_alt_ctrl_logic)
 add_test(NAME test_real_drone_mixer COMMAND test_real_drone_mixer)
+add_test(NAME test_position_controller COMMAND test_position_controller)
+add_test(NAME test_mission_loader COMMAND test_mission_loader)
+add_test(NAME test_mission_executor_transitions COMMAND test_mission_executor_transitions)
 # Enable test discovery for Catch2
 include(Catch)
 catch_discover_tests(test_utils)
@@ -232,3 +266,6 @@ catch_discover_tests(test_drone_base)
 catch_discover_tests(test_esc_logic)
 catch_discover_tests(test_alt_ctrl_logic)
 catch_discover_tests(test_real_drone_mixer)
+catch_discover_tests(test_position_controller)
+catch_discover_tests(test_mission_loader)
+catch_discover_tests(test_mission_executor_transitions)

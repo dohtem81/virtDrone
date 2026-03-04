@@ -2,9 +2,15 @@
 #define DRONE_RUNTIME_REAL_DRONE_H
 
 #include "drone/model/components/altitude_controler.h"
+#include "drone/control/position_controller.h"
+#include "drone/drone_data_types.h"
+#include "drone/mission/mission_executor.h"
+#include "drone/mission/mission_loader.h"
 
 #include <algorithm>
 #include <array>
+#include <memory>
+#include <string>
 
 namespace drone::runtime {
 
@@ -12,6 +18,9 @@ constexpr std::size_t kMotorCount = 4;
 
 struct SensorFrame {
     double altitude_m = 0.0;
+    double position_enu_x_m = 0.0;
+    double position_enu_y_m = 0.0;
+    double position_enu_z_m = 0.0;
     double gps_latitude_deg = 0.0;
     double gps_longitude_deg = 0.0;
     double gps_altitude_m = 0.0;
@@ -45,6 +54,9 @@ struct ActuatorFrame {
     double i_component_rpm = 0.0;
     double d_component_rpm = 0.0;
     double sensed_altitude_m = 0.0;
+    double sensed_position_enu_x_m = 0.0;
+    double sensed_position_enu_y_m = 0.0;
+    double sensed_position_enu_z_m = 0.0;
     double sensed_gps_latitude_deg = 0.0;
     double sensed_gps_longitude_deg = 0.0;
     double sensed_gps_altitude_m = 0.0;
@@ -75,7 +87,10 @@ public:
 class RealDrone {
 public:
     explicit RealDrone(const model::components::AltitudeController& altitude_controller)
-        : altitude_controller_(altitude_controller) {}
+        : altitude_controller_(altitude_controller) {
+        position_controller_ = std::make_unique<control::PositionController>();
+        position_controller_->setEnabled(true);
+    }
 
     void setTargetAltitude(double target_altitude_m) {
         altitude_controller_.setTargetAltitude(target_altitude_m);
@@ -99,6 +114,92 @@ public:
         roll_gain_rpm_per_rad_ = roll_rpm_per_rad;
     }
 
+    /**
+     * @brief Set target XY position for position controller
+     * @param target_x_m East position in meters (ENU frame)
+     * @param target_y_m North position in meters (ENU frame)
+     */
+    void setTargetPosition(double target_x_m, double target_y_m) {
+        position_controller_->setTargetPosition(target_x_m, target_y_m);
+        position_target_initialized_ = true;
+    }
+
+    /**
+     * @brief Enable or disable position controller
+     */
+    void setPositionControlEnabled(bool enabled) {
+        const bool was_enabled = position_controller_->isEnabled();
+        position_controller_->setEnabled(enabled);
+        if (enabled && !was_enabled) {
+            position_target_initialized_ = false;
+        }
+    }
+
+    /**
+     * @brief Set maximum velocity for position controller
+     */
+    void setMaxVelocity(double max_velocity_mps) {
+        position_controller_->setMaxVelocity(max_velocity_mps);
+    }
+
+    void setPositionGain(double kp_pos) {
+        position_controller_->setPositionGain(kp_pos);
+    }
+
+    void setVelocityGains(double kp_vel, double kd_vel) {
+        position_controller_->setVelocityGains(kp_vel, kd_vel);
+    }
+
+    /**
+     * @brief Set maximum tilt (pitch/roll) angle for position controller
+     */
+    void setMaxTilt(double max_tilt_rad) {
+        position_controller_->setMaxTilt(max_tilt_rad);
+    }
+
+    bool loadMissionFromFile(const std::string& mission_file, std::string* error_out = nullptr) {
+        mission::Mission parsed_mission;
+        if (!mission_loader_.loadFromFile(mission_file, parsed_mission, error_out)) {
+            mission_loaded_ = false;
+            return false;
+        }
+
+        mission_ = std::move(parsed_mission);
+        mission_executor_.loadMission(mission_);
+        mission_loaded_ = true;
+        return true;
+    }
+
+    void startMission() {
+        if (!mission_loaded_) {
+            return;
+        }
+        mission_executor_.start();
+    }
+
+    void updateMission(const SensorFrame& sensor_frame, double dt_s) {
+        if (!mission_loaded_) {
+            return;
+        }
+        mission_executor_.update(*this, sensor_frame, dt_s);
+    }
+
+    mission::MissionStatus getMissionStatus() const {
+        return mission_executor_.getStatus();
+    }
+
+    int getCurrentMissionStepId() const {
+        return mission_executor_.getCurrentStepId();
+    }
+
+    std::string getCurrentMissionStepName() const {
+        return mission_executor_.getCurrentStepName();
+    }
+
+    bool hasMissionLoaded() const {
+        return mission_loaded_;
+    }
+
     void update(double dt_s, const SensorSource& sensor_source, ActuatorSink& actuator_sink) {
         const SensorFrame sensors = sensor_source.readSensors();
 
@@ -118,9 +219,30 @@ public:
             desired_common_motor_rpm,
             dt_s);
 
+        // Update position controller with current state (if enabled)
+        Vector3 current_position_enu_m(sensors.position_enu_x_m,
+                           sensors.position_enu_y_m,
+                           sensors.position_enu_z_m);
+        Vector3 current_velocity_enu_mps(sensors.gps_velocity_east_mps,
+                                         sensors.gps_velocity_north_mps,
+                                         sensors.gps_velocity_down_mps);
+        if (position_controller_->isEnabled() && !position_target_initialized_) {
+            setTargetPosition(sensors.position_enu_x_m, sensors.position_enu_y_m);
+        }
+        position_controller_->update(current_position_enu_m, current_velocity_enu_mps, dt_s);
+
+        // Determine pitch/roll targets: use position controller if enabled, else use direct targets
+        double effective_pitch_rad = target_pitch_rad_;
+        double effective_roll_rad = target_roll_rad_;
+
+        if (position_controller_->isEnabled()) {
+            effective_pitch_rad = position_controller_->getPitchReference();
+            effective_roll_rad = position_controller_->getRollReference();
+        }
+
         const double yaw_error_rad = target_yaw_rad_ - sensors.yaw_rad;
-        const double pitch_error_rad = target_pitch_rad_ - sensors.pitch_rad;
-        const double roll_error_rad = target_roll_rad_ - sensors.roll_rad;
+        const double pitch_error_rad = effective_pitch_rad - sensors.pitch_rad;
+        const double roll_error_rad = effective_roll_rad - sensors.roll_rad;
 
         const double yaw_control_rpm = yaw_gain_rpm_per_rad_ * yaw_error_rad;
         const double pitch_control_rpm = pitch_gain_rpm_per_rad_ * pitch_error_rad;
@@ -164,14 +286,17 @@ public:
             pitch_control_rpm,
             roll_control_rpm,
             target_yaw_rad_,
-            target_pitch_rad_,
-            target_roll_rad_,
+            effective_pitch_rad,
+            effective_roll_rad,
             altitude_controller_.getTargetAltitude(),
             altitude_controller_.getLastTargetErrorM(),
             altitude_controller_.getLastPComponentRPM(),
             altitude_controller_.getLastIComponentRPM(),
             altitude_controller_.getLastDComponentRPM(),
             sensors.altitude_m,
+            sensors.position_enu_x_m,
+            sensors.position_enu_y_m,
+            sensors.position_enu_z_m,
             sensors.gps_latitude_deg,
             sensors.gps_longitude_deg,
             sensors.gps_altitude_m,
@@ -189,12 +314,18 @@ public:
 
 private:
     model::components::AltitudeController altitude_controller_;
+    std::unique_ptr<control::PositionController> position_controller_;
     double target_yaw_rad_ = 0.0;
     double target_pitch_rad_ = 0.0;
     double target_roll_rad_ = 0.0;
     double yaw_gain_rpm_per_rad_ = 300.0;
     double pitch_gain_rpm_per_rad_ = 300.0;
     double roll_gain_rpm_per_rad_ = 300.0;
+    bool position_target_initialized_ = false;
+    mission::MissionLoader mission_loader_;
+    mission::Mission mission_;
+    mission::MissionExecutor mission_executor_;
+    bool mission_loaded_ = false;
 };
 
 }  // namespace drone::runtime

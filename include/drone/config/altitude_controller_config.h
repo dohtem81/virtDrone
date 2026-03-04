@@ -17,6 +17,12 @@ public:
     bool enable_d_component = false;
     double activation_error_band_m = 0.5;
     double neutral_rpm = 11400.0;
+    bool position_hold_enabled = true;
+    double position_hold_kp_pos = 1.0;
+    double position_hold_kp_vel = 10.0;
+    double position_hold_kd_vel = 2.0;
+    double position_hold_max_velocity_mps = 20.0;
+    double position_hold_max_tilt_rad = 1.3;
 
 protected:
     bool loadFromYaml(const YAML::Node& yaml_config) override {
@@ -35,6 +41,12 @@ protected:
         readIfPresent(altitude_controller, "enable_d_component", enable_d_component);
         readIfPresent(altitude_controller, "activation_error_band_m", activation_error_band_m);
         readIfPresent(altitude_controller, "neutral_rpm", neutral_rpm);
+        readIfPresent(altitude_controller, "position_hold_enabled", position_hold_enabled);
+        readIfPresent(altitude_controller, "position_hold_kp_pos", position_hold_kp_pos);
+        readIfPresent(altitude_controller, "position_hold_kp_vel", position_hold_kp_vel);
+        readIfPresent(altitude_controller, "position_hold_kd_vel", position_hold_kd_vel);
+        readIfPresent(altitude_controller, "position_hold_max_velocity_mps", position_hold_max_velocity_mps);
+        readIfPresent(altitude_controller, "position_hold_max_tilt_rad", position_hold_max_tilt_rad);
         return true;
     }
 };

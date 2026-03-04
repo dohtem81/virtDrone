@@ -1,0 +1,69 @@
+mission:
+  name: "Hover and Move"
+  description: "Take off, hover, move to waypoint, then land"
+  version: "1.0"
+  metadata:
+    author: "virtDrone"
+    created: "2026-03-03"
+    max_duration_s: 180
+
+  initial_conditions:
+    altitude_m: 0.0
+    position_enu_m:
+      x: 0.0
+      y: 0.0
+    yaw_rad: 0.0
+    battery_soc_percent: 100.0
+
+  steps:
+    - step_id: 1
+      name: "Takeoff to 50m"
+      action: "hover"
+      target_altitude_m: 50.0
+      advance_mode: "completion_based"
+      timeout_s: 20.0
+      completion_criteria:
+        condition_type: "altitude_and_velocity"
+        target_altitude_m: 50.0
+        altitude_tolerance_m: 3.0
+        max_velocity_mps: 0.3
+        hold_duration_s: 1.0
+
+    - step_id: 2
+      name: "Hover 3 seconds"
+      action: "hover"
+      target_altitude_m: 50.0
+      advance_mode: "time_based"
+      duration_s: 3.0
+      timeout_s: 5.0
+
+    - step_id: 3
+      name: "Move to (20, 10)"
+      action: "go_to_position"
+      target_position_enu_m:
+        x: 20.0
+        y: 10.0
+      target_altitude_m: 50.0
+      max_tilt_rad: 0.35
+      max_velocity_mps: 4.0
+      advance_mode: "completion_based"
+      timeout_s: 60.0
+      completion_criteria:
+        condition_type: "position_reached"
+        target_position_enu_m:
+          x: 20.0
+          y: 10.0
+        position_tolerance_m: 1.5
+        target_altitude_m: 50.0
+        altitude_tolerance_m: 0.75
+        hold_duration_s: 1.0
+
+    - step_id: 4
+      name: "Land"
+      action: "land"
+      descent_rate_mps: 1.5
+      advance_mode: "completion_based"
+      timeout_s: 30.0
+      completion_criteria:
+        condition_type: "landed"
+        altitude_tolerance_m: 0.15

@@ -19,3 +19,11 @@ altitude_controller:
   
   # Hover RPM estimate
   neutral_rpm: 11400.0
+
+  # XY position hold (always-on by default, independent of mission mode)
+  position_hold_enabled: true
+  position_hold_kp_pos: 1.5
+  position_hold_kp_vel: 14.0
+  position_hold_kd_vel: 3.0
+  position_hold_max_velocity_mps: 25.0
+  position_hold_max_tilt_rad: 1.3

@@ -17,3 +17,4 @@ pytest-asyncio>=0.21.0  # For async tests if needed
 flask
 requests
 pytest
+pyyaml>=6.0

@@ -1,0 +1,102 @@
+mission:
+  name: "Rectangle Patrol"
+  description: "Fly a rectangle at fixed altitude and return home"
+  version: "1.0"
+
+  initial_conditions:
+    altitude_m: 0.0
+    position_enu_m:
+      x: 0.0
+      y: 0.0
+    yaw_rad: 0.0
+
+  steps:
+    - step_id: 1
+      name: "Takeoff"
+      action: "hover"
+      target_altitude_m: 15.0
+      advance_mode: "completion_based"
+      timeout_s: 25.0
+      completion_criteria:
+        condition_type: "altitude_and_velocity"
+        target_altitude_m: 15.0
+        altitude_tolerance_m: 0.7
+        max_velocity_mps: 0.3
+        hold_duration_s: 1.0
+
+    - step_id: 2
+      name: "Leg 1"
+      action: "go_to_position"
+      target_position_enu_m: { x: 30.0, y: 0.0 }
+      target_altitude_m: 15.0
+      max_tilt_rad: 0.35
+      max_velocity_mps: 5.0
+      advance_mode: "completion_based"
+      timeout_s: 50.0
+      completion_criteria:
+        condition_type: "position_reached"
+        target_position_enu_m: { x: 30.0, y: 0.0 }
+        position_tolerance_m: 2.0
+        target_altitude_m: 15.0
+        altitude_tolerance_m: 1.0
+        hold_duration_s: 1.0
+
+    - step_id: 3
+      name: "Leg 2"
+      action: "go_to_position"
+      target_position_enu_m: { x: 30.0, y: 20.0 }
+      target_altitude_m: 15.0
+      max_tilt_rad: 0.35
+      max_velocity_mps: 5.0
+      advance_mode: "completion_based"
+      timeout_s: 50.0
+      completion_criteria:
+        condition_type: "position_reached"
+        target_position_enu_m: { x: 30.0, y: 20.0 }
+        position_tolerance_m: 2.0
+        target_altitude_m: 15.0
+        altitude_tolerance_m: 1.0
+        hold_duration_s: 1.0
+
+    - step_id: 4
+      name: "Leg 3"
+      action: "go_to_position"
+      target_position_enu_m: { x: 0.0, y: 20.0 }
+      target_altitude_m: 15.0
+      max_tilt_rad: 0.35
+      max_velocity_mps: 5.0
+      advance_mode: "completion_based"
+      timeout_s: 50.0
+      completion_criteria:
+        condition_type: "position_reached"
+        target_position_enu_m: { x: 0.0, y: 20.0 }
+        position_tolerance_m: 2.0
+        target_altitude_m: 15.0
+        altitude_tolerance_m: 1.0
+        hold_duration_s: 1.0
+
+    - step_id: 5
+      name: "Return home"
+      action: "go_to_position"
+      target_position_enu_m: { x: 0.0, y: 0.0 }
+      target_altitude_m: 15.0
+      max_tilt_rad: 0.35
+      max_velocity_mps: 5.0
+      advance_mode: "completion_based"
+      timeout_s: 50.0
+      completion_criteria:
+        condition_type: "position_reached"
+        target_position_enu_m: { x: 0.0, y: 0.0 }
+        position_tolerance_m: 2.0
+        target_altitude_m: 15.0
+        altitude_tolerance_m: 1.0
+        hold_duration_s: 1.0
+
+    - step_id: 6
+      name: "Land"
+      action: "land"
+      advance_mode: "completion_based"
+      timeout_s: 30.0
+      completion_criteria:
+        condition_type: "landed"
+        altitude_tolerance_m: 0.15

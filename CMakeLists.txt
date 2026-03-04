@@ -29,10 +29,19 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_library(drone
     src/drone/model/model.cpp
     src/drone/control/control.cpp
+    src/drone/control/position_controller.cpp
+    src/drone/mission/mission_executor.cpp
+    src/drone/mission/completion_evaluator.cpp
+    src/drone/mission/mission_loader.cpp
     src/drone/telemetry/telemetry.cpp
     src/drone/model/sensors/base_sensor.cpp
     src/drone/model/sensors/temperature_sensor.cpp
     src/drone/model/components/elect_motor.cpp
+)
+
+target_link_libraries(drone
+    PUBLIC
+    yaml-cpp::yaml-cpp
 )
 
 # Simulator library

@@ -13,6 +13,7 @@
 #include "simulator/config/weather_config.h"
 #include "drone/model/drone_base.h"
 #include <array>
+#include <fstream>
 #include <memory>
 #include <string>
 
@@ -40,6 +41,7 @@ public:
     drone::runtime::SensorFrame readSensors() const override;
     void applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) override;
     void setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config);
+    bool setTelemetryLogFile(const std::string& telemetry_log_file);
 
 protected:
     void onStart();
@@ -71,6 +73,9 @@ private:
     double pitch_control_rpm_{0.0};
     double roll_control_rpm_{0.0};
     double sensed_altitude_m_{0.0};
+    double sensed_position_enu_x_m_{0.0};
+    double sensed_position_enu_y_m_{0.0};
+    double sensed_position_enu_z_m_{0.0};
     double sensed_gps_latitude_deg_{0.0};
     double sensed_gps_longitude_deg_{0.0};
     double sensed_gps_altitude_m_{0.0};
@@ -84,6 +89,9 @@ private:
     double sensed_motor_temperature_c_{0.0};
     double sensed_motor_rpm_{0.0};
     bool is_running_ = false;
+    std::string telemetry_log_file_ = "simulation_telemetry.csv";
+    std::ofstream telemetry_log_stream_;
+    bool telemetry_csv_header_written_ = false;
 };
 
 /**

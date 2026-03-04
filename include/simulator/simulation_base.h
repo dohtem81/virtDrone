@@ -13,7 +13,7 @@ namespace drone::simulator {
  */
 class SimulationBase {
 public:
-     SimulationBase();
+    SimulationBase();
     virtual ~SimulationBase() = default;
 
     void start();

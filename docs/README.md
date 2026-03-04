@@ -6,6 +6,7 @@ This folder contains the main project documentation.
 
 - [Architecture](architecture.md)
 - [How to Use](how-to-use.md)
+- [Simulation Mission Format](simulation-mission-format.md)
 - [Simulation ↔ Real Drone Interaction (Beginner Guide)](tutorials/simulation-real-drone-interaction.md)
 - [Current State](current-state.md)
 - [Roadmap](roadmap.md)
@@ -20,3 +21,5 @@ If you are new to the project, start with:
 1. [How to Use](how-to-use.md)
 2. [Current State](current-state.md)
 3. [Architecture](architecture.md)
+
+Tutorial runtime artifacts (logs + charts) are written under `docs/tutorials/` and `docs/tutorials/charts/` by default.

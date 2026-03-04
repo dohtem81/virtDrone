@@ -6,8 +6,30 @@
 #include "simulator/physics/force_dynamics.h"
 
 #include <algorithm>
+#include <chrono>
+#include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
+
+namespace {
+
+std::string localTimestampNow() {
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+    std::tm local_tm{};
+#if defined(_WIN32)
+    localtime_s(&local_tm, &now_time);
+#else
+    localtime_r(&now_time, &local_tm);
+#endif
+    std::ostringstream out;
+    out << std::put_time(&local_tm, "%Y-%m-%d %H:%M:%S");
+    return out.str();
+}
+
+}  // namespace
 
 namespace drone::simulator {
 
@@ -18,6 +40,9 @@ drone::runtime::SensorFrame QuaroSimulation::readSensors() const {
     }
 
     sensor_frame.altitude_m = quad_->getAltitudeM();
+    sensor_frame.position_enu_x_m = position_enu_m_.x;
+    sensor_frame.position_enu_y_m = position_enu_m_.y;
+    sensor_frame.position_enu_z_m = position_enu_m_.z;
     if (quad_->getGPS()) {
         const auto gps_position = quad_->getGPS()->getPosition();
         const auto gps_velocity = quad_->getGPS()->getVelocity();
@@ -60,6 +85,9 @@ void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuat
     i_component_rpm_ = actuator_frame.i_component_rpm;
     d_component_rpm_ = actuator_frame.d_component_rpm;
     sensed_altitude_m_ = actuator_frame.sensed_altitude_m;
+    sensed_position_enu_x_m_ = actuator_frame.sensed_position_enu_x_m;
+    sensed_position_enu_y_m_ = actuator_frame.sensed_position_enu_y_m;
+    sensed_position_enu_z_m_ = actuator_frame.sensed_position_enu_z_m;
     sensed_gps_latitude_deg_ = actuator_frame.sensed_gps_latitude_deg;
     sensed_gps_longitude_deg_ = actuator_frame.sensed_gps_longitude_deg;
     sensed_gps_altitude_m_ = actuator_frame.sensed_gps_altitude_m;
@@ -76,6 +104,17 @@ void QuaroSimulation::setWeatherConfig(const drone::simulator::config::WeatherCo
     weather_model_.setConfig(weather_config);
 }
 
+bool QuaroSimulation::setTelemetryLogFile(const std::string& telemetry_log_file) {
+    telemetry_log_file_ = telemetry_log_file;
+    if (telemetry_log_stream_.is_open()) {
+        telemetry_log_stream_.close();
+    }
+
+    telemetry_log_stream_.open(telemetry_log_file_, std::ios::out | std::ios::trunc);
+    telemetry_csv_header_written_ = false;
+    return telemetry_log_stream_.is_open();
+}
+
 void QuaroSimulation::onStart() {
     if (!is_running_) {
         is_running_ = true;
@@ -83,12 +122,42 @@ void QuaroSimulation::onStart() {
         position_enu_m_ = drone::Vector3(0.0, 0.0, altitude_m_);
         velocity_enu_mps_ = drone::Vector3(0.0, 0.0, vertical_speed_mps_);
         acceleration_enu_ms2_ = drone::Vector3();
+
+        if (!telemetry_log_stream_.is_open()) {
+            setTelemetryLogFile(telemetry_log_file_);
+        }
+        if (telemetry_log_stream_.is_open() && !telemetry_csv_header_written_) {
+            telemetry_log_stream_
+                << "local_timestamp,sim_elapsed_s,sim_is_running,ground_locked,"
+                << "sensed_altitude_m,sensed_position_enu_x_m,sensed_position_enu_y_m,sensed_position_enu_z_m,"
+                << "sensed_gps_latitude_deg,sensed_gps_longitude_deg,sensed_gps_altitude_m,"
+                << "sensed_gps_velocity_north_mps,sensed_gps_velocity_east_mps,sensed_gps_velocity_down_mps,"
+                << "sensed_battery_voltage_v,sensed_battery_soc_percent,sensed_motor_temperature_c,sensed_motor_rpm,"
+                << "altitude_m,position_enu_x_m,position_enu_y_m,position_enu_z_m,"
+                << "velocity_enu_x_mps,velocity_enu_y_mps,velocity_enu_z_mps,"
+                << "yaw_rad,pitch_rad,roll_rad,"
+                << "target_altitude_m,target_error_m,p_component_rpm,i_component_rpm,d_component_rpm,"
+                << "desired_rpm,common_motor_rpm,yaw_control_rpm,pitch_control_rpm,roll_control_rpm,"
+                << "desired_motor_rpm_0,desired_motor_rpm_1,desired_motor_rpm_2,desired_motor_rpm_3,"
+                << "battery_voltage_v,battery_soc_percent,motor_temperature_c,motor_rpm,motor_current_a,battery_capacity_mah,"
+                << "gps_latitude_deg,gps_longitude_deg,gps_altitude_m,"
+                << "gps_velocity_north_mps,gps_velocity_east_mps,gps_velocity_down_mps,"
+                << "weather_total_ax,weather_total_ay,weather_total_az,"
+                << "weather_steady_ax,weather_steady_ay,weather_steady_az,"
+                << "weather_gust_ax,weather_gust_ay,weather_gust_az,"
+                << "weather_turb_ax,weather_turb_ay,weather_turb_az\n";
+            telemetry_csv_header_written_ = true;
+        }
     }
 }
 
 void QuaroSimulation::onStop() {
     if (is_running_) {
         is_running_ = false;
+        if (telemetry_log_stream_.is_open()) {
+            telemetry_log_stream_.flush();
+            telemetry_log_stream_.close();
+        }
     }
 }
 
@@ -232,64 +301,76 @@ void QuaroSimulation::onStep(double delta_time_s) {
             gps_velocity = quad_->getGPS()->getVelocity();
         }
         
-        // Print telemetry with all data
-        std::cout << std::fixed << std::setprecision(2)
-                  << "T: " << std::setw(7) << elapsed_s_ << "s"
-              << " | S/P Alt: " << std::setw(8) << sensed_altitude_m_ << " / " << std::setw(8) << altitude_m << "m"
-              << " | S/P RPM: " << std::setw(8) << sensed_motor_rpm_ << " / " << std::setw(8) << motor_rpm
-              << " | S/P SOC: " << std::setw(6) << sensed_battery_soc_percent_ << " / " << std::setw(6) << battery_soc << "%"
-              << " | S/P V: " << std::setw(5) << sensed_battery_voltage_v_ << " / " << std::setw(5) << battery_voltage << "V"
-              << " | S/P T: " << std::setw(6) << sensed_motor_temperature_c_ << " / " << std::setw(6) << motor_temp << "C"
-              << " | Curr: " << std::setw(6) << motor_current << "A"
-              << " | Batt: " << std::setw(7) << battery_capacity << "mAh"
-              << " | TgtAlt: " << std::setw(8) << target_altitude_m_ << "m"
-              << " | RefRPM: " << std::setw(8) << desired_rpm_
-                  << " | ComRPM: " << std::setw(8) << common_motor_rpm_
-                  << " | MixYPR: (" << std::setw(7) << yaw_control_rpm_
-                  << ", " << std::setw(7) << pitch_control_rpm_
-                  << ", " << std::setw(7) << roll_control_rpm_ << ")"
-                  << " | MRef: (" << std::setw(8) << desired_motor_rpm_each_[0]
-                  << ", " << std::setw(8) << desired_motor_rpm_each_[1]
-                  << ", " << std::setw(8) << desired_motor_rpm_each_[2]
-                  << ", " << std::setw(8) << desired_motor_rpm_each_[3] << ")"
-                  << " | TgtErr: " << std::setw(8) << target_error_m_ << "m"
-                  << " | P: " << std::setw(8) << p_component_rpm_
-                  << " | I: " << std::setw(8) << i_component_rpm_
-                  << " | D: " << std::setw(8) << d_component_rpm_
-                  << " | PosENU: (" << std::setw(8) << position_enu_m_.x
-                  << ", " << std::setw(8) << position_enu_m_.y
-                  << ", " << std::setw(8) << position_enu_m_.z << ")m"
-                  << " | VelENU: (" << std::setw(8) << velocity_enu_mps_.x
-                  << ", " << std::setw(8) << velocity_enu_mps_.y
-                  << ", " << std::setw(8) << velocity_enu_mps_.z << ")m/s"
-                  << " | YPR: (" << std::setw(7) << attitude_ypr_rad_.yaw_rad
-                  << ", " << std::setw(7) << attitude_ypr_rad_.pitch_rad
-                  << ", " << std::setw(7) << attitude_ypr_rad_.roll_rad << ")rad"
-                  << " | S/P GPSPos: (" << std::setw(9) << sensed_gps_latitude_deg_
-                  << ", " << std::setw(9) << sensed_gps_longitude_deg_
-                  << ", " << std::setw(8) << sensed_gps_altitude_m_ << ") / ("
-                  << std::setw(9) << gps_position.latitude_deg
-                  << ", " << std::setw(9) << gps_position.longitude_deg
-                  << ", " << std::setw(8) << gps_position.altitude_m << ")"
-                  << " | S/P GPSVel: (" << std::setw(7) << sensed_gps_velocity_north_mps_
-                  << ", " << std::setw(7) << sensed_gps_velocity_east_mps_
-                  << ", " << std::setw(7) << sensed_gps_velocity_down_mps_ << ") / ("
-                  << std::setw(7) << gps_velocity.north_mps
-                  << ", " << std::setw(7) << gps_velocity.east_mps
-                  << ", " << std::setw(7) << gps_velocity.down_mps << ")m/s"
-                  << " | WTotAcc: (" << std::setw(7) << weather_sample_.total_accel_enu_ms2.x
-                  << ", " << std::setw(7) << weather_sample_.total_accel_enu_ms2.y
-                  << ", " << std::setw(7) << weather_sample_.total_accel_enu_ms2.z << ")m/s2"
-                  << " | WSteady: (" << std::setw(7) << weather_sample_.steady_accel_enu_ms2.x
-                  << ", " << std::setw(7) << weather_sample_.steady_accel_enu_ms2.y
-                  << ", " << std::setw(7) << weather_sample_.steady_accel_enu_ms2.z << ")"
-                  << " | WGust: (" << std::setw(7) << weather_sample_.gust_accel_enu_ms2.x
-                  << ", " << std::setw(7) << weather_sample_.gust_accel_enu_ms2.y
-                  << ", " << std::setw(7) << weather_sample_.gust_accel_enu_ms2.z << ")"
-                  << " | WTurb: (" << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.x
-                  << ", " << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.y
-                  << ", " << std::setw(7) << weather_sample_.turbulence_accel_enu_ms2.z << ")"
-                  << std::endl;
+        if (telemetry_log_stream_.is_open()) {
+            const bool ground_locked = position_enu_m_.z <= 0.0;
+            telemetry_log_stream_ << std::fixed << std::setprecision(6)
+                << localTimestampNow() << ","
+                << elapsed_s_ << ","
+                << (is_running_ ? 1 : 0) << ","
+                << (ground_locked ? 1 : 0) << ","
+                << sensed_altitude_m_ << ","
+                << sensed_position_enu_x_m_ << ","
+                << sensed_position_enu_y_m_ << ","
+                << sensed_position_enu_z_m_ << ","
+                << sensed_gps_latitude_deg_ << ","
+                << sensed_gps_longitude_deg_ << ","
+                << sensed_gps_altitude_m_ << ","
+                << sensed_gps_velocity_north_mps_ << ","
+                << sensed_gps_velocity_east_mps_ << ","
+                << sensed_gps_velocity_down_mps_ << ","
+                << sensed_battery_voltage_v_ << ","
+                << sensed_battery_soc_percent_ << ","
+                << sensed_motor_temperature_c_ << ","
+                << sensed_motor_rpm_ << ","
+                << altitude_m << ","
+                << position_enu_m_.x << ","
+                << position_enu_m_.y << ","
+                << position_enu_m_.z << ","
+                << velocity_enu_mps_.x << ","
+                << velocity_enu_mps_.y << ","
+                << velocity_enu_mps_.z << ","
+                << attitude_ypr_rad_.yaw_rad << ","
+                << attitude_ypr_rad_.pitch_rad << ","
+                << attitude_ypr_rad_.roll_rad << ","
+                << target_altitude_m_ << ","
+                << target_error_m_ << ","
+                << p_component_rpm_ << ","
+                << i_component_rpm_ << ","
+                << d_component_rpm_ << ","
+                << desired_rpm_ << ","
+                << common_motor_rpm_ << ","
+                << yaw_control_rpm_ << ","
+                << pitch_control_rpm_ << ","
+                << roll_control_rpm_ << ","
+                << desired_motor_rpm_each_[0] << ","
+                << desired_motor_rpm_each_[1] << ","
+                << desired_motor_rpm_each_[2] << ","
+                << desired_motor_rpm_each_[3] << ","
+                << battery_voltage << ","
+                << battery_soc << ","
+                << motor_temp << ","
+                << motor_rpm << ","
+                << motor_current << ","
+                << battery_capacity << ","
+                << gps_position.latitude_deg << ","
+                << gps_position.longitude_deg << ","
+                << gps_position.altitude_m << ","
+                << gps_velocity.north_mps << ","
+                << gps_velocity.east_mps << ","
+                << gps_velocity.down_mps << ","
+                << weather_sample_.total_accel_enu_ms2.x << ","
+                << weather_sample_.total_accel_enu_ms2.y << ","
+                << weather_sample_.total_accel_enu_ms2.z << ","
+                << weather_sample_.steady_accel_enu_ms2.x << ","
+                << weather_sample_.steady_accel_enu_ms2.y << ","
+                << weather_sample_.steady_accel_enu_ms2.z << ","
+                << weather_sample_.gust_accel_enu_ms2.x << ","
+                << weather_sample_.gust_accel_enu_ms2.y << ","
+                << weather_sample_.gust_accel_enu_ms2.z << ","
+                << weather_sample_.turbulence_accel_enu_ms2.x << ","
+                << weather_sample_.turbulence_accel_enu_ms2.y << ","
+                << weather_sample_.turbulence_accel_enu_ms2.z << "\n";
+        }
     }
 }
 
