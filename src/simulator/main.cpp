@@ -9,6 +9,7 @@
 #include <string>
 
 #include "drone/config/altitude_controller_config.h"
+#include "drone/config/attitude_controller_config.h"
 #include "drone/model/quadrocopter.h"
 #include "drone/runtime/real_drone.h"
 #include "simulator/config/weather_config.h"
@@ -92,6 +93,7 @@ bool parseArgs(
     uint64_t& steps,
     double& dt_s,
     std::string& altitude_config_file,
+    std::string& attitude_config_file,
     std::string& weather_config_file,
     std::string& mission_file,
     std::string& logs_dir) {
@@ -113,13 +115,16 @@ bool parseArgs(
         altitude_config_file = argv[3];
     }
     if (argc >= 5) {
-        weather_config_file = argv[4];
+        attitude_config_file = argv[4];
     }
     if (argc >= 6) {
-        mission_file = argv[5];
+        weather_config_file = argv[5];
     }
     if (argc >= 7) {
-        logs_dir = argv[6];
+        mission_file = argv[6];
+    }
+    if (argc >= 8) {
+        logs_dir = argv[7];
     }
     return true;
 }
@@ -130,16 +135,18 @@ int main(int argc, char** argv) {
     uint64_t steps = 10;
     double dt_s = 0.01;
     std::string altitude_config_file = "config/altitude_controller.yaml";
+    std::string attitude_config_file = "config/attitude_controller.yaml";
     std::string weather_config_file = "config/weather.yaml";
     std::string mission_file;
     std::string logs_dir;
     double sim_elapsed_s = 0.0;
 
-    if (!parseArgs(argc, argv, steps, dt_s, altitude_config_file, weather_config_file, mission_file, logs_dir)) {
-        std::cerr << "Usage: " << argv[0] << " [steps] [dt_s] [altitude_config_file] [weather_config_file] [mission_file] [logs_dir]" << std::endl;
+    if (!parseArgs(argc, argv, steps, dt_s, altitude_config_file, attitude_config_file, weather_config_file, mission_file, logs_dir)) {
+        std::cerr << "Usage: " << argv[0] << " [steps] [dt_s] [altitude_config_file] [attitude_config_file] [weather_config_file] [mission_file] [logs_dir]" << std::endl;
         std::cerr << "  steps: number of simulation steps (default: 10)" << std::endl;
         std::cerr << "  dt_s: time step in seconds (default: 0.01)" << std::endl;
         std::cerr << "  altitude_config_file: YAML config file path (default: config/altitude_controller.yaml)" << std::endl;
+        std::cerr << "  attitude_config_file: YAML config file path (default: config/attitude_controller.yaml)" << std::endl;
         std::cerr << "  weather_config_file: YAML config file path (default: config/weather.yaml)" << std::endl;
         std::cerr << "  mission_file: YAML mission file path (optional)" << std::endl;
         std::cerr << "  logs_dir: output directory for simulation_telemetry.csv and simulation_events.log (optional, default: docs/tutorials)" << std::endl;
@@ -160,6 +167,7 @@ int main(int argc, char** argv) {
              "SIMULATION_START steps=" + std::to_string(steps) +
              " dt_s=" + std::to_string(dt_s) +
              " altitude_config='" + altitude_config_file + "'" +
+             " attitude_config='" + attitude_config_file + "'" +
              " weather_config='" + weather_config_file + "'" +
              " mission_file='" + mission_file + "'" +
              " logs_dir='" + output_logs_dir.string() + "'" +
@@ -172,6 +180,15 @@ int main(int argc, char** argv) {
                  "WARN altitude config load failed: '" + altitude_config_file + "' using defaults");
     } else {
         logEvent(events_log, sim_elapsed_s, "Loaded altitude config: '" + altitude_config_file + "'");
+    }
+
+    // Load attitude controller configuration
+    drone::config::AttitudeControllerConfig att_config;
+    if (!att_config.loadFromFile(attitude_config_file)) {
+        logEvent(events_log, sim_elapsed_s,
+                 "WARN attitude config load failed: '" + attitude_config_file + "' using defaults");
+    } else {
+        logEvent(events_log, sim_elapsed_s, "Loaded attitude config: '" + attitude_config_file + "'");
     }
 
     drone::simulator::config::WeatherConfig weather_config;
@@ -227,6 +244,16 @@ int main(int argc, char** argv) {
     real_drone.setVelocityGains(alt_config.position_hold_kp_vel, alt_config.position_hold_kd_vel);
     real_drone.setMaxVelocity(alt_config.position_hold_max_velocity_mps);
     real_drone.setMaxTilt(alt_config.position_hold_max_tilt_rad);
+    
+    // Apply attitude controller gains
+    real_drone.setAttitudeGains(
+        att_config.yaw_p_gain_rpm_per_rad,
+        att_config.yaw_d_gain_rpm_per_rad_s,
+        att_config.pitch_p_gain_rpm_per_rad,
+        att_config.pitch_d_gain_rpm_per_rad_s,
+        att_config.roll_p_gain_rpm_per_rad,
+        att_config.roll_d_gain_rpm_per_rad_s
+    );
 
     {
         std::ostringstream params;
@@ -247,6 +274,18 @@ int main(int argc, char** argv) {
                << " position_hold_kd_vel=" << alt_config.position_hold_kd_vel
                << " position_hold_max_velocity_mps=" << alt_config.position_hold_max_velocity_mps
                << " position_hold_max_tilt_rad=" << alt_config.position_hold_max_tilt_rad;
+        logEvent(events_log, sim_elapsed_s, params.str());
+    }
+    
+    {
+        std::ostringstream params;
+        params << "Attitude controller params"
+               << " yaw_p=" << att_config.yaw_p_gain_rpm_per_rad
+               << " yaw_d=" << att_config.yaw_d_gain_rpm_per_rad_s
+               << " pitch_p=" << att_config.pitch_p_gain_rpm_per_rad
+               << " pitch_d=" << att_config.pitch_d_gain_rpm_per_rad_s
+               << " roll_p=" << att_config.roll_p_gain_rpm_per_rad
+               << " roll_d=" << att_config.roll_d_gain_rpm_per_rad_s;
         logEvent(events_log, sim_elapsed_s, params.str());
     }
 

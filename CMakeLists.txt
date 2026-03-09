@@ -37,6 +37,7 @@ add_library(drone
     src/drone/model/sensors/base_sensor.cpp
     src/drone/model/sensors/temperature_sensor.cpp
     src/drone/model/components/elect_motor.cpp
+    src/drone/config/attitude_controller_config.cpp
 )
 
 target_link_libraries(drone

@@ -1,21 +1,25 @@
 # Altitude Controller Configuration
-# This file contains parameters for the PI altitude controller
+# This file contains parameters for the PID altitude controller
 
 altitude_controller:
   # Target altitude in meters
   target_altitude_m: 50.0
   
   # Altitude reference tracking parameters
-  altitude_param_p: 2.0           # Proportional gain for altitude reference tracking
-  max_altitude_delta_mps: 5.0     # Maximum altitude reference change rate (m/s)
+  altitude_param_p: 1.0           # Proportional gain for altitude reference tracking
+  max_altitude_delta_mps: 2.0     # Maximum altitude reference change rate (m/s)
   
-  # RPM control parameters (PI controller)
-  control_param_p: 100.0          # Proportional gain for RPM control
-  control_param_i: 2.0           # Integral gain for RPM control
-  control_param_d: 2.0            # Derivative gain for RPM control
+  # RPM control parameters (PID controller)
+  # Tuning guide:
+  #   - P: 20-50 gives ~1000-2500 RPM change for 50m error (reasonable)
+  #   - I: 1-5 helps eliminate steady-state error slowly
+  #   - D: 5-15 provides damping to reduce overshoot
+  control_param_p: 30.0           # Proportional gain for RPM control (lower = less aggressive)
+  control_param_i: 2.0            # Integral gain for RPM control
+  control_param_d: 10.0           # Derivative gain for RPM control (damping)
   enable_i_component: true        # Enable integral component
-  enable_d_component: true       # Enable derivative component
-  activation_error_band_m: 5.0    # I and D active only when |error| < this band
+  enable_d_component: true        # Enable derivative component
+  activation_error_band_m: 10.0   # I and D active only when |error| < this band
   
   # Hover RPM estimate (RPM needed to maintain steady altitude)
   # This depends on drone weight and propeller characteristics

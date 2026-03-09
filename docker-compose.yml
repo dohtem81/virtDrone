@@ -63,7 +63,7 @@ services:
     working_dir: /workspace
     environment:
       - MPLBACKEND=Agg
-    command: sh -c "mkdir -p docs/tutorials/charts && pip install --no-cache-dir pandas matplotlib && python tools/scripts/generate_chart.py --input test.txt --mode full --output docs/tutorials/charts/flight_dashboard.png"
+    command: sh -c "mkdir -p docs/tutorials/charts && pip install --no-cache-dir pandas matplotlib pyyaml && python tools/scripts/generate_mission_chart.py"
     networks:
       - virtDrone-net
 
