@@ -60,6 +60,27 @@ std::string MissionExecutor::getCurrentStepName() const {
     return mission_->steps[current_step_index_].name;
 }
 
+std::string MissionExecutor::getCurrentStepTargetDescription() const {
+    if (!mission_ || current_step_index_ >= mission_->steps.size()) {
+        return "No target";
+    }
+
+    const auto& step = mission_->steps[current_step_index_];
+    std::string target;
+
+    if (step.action) {
+        target = step.action->getDescription();
+    } else {
+        target = "No action";
+    }
+
+    if (step.advance_mode == AdvanceMode::COMPLETION_BASED) {
+        target += " | completion: " + CompletionEvaluator::criteriaToString(step.completion_criteria);
+    }
+
+    return target;
+}
+
 void MissionExecutor::applyCurrentStepAction(runtime::RealDrone& drone,
                                              const runtime::SensorFrame& sensor_frame) {
     if (!mission_ || current_step_index_ >= mission_->steps.size()) {

@@ -89,7 +89,7 @@ docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 100
 Docker mission run with explicit logs directory:
 
 ```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 config/altitude_controller.yaml config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials"
+docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
 ```
 
 Mission examples:

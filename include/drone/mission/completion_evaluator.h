@@ -19,6 +19,9 @@ public:
 
     double getHoldProgress() const { return hold_duration_s_; }
 
+    static std::string conditionTypeToString(CompletionConditionType type);
+    static std::string criteriaToString(const CompletionCriteria& criteria);
+
     void reset();
 
 private:

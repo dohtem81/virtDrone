@@ -338,6 +338,7 @@ int main(int argc, char** argv) {
             const auto mission_status = real_drone.getMissionStatus();
             const int mission_step_id = real_drone.getCurrentMissionStepId();
             const std::string mission_step_name = real_drone.getCurrentMissionStepName();
+            const std::string mission_step_target = real_drone.getCurrentMissionStepTargetDescription();
 
             if (mission_status != last_mission_status) {
                 logEvent(events_log, sim_elapsed_s,
@@ -348,7 +349,8 @@ int main(int argc, char** argv) {
             if (mission_step_id != last_mission_step_id) {
                 logEvent(events_log, sim_elapsed_s,
                          "MISSION_STEP step_id=" + std::to_string(mission_step_id) +
-                             " name='" + mission_step_name + "'");
+                             " name='" + mission_step_name + "'" +
+                             " target='" + mission_step_target + "'");
                 last_mission_step_id = mission_step_id;
             }
         }

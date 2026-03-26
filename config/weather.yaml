@@ -1,5 +1,5 @@
 weather:
-  enabled: true
+  enabled: false
   steady_accel_enu_ms2: [10, -0.05, 0.03]
   gust_amplitude_enu_ms2: [0.20, 0.15, 0.12]
   gust_frequency_hz: 0.25

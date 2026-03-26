@@ -200,6 +200,10 @@ public:
         return mission_executor_.getCurrentStepName();
     }
 
+    std::string getCurrentMissionStepTargetDescription() const {
+        return mission_executor_.getCurrentStepTargetDescription();
+    }
+
     bool hasMissionLoaded() const {
         return mission_loaded_;
     }

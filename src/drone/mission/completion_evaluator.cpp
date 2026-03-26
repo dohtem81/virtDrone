@@ -3,6 +3,7 @@
 #include "drone/runtime/real_drone.h"
 
 #include <cmath>
+#include <sstream>
 
 namespace drone::mission {
 
@@ -106,6 +107,68 @@ bool CompletionEvaluator::isMet(const CompletionCriteria& criteria,
 void CompletionEvaluator::reset() {
     hold_duration_s_ = 0.0;
     last_condition_met_ = false;
+}
+
+std::string CompletionEvaluator::conditionTypeToString(CompletionConditionType type) {
+    switch (type) {
+        case CompletionConditionType::TIME_ELAPSED: return "time_elapsed";
+        case CompletionConditionType::ALTITUDE_REACHED: return "altitude_reached";
+        case CompletionConditionType::ALTITUDE_AND_VELOCITY: return "altitude_and_velocity";
+        case CompletionConditionType::POSITION_REACHED: return "position_reached";
+        case CompletionConditionType::YAW_REACHED: return "yaw_reached";
+        case CompletionConditionType::ATTITUDE_REACHED: return "attitude_reached";
+        case CompletionConditionType::VELOCITY_LOW: return "velocity_low";
+        case CompletionConditionType::LANDED: return "landed";
+    }
+    return "unknown";
+}
+
+std::string CompletionEvaluator::criteriaToString(const CompletionCriteria& c) {
+    std::ostringstream out;
+    out << "condition_type=" << conditionTypeToString(c.condition_type);
+
+    switch (c.condition_type) {
+        case CompletionConditionType::TIME_ELAPSED:
+            out << " duration_s=" << c.duration_s;
+            break;
+        case CompletionConditionType::ALTITUDE_REACHED:
+            out << " target_altitude_m=" << c.target_altitude_m
+                << " altitude_tolerance_m=" << c.altitude_tolerance_m;
+            break;
+        case CompletionConditionType::ALTITUDE_AND_VELOCITY:
+            out << " target_altitude_m=" << c.target_altitude_m
+                << " altitude_tolerance_m=" << c.altitude_tolerance_m
+                << " max_velocity_mps=" << c.max_velocity_mps;
+            break;
+        case CompletionConditionType::POSITION_REACHED:
+            out << " target_position_enu_m=(" << c.target_position_enu_m.x << "," << c.target_position_enu_m.y << ")"
+                << " position_tolerance_m=" << c.position_tolerance_m
+                << " target_altitude_m=" << c.target_altitude_m
+                << " altitude_tolerance_m=" << c.altitude_tolerance_m;
+            break;
+        case CompletionConditionType::YAW_REACHED:
+            out << " target_yaw_rad=" << c.target_yaw_rad
+                << " yaw_tolerance_rad=" << c.yaw_tolerance_rad;
+            break;
+        case CompletionConditionType::ATTITUDE_REACHED:
+            out << " target_pitch_rad=" << c.target_pitch_rad
+                << " target_roll_rad=" << c.target_roll_rad
+                << " target_yaw_rad=" << c.target_yaw_rad
+                << " pitch_tolerance_rad=" << c.pitch_tolerance_rad
+                << " roll_tolerance_rad=" << c.roll_tolerance_rad
+                << " yaw_tolerance_rad=" << c.yaw_tolerance_rad;
+            break;
+        case CompletionConditionType::VELOCITY_LOW:
+            out << " max_velocity_mps=" << c.max_velocity_mps;
+            break;
+        case CompletionConditionType::LANDED:
+            out << " altitude_tolerance_m=" << c.altitude_tolerance_m;
+            break;
+    }
+
+    out << " hold_duration_s=" << c.hold_duration_s
+        << " timeout_s=" << c.timeout_s;
+    return out.str();
 }
 
 }  // namespace drone::mission

@@ -36,6 +36,7 @@ public:
     MissionStatus getStatus() const { return status_; }
     int getCurrentStepId() const;
     std::string getCurrentStepName() const;
+    std::string getCurrentStepTargetDescription() const;
     double getStepElapsedTime() const { return step_elapsed_time_s_; }
     double getTotalElapsedTime() const { return total_elapsed_time_s_; }
     bool isMissionLoaded() const { return mission_ != nullptr; }
