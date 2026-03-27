@@ -94,8 +94,45 @@ docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 100
 
 Mission examples:
 
+- `config/missions/hover_and_land.yaml`
 - `config/missions/hover_and_move.yaml`
-- `config/missions/rectangle_patrol.yaml`
+
+### Mission Examples Under Test
+
+Current primary execution/test scenarios:
+
+1. `hover_and_move`: basic mission step transitions and XY movement checks.
+2. `hover_and_land`: hover at 10m, then 20m, then 30m, then landing.
+
+Host run (hover and move):
+
+```bash
+./build/simulator_app 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
+```
+
+Host run (hover and land):
+
+```bash
+./build/simulator_app 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_land.yaml docs/tutorials
+```
+
+Docker run from repository root (hover and move):
+
+```bash
+docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
+```
+
+Docker run from repository root (hover and land):
+
+```bash
+docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
+```
+
+After each run, inspect:
+
+- `docs/tutorials/simulation_events.log` for mission status/step transitions and completion traces.
+- `docs/tutorials/simulation_telemetry.csv` for timeline telemetry.
+- `docs/tutorials/charts/mission_xyz_status.png` for XYZ/YPR + mission overlay.
 
 ## Tests
 

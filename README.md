@@ -47,6 +47,37 @@ Default chart output:
 - `docs/tutorials/charts/flight_dashboard.png`
 - `docs/tutorials/charts/mission_xyz_status.png`
 
+### Mission Examples (Current Testing)
+
+Two mission flows are actively used for execution/testing:
+
+- `config/missions/hover_and_move.yaml`
+- `config/missions/hover_and_land.yaml`
+
+Example Docker run from repository root (hover and move):
+
+```bash
+docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
+```
+
+Example Docker run from repository root (hover 10m -> 20m -> 30m -> land):
+
+```bash
+docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
+```
+
+### Mission Trend Screenshots
+
+Hover and move mission trend:
+
+![hover_and_move trend](docs/tutorials/charts/hover_and_move.png)
+
+Hover and land mission trend:
+
+![hover_and_land trend](docs/tutorials/charts/hover_and_land.png)
+
+For mission log/chart details, see [How to Use](docs/how-to-use.md).
+
 ## Status Snapshot
 
 ### Current Mission Testing Focus
@@ -54,6 +85,13 @@ Default chart output:
 - Active scenario under test: mission profile that hovers at 10m, then 20m, then 30m, and finally lands.
 - Latest mission visualization is available in `docs/tutorials/charts/mission_xyz_status.png`.
 - The general mission backbone (load -> run -> step transitions -> completion/termination logging) is now working and usable for iteration.
+
+### Mission Execution and Control Status
+
+- Mission execution is now operational end-to-end for the current examples (`hover_and_move`, `hover_and_land`).
+- Position regulator and altitude regulator are both working in the mission loop.
+- Current tracking accuracy is acceptable for development and is expected to improve mainly through tuning.
+- Sensor-noise modeling is implemented and actively affects regulator behavior, so control quality is validated under non-ideal sensing.
 
 ### Completed
 
@@ -74,6 +112,7 @@ Default chart output:
 ### In Progress
 
 - Stabilizing mission behavior across altitude transitions and landing sequence.
+- Improving regulator tuning for tighter position/altitude tracking and smoother transitions.
 - Cleaning up variable naming/units and reducing inconsistencies across runtime, telemetry, and mission parsing paths.
 - Mission strict-validation mode for unknown schema values (currently permissive fallback)
 - Richer rigid-body rotational dynamics
@@ -87,8 +126,8 @@ The simulator intentionally remains simplified for control-development workflow 
 
 - Mission workflows are functional but still in active debugging/tuning; several edge cases remain before behavior is considered reliable.
 - Some variables and conventions are not yet fully consistent across components.
-- Position hold is available but still not consistently reliable in all scenarios (notably takeoff/hover under disturbance and noisy sensing).
-- Altitude controller behavior still requires additional tuning/rework for robust lift-off and altitude tracking.
+- Position and altitude regulation are working, but accuracy/robustness still vary by scenario and disturbance level.
+- Sensor noise is intentionally injected and can expose weak tuning; this is expected during current tuning-focused development.
 - Use tutorial artifacts for evaluation and debugging: `docs/tutorials/simulation_telemetry.csv`, `docs/tutorials/simulation_events.log`, and charts under `docs/tutorials/charts/`.
 
 ## License

@@ -17,14 +17,14 @@ mission:
 
   steps:
     - step_id: 1
-      name: "Takeoff to 50m"
+      name: "Takeoff to 10m"
       action: "hover"
-      target_altitude_m: 50.0
+      target_altitude_m: 10.0
       advance_mode: "completion_based"
       timeout_s: 20.0
       completion_criteria:
         condition_type: "altitude_and_velocity"
-        target_altitude_m: 50.0
+        target_altitude_m: 10.0
         altitude_tolerance_m: 3.0
         max_velocity_mps: 0.3
         hold_duration_s: 1.0
@@ -32,7 +32,7 @@ mission:
     - step_id: 2
       name: "Hover 3 seconds"
       action: "hover"
-      target_altitude_m: 50.0
+      target_altitude_m: 10.0
       advance_mode: "time_based"
       duration_s: 3.0
       timeout_s: 5.0
@@ -59,6 +59,14 @@ mission:
         hold_duration_s: 1.0
 
     - step_id: 4
+      name: "Hover 3 seconds"
+      action: "hover"
+      target_altitude_m: 10.0
+      advance_mode: "time_based"
+      duration_s: 3.0
+      timeout_s: 5.0
+
+    - step_id: 5
       name: "Land"
       action: "land"
       descent_rate_mps: 1.5
