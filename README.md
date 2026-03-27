@@ -49,6 +49,12 @@ Default chart output:
 
 ## Status Snapshot
 
+### Current Mission Testing Focus
+
+- Active scenario under test: mission profile that hovers at 10m, then 20m, then 30m, and finally lands.
+- Latest mission visualization is available in `docs/tutorials/charts/mission_xyz_status.png`.
+- The general mission backbone (load -> run -> step transitions -> completion/termination logging) is now working and usable for iteration.
+
 ### Completed
 
 - Split control/simulation runtime architecture
@@ -67,6 +73,8 @@ Default chart output:
 
 ### In Progress
 
+- Stabilizing mission behavior across altitude transitions and landing sequence.
+- Cleaning up variable naming/units and reducing inconsistencies across runtime, telemetry, and mission parsing paths.
 - Mission strict-validation mode for unknown schema values (currently permissive fallback)
 - Richer rigid-body rotational dynamics
 - Scenario-driven comparison workflows and broader robustness/fault coverage
@@ -77,6 +85,8 @@ The simulator intentionally remains simplified for control-development workflow 
 
 ## Known Issues
 
+- Mission workflows are functional but still in active debugging/tuning; several edge cases remain before behavior is considered reliable.
+- Some variables and conventions are not yet fully consistent across components.
 - Position hold is available but still not consistently reliable in all scenarios (notably takeoff/hover under disturbance and noisy sensing).
 - Altitude controller behavior still requires additional tuning/rework for robust lift-off and altitude tracking.
 - Use tutorial artifacts for evaluation and debugging: `docs/tutorials/simulation_telemetry.csv`, `docs/tutorials/simulation_events.log`, and charts under `docs/tutorials/charts/`.
