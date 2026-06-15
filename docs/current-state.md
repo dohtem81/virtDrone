@@ -1,78 +1,40 @@
 # Current State
 
-## Completed
+## Implemented
 
-- Split runtime architecture: real-drone control loop (`drone/`) and simulation plant (`simulator/`) with an explicit `SimulationGateway` boundary
-- Closed-loop altitude control with configurable PID behavior from YAML
-- Common + differential actuation model (`common_motor_rpm` + yaw/pitch/roll differential mixing)
-- ENU translational dynamics with yaw/pitch/roll thrust projection
-- Battery-aware motor limiting (including depletion cutoff) and thermal/current telemetry
-- GPS perfect-state propagation from ENU state to geodetic position + NED velocity representation
-- Connection-layer noisy sensing (altitude, GPS position/velocity, battery voltage, temperature)
-- Configurable weather disturbance model:
-  - steady acceleration
-  - sinusoidal gusts
-  - seeded turbulence noise
-- Ground lock behavior: while grounded (`z <= 0`) the simulator clamps position/velocity/acceleration to prevent drift
-- RealDrone-integrated XY position controller (position + velocity feedback producing pitch/roll references)
-- Default-enabled XY hold outside mission mode (auto-latched current XY hold reference for drift suppression)
-- Mission hover-step XY hold latching on step entry
-- YAML-configurable position-hold tuning (`position_hold_enabled`, `position_hold_kp_pos`, `position_hold_kp_vel`, `position_hold_kd_vel`, `position_hold_max_velocity_mps`, `position_hold_max_tilt_rad`)
-- Mission runtime support:
-  - YAML mission loading (`MissionLoader`)
-  - Mission step execution (`MissionExecutor`)
-  - Time-based and completion-based advancement
-  - timeout behavior (`abort` / `proceed` / `retry`)
-  - Simulation-loop integration through `RealDrone`
-- Split-process runtime shape:
-  - core control path uses a gateway boundary intended for gRPC transport
-  - simulator is deployed as its own container/process and advances through the gateway step call
-  - transport contract is captured in `proto/simulation_gateway.proto` and `include/drone/runtime/simulation_gateway_grpc.h`
-  - gRPC adapters are implemented by `GrpcSimulationGatewayClient` and `GrpcSimulationGatewayService`
-  - control launcher accepts a backend selector (`grpc` currently active, `hardware` reserved for future real sensors)
-  - separate entrypoints exist for the control side (`drone_app`) and simulator side (`simulator_app`)
-- Telemetry extensions:
-  - sensed/perfect pairs for altitude, power, temperature, GPS position, GPS velocity
-  - controller terms (`TgtErr`, `P`, `I`, `D`)
-  - mixer state (`ComRPM`, `MixYPR`, `MRef`)
-  - ENU and attitude state (`PosENU`, `VelENU`, `YPR`)
-  - weather state (`WTotAcc`, `WSteady`, `WGust`, `WTurb`)
-- Charting pipeline:
-  - full + minimal dashboards
-  - mission XYZ-vs-reference and sequence status/step chart
-  - UTF-8/UTF-16 log decoding fallback
-  - weather plotting support
-  - dual-axis energy/temperature panel in full dashboard
-- Test coverage additions for force dynamics, GPS mapping/noise path, weather model/config, mixer behavior, and ground-lock regression
-- Test coverage additions for mission loader parsing/fallback behavior, mission step transitions, and position controller behavior
+- Split runtime architecture with explicit boundary:
+  - control side: `drone_app`, `RealDrone`, mission runtime
+  - simulation side: `simulator_app`, `QuadroSimulation`, plant/environment
+  - boundary: `SimulationGateway` + gRPC transport
+- Backend selector in control launcher:
+  - `grpc` active
+  - `hardware` placeholder (not implemented)
+- Control session extraction:
+  - reusable `RunControlSession(...)` used by `drone_app`
+- Mission runtime in control side:
+  - mission loading, mission transitions, completion criteria checks
+- Simulation dynamics:
+  - battery-aware motor model
+  - ENU force integration with weather injection
+  - GPS propagation
+  - ground-lock behavior
+- Telemetry/logging pipeline:
+  - simulator telemetry/events
+  - control events
 
-## Important realism note
+## Validation Status
 
-The simulator currently uses **simplified, first-order approximations** for control-development workflows.
+- Docker configure/build/test path is working end-to-end.
+- Latest full run: `95/95` tests passed via Docker.
+- Closeout script now skips HTML summary generation if `python3` is not available in the container.
 
-It is not calibrated as a high-fidelity digital twin.
+## Known Gaps
 
-## In progress / next focus
+- Hardware backend implementation is still pending.
+- HTML validation summary generation is conditional on `python3` availability.
 
-- Position-hold stabilization work (current behavior is not yet consistently reliable during takeoff/hover under disturbance/noisy sensing)
-- Altitude-controller tuning/rework for more robust lift-off and altitude tracking
-- Optional strict mission schema validation mode (currently permissive fallback for unknown completion condition values)
-- Higher-fidelity rotational rigid-body dynamics (torque/inertia integration)
-- Scenario-driven repeatable experiments and richer run-to-run comparison tooling
-- Expanded failure/degradation scenario coverage
+## Supported Use Cases
 
-## Known limitations
-
-- Position hold can overreact in some conditions and is not yet production-stable.
-- Altitude control still requires additional tuning work for robust behavior across scenarios.
-- No CFD-grade aerodynamics or blade-element fidelity
-- No structural flexibility or high-order vibration model
-- Default parameters are generic and not identified from a specific airframe dataset
-- Current dynamics remain intentionally simplified for control workflow iteration
-
-## What this is good for
-
-- Control-loop integration testing
-- Tuning workflow exploration
-- Observability/logging and debugging of controller behavior
-- Studying saturation, battery effects, and noisy sensing behavior
+- Control-loop integration and regression testing
+- Mission state-machine validation
+- Simulator-side plant/control interaction debugging across the transport boundary

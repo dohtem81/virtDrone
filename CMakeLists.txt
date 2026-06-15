@@ -16,23 +16,14 @@ if(NOT yaml-cpp_FOUND)
         yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
         GIT_TAG 0.8.0
+        GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(yaml-cpp)
 endif()
 
 # Transport layer support for split control/simulator deployment
-include(FetchContent)
-FetchContent_Declare(
-    protobuf
-    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-    GIT_TAG v27.2
-)
-FetchContent_Declare(
-    grpc
-    GIT_REPOSITORY https://github.com/grpc/grpc.git
-    GIT_TAG v1.65.1
-)
-FetchContent_MakeAvailable(protobuf grpc)
+find_package(Protobuf REQUIRED)
+find_package(gRPC REQUIRED)
 
 set(proto_dir ${CMAKE_SOURCE_DIR}/proto)
 set(generated_proto_dir ${CMAKE_BINARY_DIR}/generated)
@@ -176,6 +167,7 @@ if(VIRTD_BUILD_TESTS)
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v3.5.0
+        GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(Catch2)
 

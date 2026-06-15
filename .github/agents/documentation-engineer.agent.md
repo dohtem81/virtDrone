@@ -21,6 +21,7 @@ Keep project documentation synchronized with the implemented architecture, with 
 - Describe the per-tick flow in simple, ordered steps.
 - Include migration notes if names, modules, or APIs changed.
 - Avoid ambiguous language such as "usually" or "somewhere in simulator".
+- When documenting how to run the project, use Docker-only commands. Do not describe host-based build/test execution.
 
 ## Preferred Files to Review
 - `README.md`

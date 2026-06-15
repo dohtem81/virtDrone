@@ -21,6 +21,7 @@ Ensure architecture changes preserve correctness by keeping the test suite green
 - Preserve coverage intent when renaming or restructuring tests.
 - If old tests encode obsolete coupling, rewrite them to validate new contracts.
 - Never stop with failing tests if fixes are feasible in-scope.
+- Run all test, build, and scenario verification inside Docker containers only. Do not use host `ctest`, host `cmake`, or host binaries directly.
 
 ## Test Strategy
 1. Run the impacted test subset first for fast feedback.
@@ -28,6 +29,9 @@ Ensure architecture changes preserve correctness by keeping the test suite green
 3. Update assertions for boundary-level behavior.
 4. Add edge-case tests around adapter and contract transitions.
 5. Run full suite and report final status.
+
+## Execution Rule
+- All verification commands must be expressed as Docker commands, typically through `docker compose run --rm dev ...`.
 
 ## Pass Criteria
 - All tests pass locally (or explicit blocker is documented).

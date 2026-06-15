@@ -1,7 +1,7 @@
 ---
 name: "Delivery Summary"
 description: "Use at the end of virtDrone agent-driven work to document what was done, especially agent creation, orchestration flow, and final execution summary."
-tools: [read, search]
+tools: [execute/runNotebookCell, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/testFailure, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/searchSubagent, search/usages]
 argument-hint: "Provide the completed work context and ask for a final summary of agent setup and orchestration."
 user-invocable: true
 ---
@@ -18,6 +18,7 @@ Produce the final narrative of what was delivered in this session, with special 
 - Explain why the agent order was chosen.
 - Capture constraints that shaped execution (for example: tests must pass).
 - Provide concise next-step recommendations when relevant.
+- When mentioning validation, assume Docker-only execution for builds, tests, and scenario runs.
 
 ## Required Content
 1. Agent inventory:
@@ -34,8 +35,8 @@ Produce the final narrative of what was delivered in this session, with special 
    - readiness
    - open risks or TODOs
 5. Validation artifact:
-   - confirm all tests were run
-   - confirm all created scenarios were run
+   - confirm all tests were run in Docker
+   - confirm all created scenarios were run in Docker
    - include path to HTML summary report with charts (`reports/refactor-validation-summary.html`)
 
 ## Output Format

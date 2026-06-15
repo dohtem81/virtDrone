@@ -100,6 +100,10 @@ void QuadroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actua
     sensed_motor_rpm_ = actuator_frame.sensed_motor_rpm;
 }
 
+void QuadroSimulation::step(double dt_s) {
+    onStep(dt_s);
+}
+
 void QuadroSimulation::setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config) {
     weather_model_.setConfig(weather_config);
 }

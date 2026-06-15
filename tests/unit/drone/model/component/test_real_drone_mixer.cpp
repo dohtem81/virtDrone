@@ -44,7 +44,7 @@ TEST_CASE("RealDrone splits common reference with yaw differential", "[RealDrone
 
     drone::runtime::RealDrone real_drone(altitude_controller);
     real_drone.setTargetYaw(0.2);
-    real_drone.setAttitudeControlGains(100.0, 0.0, 0.0);
+    real_drone.setAttitudeGains(100.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     drone::runtime::SensorFrame sensors;
     sensors.altitude_m = 0.0;
@@ -79,7 +79,7 @@ TEST_CASE("RealDrone preserves common reference while scaling differential on sa
 
     drone::runtime::RealDrone real_drone(altitude_controller);
     real_drone.setTargetRoll(1.0);
-    real_drone.setAttitudeControlGains(0.0, 0.0, 5000.0);
+    real_drone.setAttitudeGains(0.0, 0.0, 0.0, 0.0, 5000.0, 0.0);
 
     drone::runtime::SensorFrame sensors;
     sensors.roll_rad = 0.0;

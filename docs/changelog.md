@@ -2,6 +2,27 @@
 
 This changelog tracks major architecture, runtime, and documentation updates.
 
+## 2026-06-15
+
+### Runtime and boundary
+- Confirmed split-runtime flow with control/session ownership on `drone_app` side and plant ownership on `simulator_app` side.
+- Added explicit gateway contract implementation completeness for simulator (`step(dt_s)` path).
+- Clarified backend status: `grpc` active, `hardware` placeholder.
+
+### Build and tooling
+- Switched Docker dev image to install protobuf/gRPC development packages.
+- Updated CMake dependency path to use system protobuf/gRPC via `find_package(...)`.
+- Kept Catch2 as FetchContent for tests.
+
+### Testing
+- Restored failing tests after API shifts in control and mixer interfaces.
+- Docker full validation now passes (`95/95` tests).
+
+### Documentation
+- Updated README and core docs to align with current architecture and CLI.
+- Removed host-based execution guidance from usage docs.
+- Standardized per-tick flow and boundary ownership wording across architecture/tutorial pages.
+
 ## Entry policy
 - Use the `YYYY-MM-DD` date format for each release/update block.
 - Group changes under short headings (for example: runtime, controller, energy, tooling, docs).

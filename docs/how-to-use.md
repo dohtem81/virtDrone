@@ -1,46 +1,129 @@
 # How to Use
 
-## Build and Run
+## Supported Execution Model
 
-### Docker (recommended)
+Use Docker commands only.
 
-```bash
-docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-docker compose run --rm dev cmake --build build --target simulator_app
-docker compose run --rm dev cmake --build build --target drone_app
-```
+All build, run, and test examples below execute through `docker compose`.
 
-For the split-process architecture, run the simulator as its own container/service and keep the core control loop on the control side. The current repo already exposes `simulator` and `drone` services in `docker-compose.yml`; the boundary is intended to be gRPC-backed.
-
-The current transport layer is modeled by `proto/simulation_gateway.proto` and the RPC adapters in `include/drone/runtime/simulation_gateway_rpc.h` and `include/drone/runtime/simulation_gateway_grpc.h`.
-
-Control-side executable (separate process entrypoint):
+## Build
 
 ```bash
-docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
-docker compose run --rm dev ./build/drone_app grpc localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
+docker compose run --rm dev cmake -S /workspace -B /workspace/build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+docker compose run --rm dev cmake --build /workspace/build -j
 ```
 
-### Host
+## Run Split Runtime
+
+Start simulation side (server):
 
 ```bash
-cmake -S . -B build
-cmake --build build --target simulator_app drone_app
-./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
-./build/drone_app grpc localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
+docker compose run --rm dev bash -lc '/workspace/build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051'
 ```
 
-## Configuration
+Start control side (client):
 
-Default controller configuration:
+```bash
+docker compose run --rm dev bash -lc '/workspace/build/drone_app grpc localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials'
+```
+
+## CLI Signatures
+
+`simulator_app [weather_config_file] [logs_dir] [listen_address]`
+
+`drone_app [backend] [simulator_address] [steps] [dt_s] [altitude_config_file] [attitude_config_file] [mission_file] [logs_dir]`
+
+Backend values:
+
+- `grpc` / `sim` / `simulation`: implemented
+- `hardware`: reserved placeholder, not implemented yet
+
+## Hardware Backend Activation Plan (When Implemented)
+
+Use this checklist once `hardware` backend support is added:
+
+1. Implement and register the hardware gateway in `CreateControlGateway(...)` for `ControlBackend::Hardware`.
+2. Provide hardware-side sensor/actuator adapter configuration (device endpoint, auth, timing) via runtime config.
+3. Keep `drone_app` CLI unchanged and switch backend argument to `hardware`.
+4. Run a Docker smoke test with short duration first:
+
+```bash
+docker compose run --rm dev bash -lc '/workspace/build/drone_app hardware <hardware-endpoint> 300 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials'
+```
+
+5. Confirm output files are produced in `docs/tutorials/` and that control-session lifecycle events are present in `control_events.log`.
+
+## Validation Run
+
+End-to-end build + tests with one command:
+
+```bash
+docker compose run --rm dev bash -lc '/workspace/tools/scripts/refactor-closeout-docker.sh'
+```
+
+This command configures/builds in `/tmp/virtdrone-build` and runs `ctest --output-on-failure`.
+
+Validation summary report:
+
+- `reports/refactor-validation-summary.html`
+
+## Test Commands
+
+Run all tests:
+
+```bash
+docker compose run --rm dev bash -lc 'ctest --test-dir /workspace/build --output-on-failure'
+```
+
+Run targeted mission tests:
+
+```bash
+docker compose run --rm dev bash -lc "ctest --test-dir /workspace/build -R 'test_mission_loader$|test_mission_executor_transitions$' --output-on-failure"
+```
+
+## Logs and Artifacts
+
+Default runtime artifact folder:
+
+- `docs/tutorials/`
+
+Produced files:
+
+- `docs/tutorials/simulation_telemetry.csv`
+- `docs/tutorials/simulation_events.log`
+- `docs/tutorials/control_events.log`
+- `reports/refactor-validation-summary.html`
+
+Charts:
+
+- `docs/tutorials/charts/flight_dashboard.png`
+- `docs/tutorials/charts/mission_xyz_status.png`
+
+## Chart Generation
+
+```bash
+docker compose run --rm chart
+```
+
+Chart parser tests:
+
+```bash
+docker compose run --rm chart-test
+```
+
+## Mission Configuration
+
+Mission examples:
+
+- `config/missions/hover_and_move.yaml`
+- `config/missions/hover_and_land.yaml`
+
+Controller config files:
 
 - `config/altitude_controller.yaml`
+- `config/attitude_controller.yaml`
 
-Aggressive alternative:
-
-- `config/altitude_controller_fast.yaml`
-
-In addition to altitude PID fields, controller YAML now supports position-hold tuning fields:
+Position-hold tuning keys are defined in altitude config YAML:
 
 - `position_hold_enabled`
 - `position_hold_kp_pos`
@@ -48,204 +131,3 @@ In addition to altitude PID fields, controller YAML now supports position-hold t
 - `position_hold_kd_vel`
 - `position_hold_max_velocity_mps`
 - `position_hold_max_tilt_rad`
-
-Example (defaults from `config/altitude_controller.yaml`):
-
-```yaml
-position_hold_enabled: true
-position_hold_kp_pos: 1.0
-position_hold_kp_vel: 10.0
-position_hold_kd_vel: 2.0
-position_hold_max_velocity_mps: 20.0
-position_hold_max_tilt_rad: 1.3
-```
-
-Default runtime behavior keeps XY hold enabled even without a mission file; the current XY is latched as the hold reference during free-flight hover.
-
-Current controller status (important):
-
-- Position hold is available but still not reliable enough in all scenarios (especially takeoff/hover under disturbance/noisy sensing).
-- Altitude controller behavior still needs further tuning/rework for robust mission behavior.
-- Use the tutorial logs/charts below to evaluate behavior on your run before relying on defaults.
-
-Run the simulator server:
-
-```bash
-./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
-```
-
-Run the control client:
-
-```bash
-./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
-```
-
-Run simulator + control together from Docker:
-
-```bash
-docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
-docker compose run --rm dev ./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
-```
-
-Run with explicit log output directory parameter:
-
-```bash
-./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
-```
-
-Docker mission run from repository root:
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 1000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
-```
-
-Docker mission run with explicit logs directory:
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
-```
-
-Mission examples:
-
-- `config/missions/hover_and_land.yaml`
-- `config/missions/hover_and_move.yaml`
-
-### Mission Examples Under Test
-
-Current primary execution/test scenarios:
-
-1. `hover_and_move`: basic mission step transitions and XY movement checks.
-2. `hover_and_land`: hover at 10m, then 20m, then 30m, then landing.
-
-Host run (hover and move):
-
-```bash
-./build/drone_app localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
-```
-
-Host run (hover and land):
-
-```bash
-./build/drone_app localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_land.yaml docs/tutorials
-```
-
-Docker run from repository root (hover and move):
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
-```
-
-Docker run from repository root (hover and land):
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
-```
-
-After each run, inspect:
-
-- `docs/tutorials/simulation_events.log` for mission status/step transitions and completion traces.
-- `docs/tutorials/simulation_telemetry.csv` for timeline telemetry.
-- `docs/tutorials/charts/mission_xyz_status.png` for XYZ/YPR + mission overlay.
-
-## Tests
-
-Run all tests:
-
-```bash
-ctest --test-dir build --output-on-failure
-```
-
-Run altitude-controller-related tests:
-
-```bash
-ctest --test-dir build -R alt_ctrl --output-on-failure
-```
-
-Run mission loader and mission step transition tests:
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build; cmake --build . --target test_mission_loader test_mission_executor_transitions -j; ctest -R 'test_mission_loader$|test_mission_executor_transitions$' --output-on-failure"
-```
-
-## Runtime logs
-
-The simulator writes logs to files (instead of console telemetry output):
-
-- `docs/tutorials/simulation_telemetry.csv`: timestamped per-step telemetry for charting and troubleshooting.
-- `docs/tutorials/simulation_events.log`: timestamped lifecycle and mission events (start, mission status, mission step changes, stop).
-
-Files are written to the repository tutorial folder whether `simulator_app` is launched from repository root or from `build/`.
-
-In the split-process setup, the control process reads sensor updates from the simulation gateway and sends actuator commands back across the same transport boundary.
-
-You can override log location by passing the optional `logs_dir` argument to the simulator server or control client:
-
-`simulator_app [weather_config_file] [logs_dir] [listen_address]`
-
-`drone_app [simulator_address] [steps] [dt_s] [altitude_config_file] [attitude_config_file] [weather_config_file] [mission_file] [logs_dir]`
-
-Tutorial artifacts to inspect after each run:
-
-- Logs: `docs/tutorials/simulation_telemetry.csv`, `docs/tutorials/simulation_events.log`
-- Charts: `docs/tutorials/charts/flight_dashboard.png`, `docs/tutorials/charts/mission_xyz_status.png`
-
-## Chart Generation
-
-Recommended workflow (ensures UTF-8 simulator log for chart parser):
-
-```bash
-docker compose run --rm dev sh -lc './build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051 > simulator.txt'
-docker compose run --rm dev sh -lc './build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials > drone.txt'
-docker compose run --rm chart
-```
-
-Generate default full dashboard chart:
-
-```bash
-docker compose run --rm chart
-```
-
-Default output file:
-
-- `docs/tutorials/charts/flight_dashboard.png`
-
-Generate custom full dashboard:
-
-```bash
-docker compose run --rm chart sh -c "pip install --no-cache-dir pandas matplotlib && python tools/scripts/generate_chart.py --input test.txt --mode full --output docs/tutorials/charts/my_run_full.png"
-```
-
-Generate minimal chart (sensors + altitude + controller state):
-
-```bash
-docker compose run --rm chart sh -c "pip install --no-cache-dir pandas matplotlib && python tools/scripts/generate_chart.py --input test.txt --mode minimal --output docs/tutorials/charts/my_run_minimal.png"
-```
-
-Run chart parser tests:
-
-```bash
-docker compose run --rm chart-test
-```
-
-Generate mission chart (XYZ/YPR actual vs references + mission status/step + motor RPMs):
-
-```bash
-docker compose run --rm chart sh -c "pip install --no-cache-dir pandas matplotlib pyyaml && python tools/scripts/generate_mission_chart.py --telemetry docs/tutorials/simulation_telemetry.csv --events docs/tutorials/simulation_events.log --mission config/missions/hover_and_move.yaml --output docs/tutorials/charts/mission_xyz_status.png"
-```
-
-This chart overlays:
-
-- X/Y/Z position vs mission references
-- yaw/pitch/roll attitude vs mission references
-- Mission step id over simulation time
-- Mission sequence status (`IDLE`, `RUNNING`, `PAUSED`, `COMPLETED`, `ABORTED`, `FAILED`)
-- Per-motor RPM references (`M0..M3`)
-
-Telemetry now also appends mixer and ENU/attitude fields (`ComRPM`, `MixYPR`, `MRef`, `PosENU`, `VelENU`, `YPR`) while preserving existing chart-compatible core fields.
-
-Telemetry now also includes:
-
-- sensed/perfect GPS position + velocity pairs
-- weather terms (`WTotAcc`, `WSteady`, `WGust`, `WTurb`)
-
-Full dashboard currently includes a dual-axis energy/temperature panel and weather plots.

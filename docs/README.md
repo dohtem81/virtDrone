@@ -1,31 +1,22 @@
 # virtDrone Documentation
 
-This folder contains the main project documentation.
+This folder contains the project documentation for architecture, runtime usage, and status.
 
 ## Contents
 
 - [Architecture](architecture.md)
 - [How to Use](how-to-use.md)
 - [Simulation Mission Format](simulation-mission-format.md)
-- [Simulation ↔ Real Drone Interaction (Beginner Guide)](tutorials/simulation-real-drone-interaction.md)
+- [Simulation and Control Interaction](tutorials/simulation-real-drone-interaction.md)
 - [Current State](current-state.md)
 - [Roadmap](roadmap.md)
 - [Changelog](changelog.md)
+- [Latest Validation Summary](../reports/refactor-validation-summary.html)
 
-## Notes
+## Usage Notes
 
-For update format guidance, maintainers should follow the policy in [Changelog](changelog.md#entry-policy).
-
-If you are new to the project, start with:
-
-1. [How to Use](how-to-use.md)
-2. [Current State](current-state.md)
-3. [Architecture](architecture.md)
-
-Tutorial runtime artifacts (logs + charts) are written under `docs/tutorials/` and `docs/tutorials/charts/` by default.
-
-Architecture sketch: [docs/drawings/virtDrone_grpc_process_architecture.excalidraw](drawings/virtDrone_grpc_process_architecture.excalidraw)
-
-Transport contract: [proto/simulation_gateway.proto](../proto/simulation_gateway.proto)
-
-The current architecture documentation assumes the simulator can run as a separate process/container behind a gateway transport boundary.
+- Run/build/test instructions are documented with Docker commands.
+- Runtime artifacts are written under `docs/tutorials/` and `docs/tutorials/charts/` by default.
+- Latest validation HTML summary is written to `reports/refactor-validation-summary.html`.
+- Transport contract: [proto/simulation_gateway.proto](../proto/simulation_gateway.proto)
+- Architecture sketch: [drawings/virtDrone_grpc_process_architecture.excalidraw](drawings/virtDrone_grpc_process_architecture.excalidraw)

@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y \
     git \
     pkg-config \
     libyaml-cpp-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libgrpc++-dev \
+    protobuf-compiler-grpc \
+    python3 \
     nlohmann-json3-dev \
     gdb \
     valgrind \

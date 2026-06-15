@@ -1,156 +1,65 @@
 # virtDrone
-**Vehicle Subsystem Simulation & Control Framework (Work in Progress)**
 
-## Overview
+Vehicle subsystem simulation and control framework.
 
-virtDrone is a modular framework for exploring vehicle subsystem modeling and control-loop integration.
+## What It Is
 
-The current implementation is intentionally **simplified** and aimed at engineering workflow exploration, not high-fidelity flight prediction.
+virtDrone is organized as a split runtime:
 
-The control loop and simulator are being organized as separate process/container responsibilities, with the boundary expressed through a simulation gateway intended to be backed by gRPC in deployment.
+- control side: mission and control logic (`drone_app`)
+- simulation side: plant/environment model (`simulator_app`)
+- boundary: `SimulationGateway` over gRPC (current implementation)
+
+The architecture is intended for control-development workflows, not high-fidelity digital-twin prediction.
 
 ## Documentation
-
-Detailed documentation lives in the `docs/` folder:
 
 - [Documentation Index](docs/README.md)
 - [Architecture](docs/architecture.md)
 - [How to Use](docs/how-to-use.md)
 - [Simulation Mission Format](docs/simulation-mission-format.md)
-- [Simulation ↔ Real Drone Interaction (Beginner Guide)](docs/tutorials/simulation-real-drone-interaction.md)
+- [Simulation and Control Interaction](docs/tutorials/simulation-real-drone-interaction.md)
 - [Current State](docs/current-state.md)
 - [Roadmap](docs/roadmap.md)
 - [Changelog](docs/changelog.md)
+- [Latest Validation Summary](reports/refactor-validation-summary.html)
 
-Architecture sketch for the split-process/gRPC boundary: [docs/drawings/virtDrone_grpc_process_architecture.excalidraw](docs/drawings/virtDrone_grpc_process_architecture.excalidraw)
-Transport contract: [proto/simulation_gateway.proto](proto/simulation_gateway.proto)
+## Quick Start (Docker)
 
-## Quick Start
-
-### Build and Run (Docker)
+Build:
 
 ```bash
-docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-docker compose run --rm dev cmake --build build --target simulator_app
-docker compose run --rm dev cmake --build build --target drone_app
+docker compose run --rm dev cmake -S /workspace -B /workspace/build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+docker compose run --rm dev cmake --build /workspace/build -j
 ```
 
-Run the simulator process in one terminal/container and the control process in another:
+Run simulation side:
 
 ```bash
-docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
-docker compose run --rm dev ./build/drone_app grpc localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
+docker compose run --rm dev bash -lc '/workspace/build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051'
 ```
 
-For the split deployment shape, the simulator runs as its own container/process and the core control side communicates through the gRPC gateway boundary instead of direct in-process calls.
-
-Build the control-side executable as well:
+Run control side:
 
 ```bash
-docker compose run --rm dev cmake --build build --target drone_app
-docker compose run --rm dev ./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
+docker compose run --rm dev bash -lc '/workspace/build/drone_app grpc localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials'
 ```
 
-### Generate Chart
+## Validate
 
 ```bash
-docker compose run --rm chart
+docker compose run --rm dev bash -lc '/workspace/tools/scripts/refactor-closeout-docker.sh'
 ```
 
-### Run Chart Parser Tests
+Latest full validation status:
 
-```bash
-docker compose run --rm chart-test
-```
+- 95/95 tests passed in Docker.
 
-Default chart output:
+## Backend Status
 
-- `docs/tutorials/charts/flight_dashboard.png`
-- `docs/tutorials/charts/mission_xyz_status.png`
-
-### Mission Examples (Current Testing)
-
-Two mission flows are actively used for execution/testing:
-
-- `config/missions/hover_and_move.yaml`
-- `config/missions/hover_and_land.yaml`
-
-Example Docker run from repository root (hover and move):
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
-```
-
-Example Docker run from repository root (hover 10m -> 20m -> 30m -> land):
-
-```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
-```
-
-### Mission Trend Screenshots
-
-Hover and move mission trend:
-
-![hover_and_move trend](docs/tutorials/charts/hover_and_move.png)
-
-Hover and land mission trend:
-
-![hover_and_land trend](docs/tutorials/charts/hover_and_land.png)
-
-For mission log/chart details, see [How to Use](docs/how-to-use.md).
-
-## Status Snapshot
-
-### Current Mission Testing Focus
-
-- Active scenario under test: mission profile that hovers at 10m, then 20m, then 30m, and finally lands.
-- Latest mission visualization is available in `docs/tutorials/charts/mission_xyz_status.png`.
-- The general mission backbone (load -> run -> step transitions -> completion/termination logging) is now working and usable for iteration.
-
-### Mission Execution and Control Status
-
-- Mission execution is now operational end-to-end for the current examples (`hover_and_move`, `hover_and_land`).
-- Position regulator and altitude regulator are both working in the mission loop.
-- Current tracking accuracy is acceptable for development and is expected to improve mainly through tuning.
-- Sensor-noise modeling is implemented and actively affects regulator behavior, so control quality is validated under non-ideal sensing.
-
-### Completed
-
-- Split control/simulation runtime architecture
-- ENU translational dynamics with yaw/pitch/roll thrust projection
-- Common + differential motor mixing (`common_motor_rpm` + yaw/pitch/roll terms)
-- Battery-aware motor behavior (including depletion cutoff), plus thermal/current telemetry
-- GPS perfect-state propagation from ENU to geodetic + noisy GPS sensing path
-- Configurable weather disturbance model (steady, gust, turbulence)
-- Ground-lock constraint to prevent movement while clamped on ground
-- RealDrone-integrated XY position controller (position/velocity feedback -> pitch/roll references)
-- Default-enabled XY position hold outside mission mode (auto-latched current XY hold reference)
-- Mission YAML support with step-based execution (time-based and completion-based advancement)
-- YAML-configurable position-hold tuning (`position_hold_enabled`, `position_hold_kp_pos`, `position_hold_kp_vel`, `position_hold_kd_vel`, `position_hold_max_velocity_mps`, `position_hold_max_tilt_rad`)
-- Extended telemetry and charts (weather panel + dual-axis energy/temperature view)
-- Mission loader + executor tests and position-controller unit coverage
-
-### In Progress
-
-- Stabilizing mission behavior across altitude transitions and landing sequence.
-- Improving regulator tuning for tighter position/altitude tracking and smoother transitions.
-- Cleaning up variable naming/units and reducing inconsistencies across runtime, telemetry, and mission parsing paths.
-- Mission strict-validation mode for unknown schema values (currently permissive fallback)
-- Richer rigid-body rotational dynamics
-- Scenario-driven comparison workflows and broader robustness/fault coverage
-
-### Scope Note
-
-The simulator intentionally remains simplified for control-development workflow iteration rather than high-fidelity digital-twin prediction.
-
-## Known Issues
-
-- Mission workflows are functional but still in active debugging/tuning; several edge cases remain before behavior is considered reliable.
-- Some variables and conventions are not yet fully consistent across components.
-- Position and altitude regulation are working, but accuracy/robustness still vary by scenario and disturbance level.
-- Sensor noise is intentionally injected and can expose weak tuning; this is expected during current tuning-focused development.
-- Use tutorial artifacts for evaluation and debugging: `docs/tutorials/simulation_telemetry.csv`, `docs/tutorials/simulation_events.log`, and charts under `docs/tutorials/charts/`.
+- `grpc`: implemented
+- `hardware`: placeholder, not implemented yet
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE).

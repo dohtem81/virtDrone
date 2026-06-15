@@ -131,7 +131,7 @@ int RunControlSession(
         logEvent(events_log, sim_elapsed_s, "Loaded mission: '" + mission_file + "'");
     }
 
-    MissionStatus last_mission_status = MissionStatus::IDLE;
+    drone::mission::MissionStatus last_mission_status = drone::mission::MissionStatus::IDLE;
     int last_mission_step_id = -1;
 
     for (uint64_t i = 0; i < steps; ++i) {
@@ -163,9 +163,9 @@ int RunControlSession(
 
         if (real_drone.hasMissionLoaded()) {
             const auto status = real_drone.getMissionStatus();
-            if (status == MissionStatus::COMPLETED ||
-                status == MissionStatus::ABORTED ||
-                status == MissionStatus::FAILED) {
+            if (status == drone::mission::MissionStatus::COMPLETED ||
+                status == drone::mission::MissionStatus::ABORTED ||
+                status == drone::mission::MissionStatus::FAILED) {
                 logEvent(events_log, sim_elapsed_s,
                          "MISSION_TERMINATED status=" + missionStatusToString(status));
                 break;

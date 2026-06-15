@@ -26,6 +26,7 @@ Keep behavior stable unless explicitly requested otherwise.
 - Do not leave the repo with failing tests.
 - You may update tests when architecture changes require new seams or API shapes.
 - Minimize broad rewrites; prefer incremental, verifiable changes.
+- Run all builds, tests, and scenario checks inside Docker containers only. Do not use host CMake, host CTest, or host compiler/toolchain commands.
 
 ## Implementation Workflow
 1. Identify current coupling points between control and simulation code.
@@ -34,6 +35,10 @@ Keep behavior stable unless explicitly requested otherwise.
 4. Update call sites with minimal disruption.
 5. Adjust tests to target interfaces and architecture boundaries.
 6. Run build and tests; iterate until green.
+
+## Execution Rule
+- Use Docker-based commands for all verification, including compile checks and scenario runs.
+- If a local command appears in an example, translate it to the equivalent `docker compose run --rm dev ...` form before using it.
 
 ## Acceptance Criteria
 - Control code compiles and runs without direct dependency on simulator internals.

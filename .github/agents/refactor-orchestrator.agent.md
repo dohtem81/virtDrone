@@ -1,7 +1,7 @@
 ---
 name: "Refactor Orchestrator"
 description: "Use when running end-to-end virtDrone architecture refactors that must separate hardware-capable and simulation-only code by coordinating Software Developer, Test Agent, and Documentation Engineer in the right order."
-tools: [agent, read, search]
+tools: [agent, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/searchSubagent, search/usages]
 agents: ["Software Developer", "Test Agent", "Documentation Engineer", "Delivery Summary"]
 argument-hint: "Describe the refactor goal, constraints, and done criteria."
 user-invocable: true
@@ -13,6 +13,8 @@ Use a hybrid approach:
 - First, run a quick baseline test pass to capture current status and prevent hidden pre-existing failures.
 - Then perform boundary-first implementation work.
 - Then run and update tests to match the new architecture.
+
+All build, test, scenario, and report-generation commands must run inside Docker containers only. Do not rely on host CMake, host CTest, or host-installed toolchains.
 
 This is neither pure test-first nor pure code-first; it is test-baseline first, code second, validation third.
 
@@ -35,7 +37,7 @@ This is neither pure test-first nor pure code-first; it is test-baseline first, 
 ## Mandatory Final Validation Artifact
 At the end of refactoring, run all tests and all mission scenarios created so far, then generate an HTML summary report with charts.
 
-- Preferred command path: run the VS Code task `refactor-closeout: test-scenarios-html`.
+- Preferred command path: run the VS Code task `refactor-closeout: test-scenarios-html`, which must execute Docker-based commands only.
 - Expected artifact: `reports/refactor-validation-summary.html`.
 - The report must include:
    - complete test output summary

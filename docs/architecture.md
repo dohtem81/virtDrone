@@ -1,191 +1,99 @@
 # Architecture
 
-## Overview
+## Runtime Split
 
-virtDrone uses a split runtime model:
+virtDrone runs as two explicit sides connected by a boundary contract.
 
-- **Real drone side (`drone/`)**: controller logic, mission logic, and config
-- **Simulation side (`simulator/`)**: plant physics, environment updates, and sensor synthesis
-- **Transport boundary**: a simulation gateway contract intended to be backed by gRPC when the simulator runs in a separate process/container
+- Control side (can run with real hardware in the future):
+  - `drone_app`
+  - `drone::runtime::RealDrone`
+  - `drone::mission::MissionLoader`, `drone::mission::MissionExecutor`
+  - controller config loading and control-session orchestration
+- Simulation side (simulation only):
+  - `simulator_app`
+  - `drone::simulator::QuadroSimulation`
+  - physics, weather, GPS synthesis, battery/motor simulation, telemetry CSV/event logs
+- Boundary contract:
+  - `drone::runtime::SimulationGateway`
+  - proto contract: `proto/simulation_gateway.proto`
+  - current transport implementation: gRPC client/server adapters
 
-This keeps control decisions separate from physics integration.
+The control process does not call simulator internals directly.
 
-The current runtime shape is designed so the core control process talks to the simulator through a gateway contract rather than through direct simulator calls. The transport layer lives in `drone/runtime/simulation_gateway_grpc.h` and mirrors `proto/simulation_gateway.proto`.
+## Hardware vs Simulation
 
-The control launcher now accepts a backend selector. `grpc` routes to the current simulator transport, while `hardware` is reserved as the switch point for a future real-sensor backend.
+Real-hardware capable side:
 
-The repo now builds separate entrypoints for the two sides: `drone_app` for the control process and `simulator_app` for the plant process.
+- `drone_app`
+- `RunControlSession(...)`
+- `RealDrone`
+- mission execution and control logic
 
-Architecture sketch: [docs/drawings/virtDrone_grpc_process_architecture.excalidraw](docs/drawings/virtDrone_grpc_process_architecture.excalidraw)
+Simulation-only side:
 
-## Runtime Flow
+- `simulator_app`
+- `QuadroSimulation` and physics/environment stack
+- simulation telemetry and simulator event logs
 
-Each simulation step:
+Backend status:
 
-1. **Core process** requests sensor state from the simulation gateway
-   - The gateway may be backed by gRPC in the deployed split-process setup
-   - Any simulation-only sensor noise should live behind the simulation boundary, not inside the control app
-2. **RealDrone** computes actuator command from sensed values
-3. **Core process** sends actuator output back through the gateway
-4. **Simulation process** applies command and advances plant state
+- `grpc` backend: implemented and active
+- `hardware` backend: selected via CLI but currently not implemented (factory returns null)
 
-When a mission is active, mission execution is evaluated every tick before control updates:
+## Per-Tick Flow
 
-1. **MissionExecutor** applies the active mission step action to `RealDrone` targets
-2. **RealDrone** computes control commands (altitude + optional position-controller-derived attitude references)
-3. **Gateway + simulation process** advance plant state and refresh sensor truth/noisy views
+Ordered flow inside the control loop:
 
-Simulation step currently includes:
+1. Control side reads `SensorFrame` through `SimulationGateway::readSensors()`.
+2. If a mission is loaded, control side runs mission-step update logic.
+3. Control side runs `RealDrone::update(...)` to compute `ActuatorFrame`.
+4. Control side sends actuator output through `SimulationGateway::applyActuators(...)`.
+5. Control side requests simulator advance through `SimulationGateway::step(dt_s)`.
+6. Simulation side applies motor commands, advances physics/weather/GPS, and stores updated state for the next sensor read.
 
-- battery-aware motor update
-- thrust accumulation and ENU force integration
-- weather disturbance sampling and injection
-- ground lock clamp at contact (`z <= 0`)
-- perfect GPS state propagation from ENU -> geodetic/NED
+This order is fixed: control computes first from the current sample, then plant advances.
 
-## Main Interfaces
+## Key Interfaces
 
 - `drone::runtime::SensorSource`
 - `drone::runtime::ActuatorSink`
 - `drone::runtime::SimulationGateway`
-- `drone::runtime::GrpcSimulationGatewayService`
 - `drone::runtime::GrpcSimulationGatewayClient`
-- `drone::runtime::SimulationGateway`
-- `drone::runtime::runSimulationStep(...)`
+- `drone::runtime::GrpcSimulationGatewayService`
+- `drone::runtime::CreateControlGateway(...)`
+- `drone::runtime::RunControlSession(...)`
 - `drone::runtime::RealDrone`
-- `drone::control::PositionController`
-- `drone::mission::MissionLoader`
-- `drone::mission::MissionExecutor`
 - `drone::simulator::QuadroSimulation`
 
-## Position Control Placement
+## Data Contracts
 
-The XY position controller is owned by `RealDrone` and runs as a cascaded loop:
+Control-to-simulation boundary payloads:
 
-- outer loop: position error -> velocity reference (with saturation)
-- inner loop: velocity error -> pitch/roll references (with tilt clamp)
+- `SensorFrame`:
+  - altitude, ENU position, GPS position/velocity, battery, motor thermal/RPM, yaw/pitch/roll
+- `ActuatorFrame`:
+  - `common_motor_rpm`
+  - yaw/pitch/roll differential terms
+  - per-motor RPM refs
+  - control diagnostics (target error, PID terms, sensed mirrors)
 
-This keeps position control in the `RealDrone` control domain while simulation remains responsible for plant dynamics and sensing. The control process only sees sensor frames coming through the gateway boundary.
+Contract source of truth: `proto/simulation_gateway.proto`.
 
-Yaw remains independently commanded and is not generated by the XY position controller.
+## Build/Dependency Model
 
-By default, XY position hold is enabled even when no mission is running. `RealDrone` uses an auto-latched current XY hold reference and continuously applies position-control corrections to reduce drift.
+- Primary C++ build uses CMake + Ninja.
+- gRPC/protobuf are resolved via system packages in the Docker dev image and consumed via `find_package(...)`.
+- Catch2 remains fetched for tests.
 
-For mission `hover` steps, the current XY hold reference is latched on step entry so the vehicle maintains local position while altitude/yaw targets are tracked.
+## Migration Notes
 
-## Mission Execution Model
+- Runtime entrypoints are split:
+  - old single-process assumptions should be replaced with `simulator_app` + `drone_app`.
+- `drone_app` CLI now includes backend selection:
+  - `[backend] [simulator_address] [steps] [dt_s] [altitude_config] [attitude_config] [mission_file] [logs_dir]`
+- Mission ownership moved to the control domain (`drone/mission`), not simulator domain.
+- Docker is the supported execution path for build/test/run documentation.
 
-Mission YAML is parsed by `MissionLoader` into typed steps and actions.
+## Diagram Reference
 
-`MissionExecutor` supports:
-
-- time-based mission step advancement (`duration_s`)
-- completion-based mission step advancement (`completion_criteria`)
-- timeout handling (`abort`, `proceed`, `retry`)
-
-Mission lifecycle ownership is hosted in `RealDrone` (`loadMissionFromFile`, `startMission`, `updateMission`).
-
-## Coordinate and Attitude Conventions
-
-Dynamics are now modeled in **ENU Cartesian coordinates**:
-
-- `x`: East [m]
-- `y`: North [m]
-- `z`: Up [m]
-
-Attitude is represented as Euler angles in radians:
-
-- `yaw_rad`
-- `pitch_rad`
-- `roll_rad`
-
-Rotation used for force projection is body-to-world with Z-Y-X composition (yaw -> pitch -> roll).
-
-## Force-Vector Integration
-
-At each simulation step:
-
-1. Total motor thrust is accumulated in body frame (`[0, 0, thrust]`)
-2. Thrust is rotated to ENU using yaw/pitch/roll
-3. Gravity is applied as `[0, 0, -m*g]`
-4. Linear damping is applied opposite ENU velocity
-5. Net force is integrated to ENU acceleration, velocity, and position
-
-Altitude compatibility is preserved by mirroring `altitude_m = z` for existing altitude-focused runtime/controller paths.
-
-## Command Decomposition and Mixing
-
-Actuation now uses a two-part command model:
-
-1. **Common reference** (`common_motor_rpm`) for shared lift demand
-2. **Differential terms** (`yaw_control_rpm`, `pitch_control_rpm`, `roll_control_rpm`) for attitude shaping
-
-The final per-motor setpoints are mixed from common + differential terms (X-frame convention), then saturated while preserving common reference first.
-
-Backward compatibility is preserved by keeping scalar `desired_motor_rpm`; when per-motor references are absent, simulator falls back to equal RPM on all motors.
-
-## Noise Model Placement
-
-Noise is modeled on the **control-side transport path** (sensor transport), not in plant state updates.
-
-- Plant state remains internally consistent for physics
-- `RealDrone` control receives noisy measurements through the gateway path
-
-Noise currently covers altitude, GPS (horizontal/vertical position + velocity), battery voltage, and motor temperature.
-
-## GPS State Pipeline
-
-- Plant integrates ENU position/velocity
-- `GPSSim` converts ENU position to geodetic latitude/longitude/altitude using a configurable reference
-- `GPSSim` maps ENU velocity to GPS north/east/down velocity fields
-- Connection layer adds measurement noise before controller consumption
-
-## Weather Disturbance Model
-
-Weather disturbance is configured from YAML and sampled each step as acceleration in ENU:
-
-- steady component
-- sinusoidal gust component
-- seeded Gaussian turbulence component
-
-Total weather acceleration is converted to force and injected into net force integration.
-
-## Ground Contact Handling
-
-Ground behavior is explicitly constrained:
-
-- if integrated altitude reaches/falls below ground, state clamps to `z = 0`
-- velocity and acceleration are reset while grounded
-- horizontal drift is suppressed while grounded (position lock)
-
-## Controller Configuration
-
-Controller config is loaded from YAML using drone config classes:
-
-- `include/drone/config/config_base.h` (abstract base)
-- `include/drone/config/altitude_controller_config.h` (altitude controller config)
-
-Supported control parameters include:
-
-- `control_param_p`, `control_param_i`, `control_param_d`
-- `enable_i_component`, `enable_d_component`
-- `activation_error_band_m`
-- `position_hold_enabled`
-- `position_hold_kp_pos`
-- `position_hold_kp_vel`
-- `position_hold_kd_vel`
-- `position_hold_max_velocity_mps`
-- `position_hold_max_tilt_rad`
-
-## Logging
-
-Telemetry output includes:
-
-- Sensed vs perfect values (`S/P` pairs)
-- Actuator/controller state (`RefRPM`, `TgtErr`, `P`, `I`, `D`)
-- Appended ENU/YPR state (`PosENU`, `VelENU`, `YPR`)
-- Mixer state (`ComRPM`, `MixYPR`, `MRef`)
-- GPS sensed/perfect position and velocity pairs
-- Weather components (`WTotAcc`, `WSteady`, `WGust`, `WTurb`)
-
-This supports debugging both plant behavior and control behavior in one run.
+- Architecture sketch: `docs/drawings/virtDrone_grpc_process_architecture.excalidraw`

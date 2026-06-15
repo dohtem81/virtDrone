@@ -39,6 +39,7 @@ public:
 
     drone::runtime::SensorFrame readSensors() const override;
     void applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) override;
+    void step(double dt_s) override;
     void setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config);
     bool setTelemetryLogFile(const std::string& telemetry_log_file);
 
