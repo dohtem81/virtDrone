@@ -33,10 +33,15 @@ Produce the final narrative of what was delivered in this session, with special 
 4. Final status:
    - readiness
    - open risks or TODOs
+5. Validation artifact:
+   - confirm all tests were run
+   - confirm all created scenarios were run
+   - include path to HTML summary report with charts (`reports/refactor-validation-summary.html`)
 
 ## Output Format
 Return:
 1. Executive summary.
 2. Agent creation summary.
 3. Orchestration summary.
-4. Final status and open items.
+4. Validation artifact summary (tests, scenarios, charts, HTML path).
+5. Final status and open items.
