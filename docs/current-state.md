@@ -2,7 +2,7 @@
 
 ## Completed
 
-- Split runtime architecture: real-drone control loop (`drone/`) and simulation plant (`simulator/`)
+- Split runtime architecture: real-drone control loop (`drone/`) and simulation plant (`simulator/`) with an explicit `SimulationGateway` boundary
 - Closed-loop altitude control with configurable PID behavior from YAML
 - Common + differential actuation model (`common_motor_rpm` + yaw/pitch/roll differential mixing)
 - ENU translational dynamics with yaw/pitch/roll thrust projection
@@ -24,6 +24,13 @@
   - Time-based and completion-based advancement
   - timeout behavior (`abort` / `proceed` / `retry`)
   - Simulation-loop integration through `RealDrone`
+- Split-process runtime shape:
+  - core control path uses a gateway boundary intended for gRPC transport
+  - simulator is deployed as its own container/process and advances through the gateway step call
+  - transport contract is captured in `proto/simulation_gateway.proto` and `include/drone/runtime/simulation_gateway_grpc.h`
+  - gRPC adapters are implemented by `GrpcSimulationGatewayClient` and `GrpcSimulationGatewayService`
+  - control launcher accepts a backend selector (`grpc` currently active, `hardware` reserved for future real sensors)
+  - separate entrypoints exist for the control side (`drone_app`) and simulator side (`simulator_app`)
 - Telemetry extensions:
   - sensed/perfect pairs for altitude, power, temperature, GPS position, GPS velocity
   - controller terms (`TgtErr`, `P`, `I`, `D`)

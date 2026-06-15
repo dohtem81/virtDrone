@@ -20,6 +20,50 @@ if(NOT yaml-cpp_FOUND)
     FetchContent_MakeAvailable(yaml-cpp)
 endif()
 
+# Transport layer support for split control/simulator deployment
+include(FetchContent)
+FetchContent_Declare(
+    protobuf
+    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+    GIT_TAG v27.2
+)
+FetchContent_Declare(
+    grpc
+    GIT_REPOSITORY https://github.com/grpc/grpc.git
+    GIT_TAG v1.65.1
+)
+FetchContent_MakeAvailable(protobuf grpc)
+
+set(proto_dir ${CMAKE_SOURCE_DIR}/proto)
+set(generated_proto_dir ${CMAKE_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${generated_proto_dir})
+
+set(simulation_gateway_proto ${proto_dir}/simulation_gateway.proto)
+set(simulation_gateway_proto_srcs ${generated_proto_dir}/simulation_gateway.pb.cc)
+set(simulation_gateway_proto_hdrs ${generated_proto_dir}/simulation_gateway.pb.h)
+set(simulation_gateway_grpc_srcs ${generated_proto_dir}/simulation_gateway.grpc.pb.cc)
+set(simulation_gateway_grpc_hdrs ${generated_proto_dir}/simulation_gateway.grpc.pb.h)
+
+add_custom_command(
+    OUTPUT ${simulation_gateway_proto_srcs} ${simulation_gateway_proto_hdrs} ${simulation_gateway_grpc_srcs} ${simulation_gateway_grpc_hdrs}
+    COMMAND protobuf::protoc
+    ARGS --cpp_out=${generated_proto_dir} --grpc_out=${generated_proto_dir} --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin> -I ${proto_dir} ${simulation_gateway_proto}
+    DEPENDS ${simulation_gateway_proto}
+)
+
+add_library(simulation_gateway_proto
+    ${simulation_gateway_proto_srcs}
+    ${simulation_gateway_grpc_srcs}
+)
+
+target_include_directories(simulation_gateway_proto
+    PUBLIC ${generated_proto_dir}
+)
+
+target_link_libraries(simulation_gateway_proto
+    PUBLIC protobuf::libprotobuf gRPC::grpc++
+)
+
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/libs)
@@ -43,6 +87,22 @@ add_library(drone
 target_link_libraries(drone
     PUBLIC
     yaml-cpp::yaml-cpp
+)
+
+add_library(drone_transport
+    src/drone/runtime/simulation_gateway_grpc.cpp
+    src/drone/runtime/control_session.cpp
+)
+
+target_include_directories(drone_transport
+    PUBLIC ${generated_proto_dir}
+)
+
+target_link_libraries(drone_transport
+    PUBLIC
+    drone
+    simulation_gateway_proto
+    gRPC::grpc++
 )
 
 # Simulator library
@@ -84,9 +144,22 @@ add_executable(simulator_app
 )
 target_link_libraries(simulator_app
     PRIVATE
-    drone
     simulator
     drone_sim
+    drone
+    drone_transport
+    yaml-cpp::yaml-cpp
+)
+
+# Control-side executable for split-process runs
+add_executable(drone_app
+    src/drone/main.cpp
+)
+
+target_link_libraries(drone_app
+    PRIVATE
+    drone
+    drone_transport
     yaml-cpp::yaml-cpp
 )
 

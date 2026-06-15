@@ -23,4 +23,4 @@ RUN mkdir build && cd build && cmake .. -GNinja && ninja
 EXPOSE 8081
 
 # Default command
-CMD ["./build/drone_executable"]  # Adjust to your executable
+CMD ["./build/drone_app"]

@@ -23,3 +23,9 @@ If you are new to the project, start with:
 3. [Architecture](architecture.md)
 
 Tutorial runtime artifacts (logs + charts) are written under `docs/tutorials/` and `docs/tutorials/charts/` by default.
+
+Architecture sketch: [docs/drawings/virtDrone_grpc_process_architecture.excalidraw](drawings/virtDrone_grpc_process_architecture.excalidraw)
+
+Transport contract: [proto/simulation_gateway.proto](../proto/simulation_gateway.proto)
+
+The current architecture documentation assumes the simulator can run as a separate process/container behind a gateway transport boundary.

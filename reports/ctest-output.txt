@@ -1,0 +1,921 @@
+Internal ctest changing into directory: /workspace/build
+Test project /workspace/build
+      Start  1: test_utils_NOT_BUILT-b12d07c
+Could not find executable test_utils_NOT_BUILT-b12d07c
+Looked in the following places:
+test_utils_NOT_BUILT-b12d07c
+test_utils_NOT_BUILT-b12d07c
+Release/test_utils_NOT_BUILT-b12d07c
+Release/test_utils_NOT_BUILT-b12d07c
+Debug/test_utils_NOT_BUILT-b12d07c
+Debug/test_utils_NOT_BUILT-b12d07c
+MinSizeRel/test_utils_NOT_BUILT-b12d07c
+MinSizeRel/test_utils_NOT_BUILT-b12d07c
+RelWithDebInfo/test_utils_NOT_BUILT-b12d07c
+RelWithDebInfo/test_utils_NOT_BUILT-b12d07c
+Deployment/test_utils_NOT_BUILT-b12d07c
+Deployment/test_utils_NOT_BUILT-b12d07c
+Development/test_utils_NOT_BUILT-b12d07c
+Development/test_utils_NOT_BUILT-b12d07c
+Unable to find executable: test_utils_NOT_BUILT-b12d07c
+ 1/56 Test  #1: test_utils_NOT_BUILT-b12d07c ....................................................***Not Run   0.00 sec
+      Start  2: test_base_sensor_NOT_BUILT-b12d07c
+Could not find executable test_base_sensor_NOT_BUILT-b12d07c
+Looked in the following places:
+test_base_sensor_NOT_BUILT-b12d07c
+test_base_sensor_NOT_BUILT-b12d07c
+Release/test_base_sensor_NOT_BUILT-b12d07c
+Release/test_base_sensor_NOT_BUILT-b12d07c
+Debug/test_base_sensor_NOT_BUILT-b12d07c
+Debug/test_base_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_base_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_base_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_base_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_base_sensor_NOT_BUILT-b12d07c
+Deployment/test_base_sensor_NOT_BUILT-b12d07c
+Deployment/test_base_sensor_NOT_BUILT-b12d07c
+Development/test_base_sensor_NOT_BUILT-b12d07c
+Development/test_base_sensor_NOT_BUILT-b12d07c
+Unable to find executable: test_base_sensor_NOT_BUILT-b12d07c
+ 2/56 Test  #2: test_base_sensor_NOT_BUILT-b12d07c ..............................................***Not Run   0.00 sec
+      Start  3: test_temperature_sensor_NOT_BUILT-b12d07c
+Could not find executable test_temperature_sensor_NOT_BUILT-b12d07c
+Looked in the following places:
+test_temperature_sensor_NOT_BUILT-b12d07c
+test_temperature_sensor_NOT_BUILT-b12d07c
+Release/test_temperature_sensor_NOT_BUILT-b12d07c
+Release/test_temperature_sensor_NOT_BUILT-b12d07c
+Debug/test_temperature_sensor_NOT_BUILT-b12d07c
+Debug/test_temperature_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_temperature_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_temperature_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_temperature_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_temperature_sensor_NOT_BUILT-b12d07c
+Deployment/test_temperature_sensor_NOT_BUILT-b12d07c
+Deployment/test_temperature_sensor_NOT_BUILT-b12d07c
+Development/test_temperature_sensor_NOT_BUILT-b12d07c
+Development/test_temperature_sensor_NOT_BUILT-b12d07c
+Unable to find executable: test_temperature_sensor_NOT_BUILT-b12d07c
+ 3/56 Test  #3: test_temperature_sensor_NOT_BUILT-b12d07c .......................................***Not Run   0.00 sec
+      Start  4: test_motors_NOT_BUILT-b12d07c
+Could not find executable test_motors_NOT_BUILT-b12d07c
+Looked in the following places:
+test_motors_NOT_BUILT-b12d07c
+test_motors_NOT_BUILT-b12d07c
+Release/test_motors_NOT_BUILT-b12d07c
+Release/test_motors_NOT_BUILT-b12d07c
+Debug/test_motors_NOT_BUILT-b12d07c
+Debug/test_motors_NOT_BUILT-b12d07c
+MinSizeRel/test_motors_NOT_BUILT-b12d07c
+MinSizeRel/test_motors_NOT_BUILT-b12d07c
+RelWithDebInfo/test_motors_NOT_BUILT-b12d07c
+RelWithDebInfo/test_motors_NOT_BUILT-b12d07c
+Deployment/test_motors_NOT_BUILT-b12d07c
+Deployment/test_motors_NOT_BUILT-b12d07c
+Development/test_motors_NOT_BUILT-b12d07c
+Development/test_motors_NOT_BUILT-b12d07c
+Unable to find executable: test_motors_NOT_BUILT-b12d07c
+ 4/56 Test  #4: test_motors_NOT_BUILT-b12d07c ...................................................***Not Run   0.00 sec
+      Start  5: test_motor_physics_NOT_BUILT-b12d07c
+Could not find executable test_motor_physics_NOT_BUILT-b12d07c
+Looked in the following places:
+test_motor_physics_NOT_BUILT-b12d07c
+test_motor_physics_NOT_BUILT-b12d07c
+Release/test_motor_physics_NOT_BUILT-b12d07c
+Release/test_motor_physics_NOT_BUILT-b12d07c
+Debug/test_motor_physics_NOT_BUILT-b12d07c
+Debug/test_motor_physics_NOT_BUILT-b12d07c
+MinSizeRel/test_motor_physics_NOT_BUILT-b12d07c
+MinSizeRel/test_motor_physics_NOT_BUILT-b12d07c
+RelWithDebInfo/test_motor_physics_NOT_BUILT-b12d07c
+RelWithDebInfo/test_motor_physics_NOT_BUILT-b12d07c
+Deployment/test_motor_physics_NOT_BUILT-b12d07c
+Deployment/test_motor_physics_NOT_BUILT-b12d07c
+Development/test_motor_physics_NOT_BUILT-b12d07c
+Development/test_motor_physics_NOT_BUILT-b12d07c
+Unable to find executable: test_motor_physics_NOT_BUILT-b12d07c
+ 5/56 Test  #5: test_motor_physics_NOT_BUILT-b12d07c ............................................***Not Run   0.00 sec
+      Start  6: Body Z thrust projects to ENU Z at zero attitude
+ 6/56 Test  #6: Body Z thrust projects to ENU Z at zero attitude ................................   Passed    0.01 sec
+      Start  7: Pitch rotates body Z thrust into ENU X
+ 7/56 Test  #7: Pitch rotates body Z thrust into ENU X ..........................................   Passed    0.01 sec
+      Start  8: Net force is near zero at hover with zero velocity
+ 8/56 Test  #8: Net force is near zero at hover with zero velocity ..............................   Passed    0.01 sec
+      Start  9: Damping opposes velocity in ENU net force
+ 9/56 Test  #9: Damping opposes velocity in ENU net force .......................................   Passed    0.01 sec
+      Start 10: Roll rotates body Z thrust into negative ENU Y
+10/56 Test #10: Roll rotates body Z thrust into negative ENU Y ..................................   Passed    0.01 sec
+      Start 11: Yaw with pitch keeps thrust magnitude and creates XY components
+11/56 Test #11: Yaw with pitch keeps thrust magnitude and creates XY components .................   Passed    0.01 sec
+      Start 12: Tilt yaw roll produce net-force-driven XYZ movement
+12/56 Test #12: Tilt yaw roll produce net-force-driven XYZ movement .............................   Passed    0.01 sec
+      Start 13: test_gps_sim_NOT_BUILT-b12d07c
+Could not find executable test_gps_sim_NOT_BUILT-b12d07c
+Looked in the following places:
+test_gps_sim_NOT_BUILT-b12d07c
+test_gps_sim_NOT_BUILT-b12d07c
+Release/test_gps_sim_NOT_BUILT-b12d07c
+Release/test_gps_sim_NOT_BUILT-b12d07c
+Debug/test_gps_sim_NOT_BUILT-b12d07c
+Debug/test_gps_sim_NOT_BUILT-b12d07c
+MinSizeRel/test_gps_sim_NOT_BUILT-b12d07c
+MinSizeRel/test_gps_sim_NOT_BUILT-b12d07c
+RelWithDebInfo/test_gps_sim_NOT_BUILT-b12d07c
+RelWithDebInfo/test_gps_sim_NOT_BUILT-b12d07c
+Deployment/test_gps_sim_NOT_BUILT-b12d07c
+Deployment/test_gps_sim_NOT_BUILT-b12d07c
+Development/test_gps_sim_NOT_BUILT-b12d07c
+Development/test_gps_sim_NOT_BUILT-b12d07c
+Unable to find executable: test_gps_sim_NOT_BUILT-b12d07c
+13/56 Test #13: test_gps_sim_NOT_BUILT-b12d07c ..................................................***Not Run   0.00 sec
+      Start 14: test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Could not find executable test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Looked in the following places:
+test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Release/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Release/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Debug/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Debug/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+MinSizeRel/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+MinSizeRel/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+RelWithDebInfo/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+RelWithDebInfo/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Deployment/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Deployment/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Development/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Development/test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+Unable to find executable: test_noisy_sensor_source_gps_NOT_BUILT-b12d07c
+14/56 Test #14: test_noisy_sensor_source_gps_NOT_BUILT-b12d07c ..................................***Not Run   0.00 sec
+      Start 15: test_weather_model_NOT_BUILT-b12d07c
+Could not find executable test_weather_model_NOT_BUILT-b12d07c
+Looked in the following places:
+test_weather_model_NOT_BUILT-b12d07c
+test_weather_model_NOT_BUILT-b12d07c
+Release/test_weather_model_NOT_BUILT-b12d07c
+Release/test_weather_model_NOT_BUILT-b12d07c
+Debug/test_weather_model_NOT_BUILT-b12d07c
+Debug/test_weather_model_NOT_BUILT-b12d07c
+MinSizeRel/test_weather_model_NOT_BUILT-b12d07c
+MinSizeRel/test_weather_model_NOT_BUILT-b12d07c
+RelWithDebInfo/test_weather_model_NOT_BUILT-b12d07c
+RelWithDebInfo/test_weather_model_NOT_BUILT-b12d07c
+Deployment/test_weather_model_NOT_BUILT-b12d07c
+Deployment/test_weather_model_NOT_BUILT-b12d07c
+Development/test_weather_model_NOT_BUILT-b12d07c
+Development/test_weather_model_NOT_BUILT-b12d07c
+Unable to find executable: test_weather_model_NOT_BUILT-b12d07c
+15/56 Test #15: test_weather_model_NOT_BUILT-b12d07c ............................................***Not Run   0.00 sec
+      Start 16: test_weather_config_NOT_BUILT-b12d07c
+Could not find executable test_weather_config_NOT_BUILT-b12d07c
+Looked in the following places:
+test_weather_config_NOT_BUILT-b12d07c
+test_weather_config_NOT_BUILT-b12d07c
+Release/test_weather_config_NOT_BUILT-b12d07c
+Release/test_weather_config_NOT_BUILT-b12d07c
+Debug/test_weather_config_NOT_BUILT-b12d07c
+Debug/test_weather_config_NOT_BUILT-b12d07c
+MinSizeRel/test_weather_config_NOT_BUILT-b12d07c
+MinSizeRel/test_weather_config_NOT_BUILT-b12d07c
+RelWithDebInfo/test_weather_config_NOT_BUILT-b12d07c
+RelWithDebInfo/test_weather_config_NOT_BUILT-b12d07c
+Deployment/test_weather_config_NOT_BUILT-b12d07c
+Deployment/test_weather_config_NOT_BUILT-b12d07c
+Development/test_weather_config_NOT_BUILT-b12d07c
+Development/test_weather_config_NOT_BUILT-b12d07c
+Unable to find executable: test_weather_config_NOT_BUILT-b12d07c
+16/56 Test #16: test_weather_config_NOT_BUILT-b12d07c ...........................................***Not Run   0.00 sec
+      Start 17: test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Could not find executable test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Looked in the following places:
+test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Release/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Release/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Debug/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Debug/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+MinSizeRel/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+MinSizeRel/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+RelWithDebInfo/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+RelWithDebInfo/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Deployment/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Deployment/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Development/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Development/test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+Unable to find executable: test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c
+17/56 Test #17: test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c ..............................***Not Run   0.00 sec
+      Start 18: test_simulation_base_NOT_BUILT-b12d07c
+Could not find executable test_simulation_base_NOT_BUILT-b12d07c
+Looked in the following places:
+test_simulation_base_NOT_BUILT-b12d07c
+test_simulation_base_NOT_BUILT-b12d07c
+Release/test_simulation_base_NOT_BUILT-b12d07c
+Release/test_simulation_base_NOT_BUILT-b12d07c
+Debug/test_simulation_base_NOT_BUILT-b12d07c
+Debug/test_simulation_base_NOT_BUILT-b12d07c
+MinSizeRel/test_simulation_base_NOT_BUILT-b12d07c
+MinSizeRel/test_simulation_base_NOT_BUILT-b12d07c
+RelWithDebInfo/test_simulation_base_NOT_BUILT-b12d07c
+RelWithDebInfo/test_simulation_base_NOT_BUILT-b12d07c
+Deployment/test_simulation_base_NOT_BUILT-b12d07c
+Deployment/test_simulation_base_NOT_BUILT-b12d07c
+Development/test_simulation_base_NOT_BUILT-b12d07c
+Development/test_simulation_base_NOT_BUILT-b12d07c
+Unable to find executable: test_simulation_base_NOT_BUILT-b12d07c
+18/56 Test #18: test_simulation_base_NOT_BUILT-b12d07c ..........................................***Not Run   0.00 sec
+      Start 19: test_gps_sensor_NOT_BUILT-b12d07c
+Could not find executable test_gps_sensor_NOT_BUILT-b12d07c
+Looked in the following places:
+test_gps_sensor_NOT_BUILT-b12d07c
+test_gps_sensor_NOT_BUILT-b12d07c
+Release/test_gps_sensor_NOT_BUILT-b12d07c
+Release/test_gps_sensor_NOT_BUILT-b12d07c
+Debug/test_gps_sensor_NOT_BUILT-b12d07c
+Debug/test_gps_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_gps_sensor_NOT_BUILT-b12d07c
+MinSizeRel/test_gps_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_gps_sensor_NOT_BUILT-b12d07c
+RelWithDebInfo/test_gps_sensor_NOT_BUILT-b12d07c
+Deployment/test_gps_sensor_NOT_BUILT-b12d07c
+Deployment/test_gps_sensor_NOT_BUILT-b12d07c
+Development/test_gps_sensor_NOT_BUILT-b12d07c
+Development/test_gps_sensor_NOT_BUILT-b12d07c
+Unable to find executable: test_gps_sensor_NOT_BUILT-b12d07c
+19/56 Test #19: test_gps_sensor_NOT_BUILT-b12d07c ...............................................***Not Run   0.00 sec
+      Start 20: test_energy_NOT_BUILT-b12d07c
+Could not find executable test_energy_NOT_BUILT-b12d07c
+Looked in the following places:
+test_energy_NOT_BUILT-b12d07c
+test_energy_NOT_BUILT-b12d07c
+Release/test_energy_NOT_BUILT-b12d07c
+Release/test_energy_NOT_BUILT-b12d07c
+Debug/test_energy_NOT_BUILT-b12d07c
+Debug/test_energy_NOT_BUILT-b12d07c
+MinSizeRel/test_energy_NOT_BUILT-b12d07c
+MinSizeRel/test_energy_NOT_BUILT-b12d07c
+RelWithDebInfo/test_energy_NOT_BUILT-b12d07c
+RelWithDebInfo/test_energy_NOT_BUILT-b12d07c
+Deployment/test_energy_NOT_BUILT-b12d07c
+Deployment/test_energy_NOT_BUILT-b12d07c
+Development/test_energy_NOT_BUILT-b12d07c
+Development/test_energy_NOT_BUILT-b12d07c
+Unable to find executable: test_energy_NOT_BUILT-b12d07c
+20/56 Test #20: test_energy_NOT_BUILT-b12d07c ...................................................***Not Run   0.00 sec
+      Start 21: test_drone_base_NOT_BUILT-b12d07c
+Could not find executable test_drone_base_NOT_BUILT-b12d07c
+Looked in the following places:
+test_drone_base_NOT_BUILT-b12d07c
+test_drone_base_NOT_BUILT-b12d07c
+Release/test_drone_base_NOT_BUILT-b12d07c
+Release/test_drone_base_NOT_BUILT-b12d07c
+Debug/test_drone_base_NOT_BUILT-b12d07c
+Debug/test_drone_base_NOT_BUILT-b12d07c
+MinSizeRel/test_drone_base_NOT_BUILT-b12d07c
+MinSizeRel/test_drone_base_NOT_BUILT-b12d07c
+RelWithDebInfo/test_drone_base_NOT_BUILT-b12d07c
+RelWithDebInfo/test_drone_base_NOT_BUILT-b12d07c
+Deployment/test_drone_base_NOT_BUILT-b12d07c
+Deployment/test_drone_base_NOT_BUILT-b12d07c
+Development/test_drone_base_NOT_BUILT-b12d07c
+Development/test_drone_base_NOT_BUILT-b12d07c
+Unable to find executable: test_drone_base_NOT_BUILT-b12d07c
+21/56 Test #21: test_drone_base_NOT_BUILT-b12d07c ...............................................***Not Run   0.00 sec
+      Start 22: test_esc_logic_NOT_BUILT-b12d07c
+Could not find executable test_esc_logic_NOT_BUILT-b12d07c
+Looked in the following places:
+test_esc_logic_NOT_BUILT-b12d07c
+test_esc_logic_NOT_BUILT-b12d07c
+Release/test_esc_logic_NOT_BUILT-b12d07c
+Release/test_esc_logic_NOT_BUILT-b12d07c
+Debug/test_esc_logic_NOT_BUILT-b12d07c
+Debug/test_esc_logic_NOT_BUILT-b12d07c
+MinSizeRel/test_esc_logic_NOT_BUILT-b12d07c
+MinSizeRel/test_esc_logic_NOT_BUILT-b12d07c
+RelWithDebInfo/test_esc_logic_NOT_BUILT-b12d07c
+RelWithDebInfo/test_esc_logic_NOT_BUILT-b12d07c
+Deployment/test_esc_logic_NOT_BUILT-b12d07c
+Deployment/test_esc_logic_NOT_BUILT-b12d07c
+Development/test_esc_logic_NOT_BUILT-b12d07c
+Development/test_esc_logic_NOT_BUILT-b12d07c
+Unable to find executable: test_esc_logic_NOT_BUILT-b12d07c
+22/56 Test #22: test_esc_logic_NOT_BUILT-b12d07c ................................................***Not Run   0.00 sec
+      Start 23: test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Could not find executable test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Looked in the following places:
+test_alt_ctrl_logic_NOT_BUILT-b12d07c
+test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Release/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Release/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Debug/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Debug/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+MinSizeRel/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+MinSizeRel/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+RelWithDebInfo/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+RelWithDebInfo/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Deployment/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Deployment/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Development/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Development/test_alt_ctrl_logic_NOT_BUILT-b12d07c
+Unable to find executable: test_alt_ctrl_logic_NOT_BUILT-b12d07c
+23/56 Test #23: test_alt_ctrl_logic_NOT_BUILT-b12d07c ...........................................***Not Run   0.00 sec
+      Start 24: RealDrone splits common reference with yaw differential
+24/56 Test #24: RealDrone splits common reference with yaw differential .........................   Passed    0.01 sec
+      Start 25: RealDrone preserves common reference while scaling differential on saturation
+25/56 Test #25: RealDrone preserves common reference while scaling differential on saturation ...   Passed    0.01 sec
+      Start 26: Position controller outputs zero when disabled
+26/56 Test #26: Position controller outputs zero when disabled ..................................   Passed    0.01 sec
+      Start 27: Position error on X drives positive roll command
+27/56 Test #27: Position error on X drives positive roll command ................................   Passed    0.01 sec
+      Start 28: Position error on Y drives positive pitch command
+28/56 Test #28: Position error on Y drives positive pitch command ...............................   Passed    0.01 sec
+      Start 29: Velocity target is saturated by max velocity
+29/56 Test #29: Velocity target is saturated by max velocity ....................................   Passed    0.01 sec
+      Start 30: Pitch and roll commands are clamped to max tilt
+30/56 Test #30: Pitch and roll commands are clamped to max tilt .................................   Passed    0.01 sec
+      Start 31: MissionLoader parses valid mission yaml
+31/56 Test #31: MissionLoader parses valid mission yaml .........................................   Passed    0.01 sec
+      Start 32: MissionLoader rejects mission without steps
+32/56 Test #32: MissionLoader rejects mission without steps .....................................   Passed    0.01 sec
+      Start 33: MissionLoader falls back to TIME_ELAPSED for unknown condition_type
+33/56 Test #33: MissionLoader falls back to TIME_ELAPSED for unknown condition_type .............   Passed    0.01 sec
+      Start 34: MissionExecutor advances through time and completion steps
+34/56 Test #34: MissionExecutor advances through time and completion steps ......................   Passed    0.01 sec
+      Start 35: MissionExecutor completes step on position_reached criteria
+35/56 Test #35: MissionExecutor completes step on position_reached criteria .....................   Passed    0.01 sec
+      Start 36: test_utils
+Could not find executable /workspace/build/tests/test_utils
+Looked in the following places:
+/workspace/build/tests/test_utils
+/workspace/build/tests/test_utils
+/workspace/build/tests/Release/test_utils
+/workspace/build/tests/Release/test_utils
+/workspace/build/tests/Debug/test_utils
+/workspace/build/tests/Debug/test_utils
+/workspace/build/tests/MinSizeRel/test_utils
+/workspace/build/tests/MinSizeRel/test_utils
+/workspace/build/tests/RelWithDebInfo/test_utils
+/workspace/build/tests/RelWithDebInfo/test_utils
+/workspace/build/tests/Deployment/test_utils
+/workspace/build/tests/Deployment/test_utils
+/workspace/build/tests/Development/test_utils
+/workspace/build/tests/Development/test_utils
+workspace/build/tests/test_utils
+workspace/build/tests/test_utils
+workspace/build/tests/Release/test_utils
+workspace/build/tests/Release/test_utils
+workspace/build/tests/Debug/test_utils
+workspace/build/tests/Debug/test_utils
+workspace/build/tests/MinSizeRel/test_utils
+workspace/build/tests/MinSizeRel/test_utils
+workspace/build/tests/RelWithDebInfo/test_utils
+workspace/build/tests/RelWithDebInfo/test_utils
+workspace/build/tests/Deployment/test_utils
+workspace/build/tests/Deployment/test_utils
+workspace/build/tests/Development/test_utils
+workspace/build/tests/Development/test_utils
+Unable to find executable: /workspace/build/tests/test_utils
+36/56 Test #36: test_utils ......................................................................***Not Run   0.00 sec
+      Start 37: test_base_sensor
+Could not find executable /workspace/build/tests/test_base_sensor
+Looked in the following places:
+/workspace/build/tests/test_base_sensor
+/workspace/build/tests/test_base_sensor
+/workspace/build/tests/Release/test_base_sensor
+/workspace/build/tests/Release/test_base_sensor
+/workspace/build/tests/Debug/test_base_sensor
+/workspace/build/tests/Debug/test_base_sensor
+/workspace/build/tests/MinSizeRel/test_base_sensor
+/workspace/build/tests/MinSizeRel/test_base_sensor
+/workspace/build/tests/RelWithDebInfo/test_base_sensor
+/workspace/build/tests/RelWithDebInfo/test_base_sensor
+/workspace/build/tests/Deployment/test_base_sensor
+/workspace/build/tests/Deployment/test_base_sensor
+/workspace/build/tests/Development/test_base_sensor
+/workspace/build/tests/Development/test_base_sensor
+workspace/build/tests/test_base_sensor
+workspace/build/tests/test_base_sensor
+workspace/build/tests/Release/test_base_sensor
+workspace/build/tests/Release/test_base_sensor
+workspace/build/tests/Debug/test_base_sensor
+workspace/build/tests/Debug/test_base_sensor
+workspace/build/tests/MinSizeRel/test_base_sensor
+workspace/build/tests/MinSizeRel/test_base_sensor
+workspace/build/tests/RelWithDebInfo/test_base_sensor
+workspace/build/tests/RelWithDebInfo/test_base_sensor
+workspace/build/tests/Deployment/test_base_sensor
+workspace/build/tests/Deployment/test_base_sensor
+workspace/build/tests/Development/test_base_sensor
+workspace/build/tests/Development/test_base_sensor
+Unable to find executable: /workspace/build/tests/test_base_sensor
+37/56 Test #37: test_base_sensor ................................................................***Not Run   0.00 sec
+      Start 38: test_temperature_sensor
+Could not find executable /workspace/build/tests/test_temperature_sensor
+Looked in the following places:
+/workspace/build/tests/test_temperature_sensor
+/workspace/build/tests/test_temperature_sensor
+/workspace/build/tests/Release/test_temperature_sensor
+/workspace/build/tests/Release/test_temperature_sensor
+/workspace/build/tests/Debug/test_temperature_sensor
+/workspace/build/tests/Debug/test_temperature_sensor
+/workspace/build/tests/MinSizeRel/test_temperature_sensor
+/workspace/build/tests/MinSizeRel/test_temperature_sensor
+/workspace/build/tests/RelWithDebInfo/test_temperature_sensor
+/workspace/build/tests/RelWithDebInfo/test_temperature_sensor
+/workspace/build/tests/Deployment/test_temperature_sensor
+/workspace/build/tests/Deployment/test_temperature_sensor
+/workspace/build/tests/Development/test_temperature_sensor
+/workspace/build/tests/Development/test_temperature_sensor
+workspace/build/tests/test_temperature_sensor
+workspace/build/tests/test_temperature_sensor
+workspace/build/tests/Release/test_temperature_sensor
+workspace/build/tests/Release/test_temperature_sensor
+workspace/build/tests/Debug/test_temperature_sensor
+workspace/build/tests/Debug/test_temperature_sensor
+workspace/build/tests/MinSizeRel/test_temperature_sensor
+workspace/build/tests/MinSizeRel/test_temperature_sensor
+workspace/build/tests/RelWithDebInfo/test_temperature_sensor
+workspace/build/tests/RelWithDebInfo/test_temperature_sensor
+workspace/build/tests/Deployment/test_temperature_sensor
+workspace/build/tests/Deployment/test_temperature_sensor
+workspace/build/tests/Development/test_temperature_sensor
+workspace/build/tests/Development/test_temperature_sensor
+Unable to find executable: /workspace/build/tests/test_temperature_sensor
+38/56 Test #38: test_temperature_sensor .........................................................***Not Run   0.00 sec
+      Start 39: test_motors
+Could not find executable /workspace/build/tests/test_motors
+Looked in the following places:
+/workspace/build/tests/test_motors
+/workspace/build/tests/test_motors
+/workspace/build/tests/Release/test_motors
+/workspace/build/tests/Release/test_motors
+/workspace/build/tests/Debug/test_motors
+/workspace/build/tests/Debug/test_motors
+/workspace/build/tests/MinSizeRel/test_motors
+/workspace/build/tests/MinSizeRel/test_motors
+/workspace/build/tests/RelWithDebInfo/test_motors
+/workspace/build/tests/RelWithDebInfo/test_motors
+/workspace/build/tests/Deployment/test_motors
+/workspace/build/tests/Deployment/test_motors
+/workspace/build/tests/Development/test_motors
+/workspace/build/tests/Development/test_motors
+workspace/build/tests/test_motors
+workspace/build/tests/test_motors
+workspace/build/tests/Release/test_motors
+workspace/build/tests/Release/test_motors
+workspace/build/tests/Debug/test_motors
+workspace/build/tests/Debug/test_motors
+workspace/build/tests/MinSizeRel/test_motors
+workspace/build/tests/MinSizeRel/test_motors
+workspace/build/tests/RelWithDebInfo/test_motors
+workspace/build/tests/RelWithDebInfo/test_motors
+workspace/build/tests/Deployment/test_motors
+workspace/build/tests/Deployment/test_motors
+workspace/build/tests/Development/test_motors
+workspace/build/tests/Development/test_motors
+Unable to find executable: /workspace/build/tests/test_motors
+39/56 Test #39: test_motors .....................................................................***Not Run   0.00 sec
+      Start 40: test_motor_physics
+Could not find executable /workspace/build/tests/test_motor_physics
+Looked in the following places:
+/workspace/build/tests/test_motor_physics
+/workspace/build/tests/test_motor_physics
+/workspace/build/tests/Release/test_motor_physics
+/workspace/build/tests/Release/test_motor_physics
+/workspace/build/tests/Debug/test_motor_physics
+/workspace/build/tests/Debug/test_motor_physics
+/workspace/build/tests/MinSizeRel/test_motor_physics
+/workspace/build/tests/MinSizeRel/test_motor_physics
+/workspace/build/tests/RelWithDebInfo/test_motor_physics
+/workspace/build/tests/RelWithDebInfo/test_motor_physics
+/workspace/build/tests/Deployment/test_motor_physics
+/workspace/build/tests/Deployment/test_motor_physics
+/workspace/build/tests/Development/test_motor_physics
+/workspace/build/tests/Development/test_motor_physics
+workspace/build/tests/test_motor_physics
+workspace/build/tests/test_motor_physics
+workspace/build/tests/Release/test_motor_physics
+workspace/build/tests/Release/test_motor_physics
+workspace/build/tests/Debug/test_motor_physics
+workspace/build/tests/Debug/test_motor_physics
+workspace/build/tests/MinSizeRel/test_motor_physics
+workspace/build/tests/MinSizeRel/test_motor_physics
+workspace/build/tests/RelWithDebInfo/test_motor_physics
+workspace/build/tests/RelWithDebInfo/test_motor_physics
+workspace/build/tests/Deployment/test_motor_physics
+workspace/build/tests/Deployment/test_motor_physics
+workspace/build/tests/Development/test_motor_physics
+workspace/build/tests/Development/test_motor_physics
+Unable to find executable: /workspace/build/tests/test_motor_physics
+40/56 Test #40: test_motor_physics ..............................................................***Not Run   0.00 sec
+      Start 41: test_force_dynamics
+41/56 Test #41: test_force_dynamics .............................................................   Passed    0.01 sec
+      Start 42: test_gps_sim
+Could not find executable /workspace/build/tests/test_gps_sim
+Looked in the following places:
+/workspace/build/tests/test_gps_sim
+/workspace/build/tests/test_gps_sim
+/workspace/build/tests/Release/test_gps_sim
+/workspace/build/tests/Release/test_gps_sim
+/workspace/build/tests/Debug/test_gps_sim
+/workspace/build/tests/Debug/test_gps_sim
+/workspace/build/tests/MinSizeRel/test_gps_sim
+/workspace/build/tests/MinSizeRel/test_gps_sim
+/workspace/build/tests/RelWithDebInfo/test_gps_sim
+/workspace/build/tests/RelWithDebInfo/test_gps_sim
+/workspace/build/tests/Deployment/test_gps_sim
+/workspace/build/tests/Deployment/test_gps_sim
+/workspace/build/tests/Development/test_gps_sim
+/workspace/build/tests/Development/test_gps_sim
+workspace/build/tests/test_gps_sim
+workspace/build/tests/test_gps_sim
+workspace/build/tests/Release/test_gps_sim
+workspace/build/tests/Release/test_gps_sim
+workspace/build/tests/Debug/test_gps_sim
+workspace/build/tests/Debug/test_gps_sim
+workspace/build/tests/MinSizeRel/test_gps_sim
+workspace/build/tests/MinSizeRel/test_gps_sim
+workspace/build/tests/RelWithDebInfo/test_gps_sim
+workspace/build/tests/RelWithDebInfo/test_gps_sim
+workspace/build/tests/Deployment/test_gps_sim
+workspace/build/tests/Deployment/test_gps_sim
+workspace/build/tests/Development/test_gps_sim
+workspace/build/tests/Development/test_gps_sim
+Unable to find executable: /workspace/build/tests/test_gps_sim
+42/56 Test #42: test_gps_sim ....................................................................***Not Run   0.00 sec
+      Start 43: test_noisy_sensor_source_gps
+Could not find executable /workspace/build/tests/test_noisy_sensor_source_gps
+Looked in the following places:
+/workspace/build/tests/test_noisy_sensor_source_gps
+/workspace/build/tests/test_noisy_sensor_source_gps
+/workspace/build/tests/Release/test_noisy_sensor_source_gps
+/workspace/build/tests/Release/test_noisy_sensor_source_gps
+/workspace/build/tests/Debug/test_noisy_sensor_source_gps
+/workspace/build/tests/Debug/test_noisy_sensor_source_gps
+/workspace/build/tests/MinSizeRel/test_noisy_sensor_source_gps
+/workspace/build/tests/MinSizeRel/test_noisy_sensor_source_gps
+/workspace/build/tests/RelWithDebInfo/test_noisy_sensor_source_gps
+/workspace/build/tests/RelWithDebInfo/test_noisy_sensor_source_gps
+/workspace/build/tests/Deployment/test_noisy_sensor_source_gps
+/workspace/build/tests/Deployment/test_noisy_sensor_source_gps
+/workspace/build/tests/Development/test_noisy_sensor_source_gps
+/workspace/build/tests/Development/test_noisy_sensor_source_gps
+workspace/build/tests/test_noisy_sensor_source_gps
+workspace/build/tests/test_noisy_sensor_source_gps
+workspace/build/tests/Release/test_noisy_sensor_source_gps
+workspace/build/tests/Release/test_noisy_sensor_source_gps
+workspace/build/tests/Debug/test_noisy_sensor_source_gps
+workspace/build/tests/Debug/test_noisy_sensor_source_gps
+workspace/build/tests/MinSizeRel/test_noisy_sensor_source_gps
+workspace/build/tests/MinSizeRel/test_noisy_sensor_source_gps
+workspace/build/tests/RelWithDebInfo/test_noisy_sensor_source_gps
+workspace/build/tests/RelWithDebInfo/test_noisy_sensor_source_gps
+workspace/build/tests/Deployment/test_noisy_sensor_source_gps
+workspace/build/tests/Deployment/test_noisy_sensor_source_gps
+workspace/build/tests/Development/test_noisy_sensor_source_gps
+workspace/build/tests/Development/test_noisy_sensor_source_gps
+Unable to find executable: /workspace/build/tests/test_noisy_sensor_source_gps
+43/56 Test #43: test_noisy_sensor_source_gps ....................................................***Not Run   0.00 sec
+      Start 44: test_weather_model
+Could not find executable /workspace/build/tests/test_weather_model
+Looked in the following places:
+/workspace/build/tests/test_weather_model
+/workspace/build/tests/test_weather_model
+/workspace/build/tests/Release/test_weather_model
+/workspace/build/tests/Release/test_weather_model
+/workspace/build/tests/Debug/test_weather_model
+/workspace/build/tests/Debug/test_weather_model
+/workspace/build/tests/MinSizeRel/test_weather_model
+/workspace/build/tests/MinSizeRel/test_weather_model
+/workspace/build/tests/RelWithDebInfo/test_weather_model
+/workspace/build/tests/RelWithDebInfo/test_weather_model
+/workspace/build/tests/Deployment/test_weather_model
+/workspace/build/tests/Deployment/test_weather_model
+/workspace/build/tests/Development/test_weather_model
+/workspace/build/tests/Development/test_weather_model
+workspace/build/tests/test_weather_model
+workspace/build/tests/test_weather_model
+workspace/build/tests/Release/test_weather_model
+workspace/build/tests/Release/test_weather_model
+workspace/build/tests/Debug/test_weather_model
+workspace/build/tests/Debug/test_weather_model
+workspace/build/tests/MinSizeRel/test_weather_model
+workspace/build/tests/MinSizeRel/test_weather_model
+workspace/build/tests/RelWithDebInfo/test_weather_model
+workspace/build/tests/RelWithDebInfo/test_weather_model
+workspace/build/tests/Deployment/test_weather_model
+workspace/build/tests/Deployment/test_weather_model
+workspace/build/tests/Development/test_weather_model
+workspace/build/tests/Development/test_weather_model
+Unable to find executable: /workspace/build/tests/test_weather_model
+44/56 Test #44: test_weather_model ..............................................................***Not Run   0.00 sec
+      Start 45: test_weather_config
+Could not find executable /workspace/build/tests/test_weather_config
+Looked in the following places:
+/workspace/build/tests/test_weather_config
+/workspace/build/tests/test_weather_config
+/workspace/build/tests/Release/test_weather_config
+/workspace/build/tests/Release/test_weather_config
+/workspace/build/tests/Debug/test_weather_config
+/workspace/build/tests/Debug/test_weather_config
+/workspace/build/tests/MinSizeRel/test_weather_config
+/workspace/build/tests/MinSizeRel/test_weather_config
+/workspace/build/tests/RelWithDebInfo/test_weather_config
+/workspace/build/tests/RelWithDebInfo/test_weather_config
+/workspace/build/tests/Deployment/test_weather_config
+/workspace/build/tests/Deployment/test_weather_config
+/workspace/build/tests/Development/test_weather_config
+/workspace/build/tests/Development/test_weather_config
+workspace/build/tests/test_weather_config
+workspace/build/tests/test_weather_config
+workspace/build/tests/Release/test_weather_config
+workspace/build/tests/Release/test_weather_config
+workspace/build/tests/Debug/test_weather_config
+workspace/build/tests/Debug/test_weather_config
+workspace/build/tests/MinSizeRel/test_weather_config
+workspace/build/tests/MinSizeRel/test_weather_config
+workspace/build/tests/RelWithDebInfo/test_weather_config
+workspace/build/tests/RelWithDebInfo/test_weather_config
+workspace/build/tests/Deployment/test_weather_config
+workspace/build/tests/Deployment/test_weather_config
+workspace/build/tests/Development/test_weather_config
+workspace/build/tests/Development/test_weather_config
+Unable to find executable: /workspace/build/tests/test_weather_config
+45/56 Test #45: test_weather_config .............................................................***Not Run   0.00 sec
+      Start 46: test_quadrosimulator_ground_lock
+Could not find executable /workspace/build/tests/test_quadrosimulator_ground_lock
+Looked in the following places:
+/workspace/build/tests/test_quadrosimulator_ground_lock
+/workspace/build/tests/test_quadrosimulator_ground_lock
+/workspace/build/tests/Release/test_quadrosimulator_ground_lock
+/workspace/build/tests/Release/test_quadrosimulator_ground_lock
+/workspace/build/tests/Debug/test_quadrosimulator_ground_lock
+/workspace/build/tests/Debug/test_quadrosimulator_ground_lock
+/workspace/build/tests/MinSizeRel/test_quadrosimulator_ground_lock
+/workspace/build/tests/MinSizeRel/test_quadrosimulator_ground_lock
+/workspace/build/tests/RelWithDebInfo/test_quadrosimulator_ground_lock
+/workspace/build/tests/RelWithDebInfo/test_quadrosimulator_ground_lock
+/workspace/build/tests/Deployment/test_quadrosimulator_ground_lock
+/workspace/build/tests/Deployment/test_quadrosimulator_ground_lock
+/workspace/build/tests/Development/test_quadrosimulator_ground_lock
+/workspace/build/tests/Development/test_quadrosimulator_ground_lock
+workspace/build/tests/test_quadrosimulator_ground_lock
+workspace/build/tests/test_quadrosimulator_ground_lock
+workspace/build/tests/Release/test_quadrosimulator_ground_lock
+workspace/build/tests/Release/test_quadrosimulator_ground_lock
+workspace/build/tests/Debug/test_quadrosimulator_ground_lock
+workspace/build/tests/Debug/test_quadrosimulator_ground_lock
+workspace/build/tests/MinSizeRel/test_quadrosimulator_ground_lock
+workspace/build/tests/MinSizeRel/test_quadrosimulator_ground_lock
+workspace/build/tests/RelWithDebInfo/test_quadrosimulator_ground_lock
+workspace/build/tests/RelWithDebInfo/test_quadrosimulator_ground_lock
+workspace/build/tests/Deployment/test_quadrosimulator_ground_lock
+workspace/build/tests/Deployment/test_quadrosimulator_ground_lock
+workspace/build/tests/Development/test_quadrosimulator_ground_lock
+workspace/build/tests/Development/test_quadrosimulator_ground_lock
+Unable to find executable: /workspace/build/tests/test_quadrosimulator_ground_lock
+46/56 Test #46: test_quadrosimulator_ground_lock ................................................***Not Run   0.00 sec
+      Start 47: test_simulation_base
+Could not find executable /workspace/build/tests/test_simulation_base
+Looked in the following places:
+/workspace/build/tests/test_simulation_base
+/workspace/build/tests/test_simulation_base
+/workspace/build/tests/Release/test_simulation_base
+/workspace/build/tests/Release/test_simulation_base
+/workspace/build/tests/Debug/test_simulation_base
+/workspace/build/tests/Debug/test_simulation_base
+/workspace/build/tests/MinSizeRel/test_simulation_base
+/workspace/build/tests/MinSizeRel/test_simulation_base
+/workspace/build/tests/RelWithDebInfo/test_simulation_base
+/workspace/build/tests/RelWithDebInfo/test_simulation_base
+/workspace/build/tests/Deployment/test_simulation_base
+/workspace/build/tests/Deployment/test_simulation_base
+/workspace/build/tests/Development/test_simulation_base
+/workspace/build/tests/Development/test_simulation_base
+workspace/build/tests/test_simulation_base
+workspace/build/tests/test_simulation_base
+workspace/build/tests/Release/test_simulation_base
+workspace/build/tests/Release/test_simulation_base
+workspace/build/tests/Debug/test_simulation_base
+workspace/build/tests/Debug/test_simulation_base
+workspace/build/tests/MinSizeRel/test_simulation_base
+workspace/build/tests/MinSizeRel/test_simulation_base
+workspace/build/tests/RelWithDebInfo/test_simulation_base
+workspace/build/tests/RelWithDebInfo/test_simulation_base
+workspace/build/tests/Deployment/test_simulation_base
+workspace/build/tests/Deployment/test_simulation_base
+workspace/build/tests/Development/test_simulation_base
+workspace/build/tests/Development/test_simulation_base
+Unable to find executable: /workspace/build/tests/test_simulation_base
+47/56 Test #47: test_simulation_base ............................................................***Not Run   0.00 sec
+      Start 48: test_gps_sensor
+Could not find executable /workspace/build/tests/test_gps_sensor
+Looked in the following places:
+/workspace/build/tests/test_gps_sensor
+/workspace/build/tests/test_gps_sensor
+/workspace/build/tests/Release/test_gps_sensor
+/workspace/build/tests/Release/test_gps_sensor
+/workspace/build/tests/Debug/test_gps_sensor
+/workspace/build/tests/Debug/test_gps_sensor
+/workspace/build/tests/MinSizeRel/test_gps_sensor
+/workspace/build/tests/MinSizeRel/test_gps_sensor
+/workspace/build/tests/RelWithDebInfo/test_gps_sensor
+/workspace/build/tests/RelWithDebInfo/test_gps_sensor
+/workspace/build/tests/Deployment/test_gps_sensor
+/workspace/build/tests/Deployment/test_gps_sensor
+/workspace/build/tests/Development/test_gps_sensor
+/workspace/build/tests/Development/test_gps_sensor
+workspace/build/tests/test_gps_sensor
+workspace/build/tests/test_gps_sensor
+workspace/build/tests/Release/test_gps_sensor
+workspace/build/tests/Release/test_gps_sensor
+workspace/build/tests/Debug/test_gps_sensor
+workspace/build/tests/Debug/test_gps_sensor
+workspace/build/tests/MinSizeRel/test_gps_sensor
+workspace/build/tests/MinSizeRel/test_gps_sensor
+workspace/build/tests/RelWithDebInfo/test_gps_sensor
+workspace/build/tests/RelWithDebInfo/test_gps_sensor
+workspace/build/tests/Deployment/test_gps_sensor
+workspace/build/tests/Deployment/test_gps_sensor
+workspace/build/tests/Development/test_gps_sensor
+workspace/build/tests/Development/test_gps_sensor
+Unable to find executable: /workspace/build/tests/test_gps_sensor
+48/56 Test #48: test_gps_sensor .................................................................***Not Run   0.00 sec
+      Start 49: test_energy
+Could not find executable /workspace/build/tests/test_energy
+Looked in the following places:
+/workspace/build/tests/test_energy
+/workspace/build/tests/test_energy
+/workspace/build/tests/Release/test_energy
+/workspace/build/tests/Release/test_energy
+/workspace/build/tests/Debug/test_energy
+/workspace/build/tests/Debug/test_energy
+/workspace/build/tests/MinSizeRel/test_energy
+/workspace/build/tests/MinSizeRel/test_energy
+/workspace/build/tests/RelWithDebInfo/test_energy
+/workspace/build/tests/RelWithDebInfo/test_energy
+/workspace/build/tests/Deployment/test_energy
+/workspace/build/tests/Deployment/test_energy
+/workspace/build/tests/Development/test_energy
+/workspace/build/tests/Development/test_energy
+workspace/build/tests/test_energy
+workspace/build/tests/test_energy
+workspace/build/tests/Release/test_energy
+workspace/build/tests/Release/test_energy
+workspace/build/tests/Debug/test_energy
+workspace/build/tests/Debug/test_energy
+workspace/build/tests/MinSizeRel/test_energy
+workspace/build/tests/MinSizeRel/test_energy
+workspace/build/tests/RelWithDebInfo/test_energy
+workspace/build/tests/RelWithDebInfo/test_energy
+workspace/build/tests/Deployment/test_energy
+workspace/build/tests/Deployment/test_energy
+workspace/build/tests/Development/test_energy
+workspace/build/tests/Development/test_energy
+Unable to find executable: /workspace/build/tests/test_energy
+49/56 Test #49: test_energy .....................................................................***Not Run   0.00 sec
+      Start 50: test_drone_base
+Could not find executable /workspace/build/tests/test_drone_base
+Looked in the following places:
+/workspace/build/tests/test_drone_base
+/workspace/build/tests/test_drone_base
+/workspace/build/tests/Release/test_drone_base
+/workspace/build/tests/Release/test_drone_base
+/workspace/build/tests/Debug/test_drone_base
+/workspace/build/tests/Debug/test_drone_base
+/workspace/build/tests/MinSizeRel/test_drone_base
+/workspace/build/tests/MinSizeRel/test_drone_base
+/workspace/build/tests/RelWithDebInfo/test_drone_base
+/workspace/build/tests/RelWithDebInfo/test_drone_base
+/workspace/build/tests/Deployment/test_drone_base
+/workspace/build/tests/Deployment/test_drone_base
+/workspace/build/tests/Development/test_drone_base
+/workspace/build/tests/Development/test_drone_base
+workspace/build/tests/test_drone_base
+workspace/build/tests/test_drone_base
+workspace/build/tests/Release/test_drone_base
+workspace/build/tests/Release/test_drone_base
+workspace/build/tests/Debug/test_drone_base
+workspace/build/tests/Debug/test_drone_base
+workspace/build/tests/MinSizeRel/test_drone_base
+workspace/build/tests/MinSizeRel/test_drone_base
+workspace/build/tests/RelWithDebInfo/test_drone_base
+workspace/build/tests/RelWithDebInfo/test_drone_base
+workspace/build/tests/Deployment/test_drone_base
+workspace/build/tests/Deployment/test_drone_base
+workspace/build/tests/Development/test_drone_base
+workspace/build/tests/Development/test_drone_base
+Unable to find executable: /workspace/build/tests/test_drone_base
+50/56 Test #50: test_drone_base .................................................................***Not Run   0.00 sec
+      Start 51: test_esc_logic
+Could not find executable /workspace/build/tests/test_esc_logic
+Looked in the following places:
+/workspace/build/tests/test_esc_logic
+/workspace/build/tests/test_esc_logic
+/workspace/build/tests/Release/test_esc_logic
+/workspace/build/tests/Release/test_esc_logic
+/workspace/build/tests/Debug/test_esc_logic
+/workspace/build/tests/Debug/test_esc_logic
+/workspace/build/tests/MinSizeRel/test_esc_logic
+/workspace/build/tests/MinSizeRel/test_esc_logic
+/workspace/build/tests/RelWithDebInfo/test_esc_logic
+/workspace/build/tests/RelWithDebInfo/test_esc_logic
+/workspace/build/tests/Deployment/test_esc_logic
+/workspace/build/tests/Deployment/test_esc_logic
+/workspace/build/tests/Development/test_esc_logic
+/workspace/build/tests/Development/test_esc_logic
+workspace/build/tests/test_esc_logic
+workspace/build/tests/test_esc_logic
+workspace/build/tests/Release/test_esc_logic
+workspace/build/tests/Release/test_esc_logic
+workspace/build/tests/Debug/test_esc_logic
+workspace/build/tests/Debug/test_esc_logic
+workspace/build/tests/MinSizeRel/test_esc_logic
+workspace/build/tests/MinSizeRel/test_esc_logic
+workspace/build/tests/RelWithDebInfo/test_esc_logic
+workspace/build/tests/RelWithDebInfo/test_esc_logic
+workspace/build/tests/Deployment/test_esc_logic
+workspace/build/tests/Deployment/test_esc_logic
+workspace/build/tests/Development/test_esc_logic
+workspace/build/tests/Development/test_esc_logic
+Unable to find executable: /workspace/build/tests/test_esc_logic
+51/56 Test #51: test_esc_logic ..................................................................***Not Run   0.00 sec
+      Start 52: test_alt_ctrl_logic
+Could not find executable /workspace/build/tests/test_alt_ctrl_logic
+Looked in the following places:
+/workspace/build/tests/test_alt_ctrl_logic
+/workspace/build/tests/test_alt_ctrl_logic
+/workspace/build/tests/Release/test_alt_ctrl_logic
+/workspace/build/tests/Release/test_alt_ctrl_logic
+/workspace/build/tests/Debug/test_alt_ctrl_logic
+/workspace/build/tests/Debug/test_alt_ctrl_logic
+/workspace/build/tests/MinSizeRel/test_alt_ctrl_logic
+/workspace/build/tests/MinSizeRel/test_alt_ctrl_logic
+/workspace/build/tests/RelWithDebInfo/test_alt_ctrl_logic
+/workspace/build/tests/RelWithDebInfo/test_alt_ctrl_logic
+/workspace/build/tests/Deployment/test_alt_ctrl_logic
+/workspace/build/tests/Deployment/test_alt_ctrl_logic
+/workspace/build/tests/Development/test_alt_ctrl_logic
+/workspace/build/tests/Development/test_alt_ctrl_logic
+workspace/build/tests/test_alt_ctrl_logic
+workspace/build/tests/test_alt_ctrl_logic
+workspace/build/tests/Release/test_alt_ctrl_logic
+workspace/build/tests/Release/test_alt_ctrl_logic
+workspace/build/tests/Debug/test_alt_ctrl_logic
+workspace/build/tests/Debug/test_alt_ctrl_logic
+workspace/build/tests/MinSizeRel/test_alt_ctrl_logic
+workspace/build/tests/MinSizeRel/test_alt_ctrl_logic
+workspace/build/tests/RelWithDebInfo/test_alt_ctrl_logic
+workspace/build/tests/RelWithDebInfo/test_alt_ctrl_logic
+workspace/build/tests/Deployment/test_alt_ctrl_logic
+workspace/build/tests/Deployment/test_alt_ctrl_logic
+workspace/build/tests/Development/test_alt_ctrl_logic
+workspace/build/tests/Development/test_alt_ctrl_logic
+Unable to find executable: /workspace/build/tests/test_alt_ctrl_logic
+52/56 Test #52: test_alt_ctrl_logic .............................................................***Not Run   0.00 sec
+      Start 53: test_real_drone_mixer
+53/56 Test #53: test_real_drone_mixer ...........................................................   Passed    0.01 sec
+      Start 54: test_position_controller
+54/56 Test #54: test_position_controller ........................................................   Passed    0.01 sec
+      Start 55: test_mission_loader
+55/56 Test #55: test_mission_loader .............................................................   Passed    0.01 sec
+      Start 56: test_mission_executor_transitions
+56/56 Test #56: test_mission_executor_transitions ...............................................   Passed    0.01 sec
+
+43% tests passed, 32 tests failed out of 56
+
+Total Test time (real) =   0.52 sec
+
+The following tests FAILED:
+	  1 - test_utils_NOT_BUILT-b12d07c (Not Run)
+	  2 - test_base_sensor_NOT_BUILT-b12d07c (Not Run)
+	  3 - test_temperature_sensor_NOT_BUILT-b12d07c (Not Run)
+	  4 - test_motors_NOT_BUILT-b12d07c (Not Run)
+	  5 - test_motor_physics_NOT_BUILT-b12d07c (Not Run)
+	 13 - test_gps_sim_NOT_BUILT-b12d07c (Not Run)
+	 14 - test_noisy_sensor_source_gps_NOT_BUILT-b12d07c (Not Run)
+	 15 - test_weather_model_NOT_BUILT-b12d07c (Not Run)
+	 16 - test_weather_config_NOT_BUILT-b12d07c (Not Run)
+	 17 - test_quadrosimulator_ground_lock_NOT_BUILT-b12d07c (Not Run)
+	 18 - test_simulation_base_NOT_BUILT-b12d07c (Not Run)
+	 19 - test_gps_sensor_NOT_BUILT-b12d07c (Not Run)
+	 20 - test_energy_NOT_BUILT-b12d07c (Not Run)
+	 21 - test_drone_base_NOT_BUILT-b12d07c (Not Run)
+	 22 - test_esc_logic_NOT_BUILT-b12d07c (Not Run)
+	 23 - test_alt_ctrl_logic_NOT_BUILT-b12d07c (Not Run)
+	 36 - test_utils (Not Run)
+	 37 - test_base_sensor (Not Run)
+	 38 - test_temperature_sensor (Not Run)
+	 39 - test_motors (Not Run)
+	 40 - test_motor_physics (Not Run)
+	 42 - test_gps_sim (Not Run)
+	 43 - test_noisy_sensor_source_gps (Not Run)
+	 44 - test_weather_model (Not Run)
+	 45 - test_weather_config (Not Run)
+	 46 - test_quadrosimulator_ground_lock (Not Run)
+	 47 - test_simulation_base (Not Run)
+	 48 - test_gps_sensor (Not Run)
+	 49 - test_energy (Not Run)
+	 50 - test_drone_base (Not Run)
+	 51 - test_esc_logic (Not Run)
+	 52 - test_alt_ctrl_logic (Not Run)
+Errors while running CTest

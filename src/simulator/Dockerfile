@@ -27,4 +27,4 @@ RUN mkdir build && cd build && cmake .. -GNinja && ninja
 EXPOSE 8080
 
 # Run the simulator (placeholder, adjust as needed)
-CMD ["./build/simulator_executable"]  # Replace with actual executable
+CMD ["./build/simulator_app"]

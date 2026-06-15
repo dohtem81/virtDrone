@@ -2,7 +2,7 @@
 #define QUADROSIMULATOR_H
 
 #include "simulation_base.h"
-#include "drone/runtime/real_drone.h"
+#include "drone/runtime/simulation_gateway.h"
 #include "drone/model/quadrocopter.h"
 #include "drone/drone_data_types.h"
 #include "simulator/physics/motor_physics.h"
@@ -19,11 +19,10 @@
 
 namespace drone::simulator {
 
-class QuaroSimulation final : public drone::simulator::SimulationBase,
-                              public drone::runtime::SensorSource,
-                              public drone::runtime::ActuatorSink {
+class QuadroSimulation final : public drone::simulator::SimulationBase,
+                               public drone::runtime::SimulationGateway {
 public:
-    friend std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
+    friend std::shared_ptr<QuadroSimulation> QuadroSimulationFactory(
         std::string name,
         drone::model::components::ElecMotorSpecs emSpecs,
         drone::model::sensors::AnalogIOSpec aIOSpec,
@@ -49,10 +48,10 @@ protected:
     void onStep(double dt_s);
 
 public:
-    ~QuaroSimulation() = default;
+    ~QuadroSimulation() = default;
 
 private:
-    QuaroSimulation() = default;
+    QuadroSimulation() = default;
     std::unique_ptr<drone::model::Quadrocopter> quad_;
     double elapsed_s_;
     drone::Vector3 position_enu_m_{};
@@ -95,9 +94,9 @@ private:
 };
 
 /**
- * @brief Factory function to create a QuaroSimulation instance.
+ * @brief Factory function to create a QuadroSimulation instance.
  */
-std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
+std::shared_ptr<QuadroSimulation> QuadroSimulationFactory(
     std::string name,
     drone::model::components::ElecMotorSpecs emSpecs,
     drone::model::sensors::AnalogIOSpec aIOSpec,

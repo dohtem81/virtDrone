@@ -77,6 +77,10 @@ add_executable(test_position_controller
     unit/drone/control/test_position_controller.cpp
 )
 
+add_executable(test_simulation_gateway
+    unit/drone/runtime/test_simulation_gateway.cpp
+)
+
 add_executable(test_mission_loader
     unit/drone/mission/test_mission_loader.cpp
 )
@@ -210,6 +214,13 @@ target_link_libraries(test_position_controller
         drone
 )
 
+target_link_libraries(test_simulation_gateway
+    PRIVATE
+        Catch2::Catch2WithMain
+        drone
+        simulator
+)
+
 target_link_libraries(test_mission_loader
     PRIVATE
         Catch2::Catch2WithMain
@@ -244,6 +255,7 @@ add_test(NAME test_esc_logic COMMAND test_esc_logic)
 add_test(NAME test_alt_ctrl_logic COMMAND test_alt_ctrl_logic)
 add_test(NAME test_real_drone_mixer COMMAND test_real_drone_mixer)
 add_test(NAME test_position_controller COMMAND test_position_controller)
+add_test(NAME test_simulation_gateway COMMAND test_simulation_gateway)
 add_test(NAME test_mission_loader COMMAND test_mission_loader)
 add_test(NAME test_mission_executor_transitions COMMAND test_mission_executor_transitions)
 # Enable test discovery for Catch2
@@ -267,5 +279,6 @@ catch_discover_tests(test_esc_logic)
 catch_discover_tests(test_alt_ctrl_logic)
 catch_discover_tests(test_real_drone_mixer)
 catch_discover_tests(test_position_controller)
+catch_discover_tests(test_simulation_gateway)
 catch_discover_tests(test_mission_loader)
 catch_discover_tests(test_mission_executor_transitions)

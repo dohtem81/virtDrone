@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package virtDrone.runtime;
+
+message Empty {}
+
+message SensorFrame {
+  double altitude_m = 1;
+  double position_enu_x_m = 2;
+  double position_enu_y_m = 3;
+  double position_enu_z_m = 4;
+  double gps_latitude_deg = 5;
+  double gps_longitude_deg = 6;
+  double gps_altitude_m = 7;
+  double gps_velocity_north_mps = 8;
+  double gps_velocity_east_mps = 9;
+  double gps_velocity_down_mps = 10;
+  double battery_voltage_v = 11;
+  double battery_soc_percent = 12;
+  double motor_temperature_c = 13;
+  double motor_rpm = 14;
+  repeated double motor_rpm_each = 15;
+  repeated double motor_temperature_c_each = 16;
+  double yaw_rad = 17;
+  double pitch_rad = 18;
+  double roll_rad = 19;
+}
+
+message ActuatorFrame {
+  double desired_motor_rpm = 1;
+  double common_motor_rpm = 2;
+  repeated double desired_motor_rpm_each = 3;
+  double yaw_control_rpm = 4;
+  double pitch_control_rpm = 5;
+  double roll_control_rpm = 6;
+  double desired_yaw_rad = 7;
+  double desired_pitch_rad = 8;
+  double desired_roll_rad = 9;
+  double target_altitude_m = 10;
+  double target_error_m = 11;
+  double p_component_rpm = 12;
+  double i_component_rpm = 13;
+  double d_component_rpm = 14;
+  double sensed_altitude_m = 15;
+  double sensed_position_enu_x_m = 16;
+  double sensed_position_enu_y_m = 17;
+  double sensed_position_enu_z_m = 18;
+  double sensed_gps_latitude_deg = 19;
+  double sensed_gps_longitude_deg = 20;
+  double sensed_gps_altitude_m = 21;
+  double sensed_gps_velocity_north_mps = 22;
+  double sensed_gps_velocity_east_mps = 23;
+  double sensed_gps_velocity_down_mps = 24;
+  double sensed_battery_voltage_v = 25;
+  double sensed_battery_soc_percent = 26;
+  double sensed_motor_temperature_c = 27;
+  double sensed_motor_rpm = 28;
+  double sensed_yaw_rad = 29;
+  double sensed_pitch_rad = 30;
+  double sensed_roll_rad = 31;
+}
+
+message StepRequest {
+  double dt_s = 1;
+}
+
+service SimulationGateway {
+  rpc ReadSensors(Empty) returns (SensorFrame);
+  rpc ApplyActuators(ActuatorFrame) returns (Empty);
+  rpc Step(StepRequest) returns (Empty);
+}

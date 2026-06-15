@@ -167,11 +167,15 @@ position_hold_max_tilt_rad: 1.3
 
 ## CLI usage
 
-`simulator_app [steps] [dt_s] [altitude_config_file] [weather_config_file] [mission_file]`
+`simulator_app [weather_config_file] [logs_dir] [listen_address]`
+
+`drone_app [backend] [simulator_address] [steps] [dt_s] [altitude_config_file] [attitude_config_file] [mission_file] [logs_dir]`
 
 Example:
 
-`simulator_app 1200 0.02 config/altitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml`
+`simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051`
+
+`drone_app grpc localhost:50051 1200 0.02 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials`
 
 ## Logging outputs
 

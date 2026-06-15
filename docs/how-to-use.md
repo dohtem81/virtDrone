@@ -7,15 +7,27 @@
 ```bash
 docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 docker compose run --rm dev cmake --build build --target simulator_app
-docker compose run --rm dev ./build/simulator_app 10000 0.01
+docker compose run --rm dev cmake --build build --target drone_app
+```
+
+For the split-process architecture, run the simulator as its own container/service and keep the core control loop on the control side. The current repo already exposes `simulator` and `drone` services in `docker-compose.yml`; the boundary is intended to be gRPC-backed.
+
+The current transport layer is modeled by `proto/simulation_gateway.proto` and the RPC adapters in `include/drone/runtime/simulation_gateway_rpc.h` and `include/drone/runtime/simulation_gateway_grpc.h`.
+
+Control-side executable (separate process entrypoint):
+
+```bash
+docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
+docker compose run --rm dev ./build/drone_app grpc localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 ### Host
 
 ```bash
 cmake -S . -B build
-cmake --build build --target simulator_app
-./build/simulator_app 1000 0.01
+cmake --build build --target simulator_app drone_app
+./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
+./build/drone_app grpc localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 ## Configuration
@@ -56,40 +68,41 @@ Current controller status (important):
 - Altitude controller behavior still needs further tuning/rework for robust mission behavior.
 - Use the tutorial logs/charts below to evaluate behavior on your run before relying on defaults.
 
-Run with explicit config file:
+Run the simulator server:
 
 ```bash
-./build/simulator_app 1000 0.01 config/altitude_controller_fast.yaml
+./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
 ```
 
-Run with explicit altitude + weather config files:
+Run the control client:
 
 ```bash
-./build/simulator_app 1000 0.01 config/altitude_controller.yaml config/weather.yaml
+./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
-Run with explicit altitude + weather + mission files:
+Run simulator + control together from Docker:
 
 ```bash
-./build/simulator_app 1000 0.01 config/altitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml
+docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
+docker compose run --rm dev ./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 Run with explicit log output directory parameter:
 
 ```bash
-./build/simulator_app 1000 0.01 config/altitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
+./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 Docker mission run from repository root:
 
 ```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 1000 0.01 config/altitude_controller.yaml config/weather.yaml ../config/missions/hover_and_move.yaml"
+docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 1000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
 ```
 
 Docker mission run with explicit logs directory:
 
 ```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
+docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
 ```
 
 Mission examples:
@@ -107,25 +120,25 @@ Current primary execution/test scenarios:
 Host run (hover and move):
 
 ```bash
-./build/simulator_app 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
+./build/drone_app localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 Host run (hover and land):
 
 ```bash
-./build/simulator_app 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_land.yaml docs/tutorials
+./build/drone_app localhost:50051 10000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_land.yaml docs/tutorials
 ```
 
 Docker run from repository root (hover and move):
 
 ```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
+docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_move.yaml ../docs/tutorials/"
 ```
 
 Docker run from repository root (hover and land):
 
 ```bash
-docker compose run --rm dev bash -lc "cd /workspace/build && ./simulator_app 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
+docker compose run --rm dev bash -lc "cd /workspace/build && ./drone_app localhost:50051 10000 0.01 ../config/altitude_controller.yaml ../config/attitude_controller.yaml ../config/weather.yaml ../config/missions/hover_and_land.yaml ../docs/tutorials/"
 ```
 
 After each run, inspect:
@@ -163,9 +176,13 @@ The simulator writes logs to files (instead of console telemetry output):
 
 Files are written to the repository tutorial folder whether `simulator_app` is launched from repository root or from `build/`.
 
-You can override log location by passing the optional `logs_dir` argument:
+In the split-process setup, the control process reads sensor updates from the simulation gateway and sends actuator commands back across the same transport boundary.
 
-`simulator_app [steps] [dt_s] [altitude_config_file] [weather_config_file] [mission_file] [logs_dir]`
+You can override log location by passing the optional `logs_dir` argument to the simulator server or control client:
+
+`simulator_app [weather_config_file] [logs_dir] [listen_address]`
+
+`drone_app [simulator_address] [steps] [dt_s] [altitude_config_file] [attitude_config_file] [weather_config_file] [mission_file] [logs_dir]`
 
 Tutorial artifacts to inspect after each run:
 
@@ -177,7 +194,8 @@ Tutorial artifacts to inspect after each run:
 Recommended workflow (ensures UTF-8 simulator log for chart parser):
 
 ```bash
-docker compose run --rm dev sh -lc './build/simulator_app 1000 0.01 > test.txt'
+docker compose run --rm dev sh -lc './build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051 > simulator.txt'
+docker compose run --rm dev sh -lc './build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/weather.yaml config/missions/hover_and_move.yaml docs/tutorials > drone.txt'
 docker compose run --rm chart
 ```
 

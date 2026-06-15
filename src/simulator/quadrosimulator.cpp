@@ -33,7 +33,7 @@ std::string localTimestampNow() {
 
 namespace drone::simulator {
 
-drone::runtime::SensorFrame QuaroSimulation::readSensors() const {
+drone::runtime::SensorFrame QuadroSimulation::readSensors() const {
     drone::runtime::SensorFrame sensor_frame;
     if (!quad_) {
         return sensor_frame;
@@ -69,7 +69,7 @@ drone::runtime::SensorFrame QuaroSimulation::readSensors() const {
     return sensor_frame;
 }
 
-void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) {
+void QuadroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuator_frame) {
     desired_rpm_ = actuator_frame.desired_motor_rpm;
     common_motor_rpm_ = actuator_frame.common_motor_rpm;
     desired_motor_rpm_each_ = actuator_frame.desired_motor_rpm_each;
@@ -100,11 +100,11 @@ void QuaroSimulation::applyActuators(const drone::runtime::ActuatorFrame& actuat
     sensed_motor_rpm_ = actuator_frame.sensed_motor_rpm;
 }
 
-void QuaroSimulation::setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config) {
+void QuadroSimulation::setWeatherConfig(const drone::simulator::config::WeatherConfig& weather_config) {
     weather_model_.setConfig(weather_config);
 }
 
-bool QuaroSimulation::setTelemetryLogFile(const std::string& telemetry_log_file) {
+bool QuadroSimulation::setTelemetryLogFile(const std::string& telemetry_log_file) {
     telemetry_log_file_ = telemetry_log_file;
     if (telemetry_log_stream_.is_open()) {
         telemetry_log_stream_.close();
@@ -115,7 +115,7 @@ bool QuaroSimulation::setTelemetryLogFile(const std::string& telemetry_log_file)
     return telemetry_log_stream_.is_open();
 }
 
-void QuaroSimulation::onStart() {
+void QuadroSimulation::onStart() {
     if (!is_running_) {
         is_running_ = true;
         elapsed_s_ = 0.0;
@@ -151,7 +151,7 @@ void QuaroSimulation::onStart() {
     }
 }
 
-void QuaroSimulation::onStop() {
+void QuadroSimulation::onStop() {
     if (is_running_) {
         is_running_ = false;
         if (telemetry_log_stream_.is_open()) {
@@ -161,7 +161,7 @@ void QuaroSimulation::onStop() {
     }
 }
 
-void QuaroSimulation::onStep(double delta_time_s) {
+void QuadroSimulation::onStep(double delta_time_s) {
     if (is_running_ && quad_) {
         elapsed_s_ += delta_time_s;
         uint64_t delta_ms = static_cast<uint64_t>(delta_time_s * 1000.0);
@@ -374,7 +374,7 @@ void QuaroSimulation::onStep(double delta_time_s) {
     }
 }
 
-std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
+std::shared_ptr<QuadroSimulation> QuadroSimulationFactory(
     std::string name,
     drone::model::components::ElecMotorSpecs emSpecs,
     drone::model::sensors::AnalogIOSpec aIOSpec,
@@ -392,7 +392,7 @@ std::shared_ptr<QuaroSimulation> QuadroSimulationFactory(
     (void)dt_s;
     
     // Create simulation object using new (since make_shared can't access protected constructor)
-    auto sim = std::shared_ptr<QuaroSimulation>(new QuaroSimulation());
+    auto sim = std::shared_ptr<QuadroSimulation>(new QuadroSimulation());
     
     // Create quadrocopter with simulated battery and GPS modules
     sim->quad_ = std::make_unique<drone::model::Quadrocopter>(

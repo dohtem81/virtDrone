@@ -34,7 +34,7 @@ drone::model::sensors::TemperatureSensorRanges makeTempRanges() {
     return drone::model::sensors::TemperatureSensorRanges(-50.0, 150.0);
 }
 
-std::shared_ptr<drone::simulator::QuaroSimulation> makeSimulation() {
+std::shared_ptr<drone::simulator::QuadroSimulation> makeSimulation() {
     return drone::simulator::QuadroSimulationFactory(
         "QuadTest",
         makeMotorSpecs(),
@@ -53,7 +53,7 @@ std::shared_ptr<drone::simulator::QuaroSimulation> makeSimulation() {
 
 }  // namespace
 
-TEST_CASE("QuaroSimulation does not move while grounded under weather disturbance", "[QuaroSimulation][GroundLock]") {
+TEST_CASE("QuadroSimulation does not move while grounded under weather disturbance", "[QuadroSimulation][GroundLock]") {
     auto sim = makeSimulation();
 
     drone::simulator::config::WeatherConfig weather_config;
@@ -82,7 +82,7 @@ TEST_CASE("QuaroSimulation does not move while grounded under weather disturbanc
     REQUIRE(sensors.gps_velocity_down_mps == Catch::Approx(0.0).margin(1e-12));
 }
 
-TEST_CASE("QuaroSimulation can move after liftoff while weather is enabled", "[QuaroSimulation][GroundLock]") {
+TEST_CASE("QuadroSimulation can move after liftoff while weather is enabled", "[QuadroSimulation][GroundLock]") {
     auto sim = makeSimulation();
 
     drone::simulator::config::WeatherConfig weather_config;

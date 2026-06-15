@@ -7,6 +7,8 @@ virtDrone is a modular framework for exploring vehicle subsystem modeling and co
 
 The current implementation is intentionally **simplified** and aimed at engineering workflow exploration, not high-fidelity flight prediction.
 
+The control loop and simulator are being organized as separate process/container responsibilities, with the boundary expressed through a simulation gateway intended to be backed by gRPC in deployment.
+
 ## Documentation
 
 Detailed documentation lives in the `docs/` folder:
@@ -20,6 +22,9 @@ Detailed documentation lives in the `docs/` folder:
 - [Roadmap](docs/roadmap.md)
 - [Changelog](docs/changelog.md)
 
+Architecture sketch for the split-process/gRPC boundary: [docs/drawings/virtDrone_grpc_process_architecture.excalidraw](docs/drawings/virtDrone_grpc_process_architecture.excalidraw)
+Transport contract: [proto/simulation_gateway.proto](proto/simulation_gateway.proto)
+
 ## Quick Start
 
 ### Build and Run (Docker)
@@ -27,7 +32,23 @@ Detailed documentation lives in the `docs/` folder:
 ```bash
 docker compose run --rm dev cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 docker compose run --rm dev cmake --build build --target simulator_app
-docker compose run --rm dev ./build/simulator_app 1000 0.01
+docker compose run --rm dev cmake --build build --target drone_app
+```
+
+Run the simulator process in one terminal/container and the control process in another:
+
+```bash
+docker compose run --rm dev ./build/simulator_app config/weather.yaml docs/tutorials 0.0.0.0:50051
+docker compose run --rm dev ./build/drone_app grpc localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
+```
+
+For the split deployment shape, the simulator runs as its own container/process and the core control side communicates through the gRPC gateway boundary instead of direct in-process calls.
+
+Build the control-side executable as well:
+
+```bash
+docker compose run --rm dev cmake --build build --target drone_app
+docker compose run --rm dev ./build/drone_app localhost:50051 1000 0.01 config/altitude_controller.yaml config/attitude_controller.yaml config/missions/hover_and_move.yaml docs/tutorials
 ```
 
 ### Generate Chart

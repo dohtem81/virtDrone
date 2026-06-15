@@ -21,7 +21,7 @@
    - **Solution**: Moved alt_ctrl_ initialization to member initializer list
    - **File**: [src/drone/model/quadrocopter.cpp](src/drone/model/quadrocopter.cpp#L34-L47)
 
-### 4. **QuaroSimulation Accessibility**
+### 4. **QuadroSimulation Accessibility**
    - **Problem**: Protected/private constructor and destructor prevented shared_ptr creation
    - **Solution**: Made destructor public, kept constructor private, used friend factory function
    - **File**: [include/simulator/quadrosimulator.h](include/simulator/quadrosimulator.h#L40-L48)
@@ -34,7 +34,7 @@
      - `drone_sim` - Integration layer (Quadrocopter depends on both drone and simulator)
    - **File**: [CMakeLists.txt](CMakeLists.txt#L14-L50)
 
-### 6. **Missing Implementation in QuaroSimulation**
+### 6. **Missing Implementation in QuadroSimulation**
    - **Problem**: onStart(), onStop(), onStep() methods were recursively calling themselves
    - **Solution**: Implemented proper lifecycle methods
    - **File**: [src/simulator/quadrosimulator.cpp](src/simulator/quadrosimulator.cpp#L3-L24)
@@ -69,4 +69,4 @@ The refactored architecture now has:
 - **DronePhysical**: Sensor data interface (what the drone "knows")
 - **DroneBase**: Simulator with physics calculations
 - **Quadrocopter**: Concrete quadrocopter specialization
-- **QuaroSimulation**: Simulation runner for the quadrocopter
+- **QuadroSimulation**: Simulation runner for the quadrocopter

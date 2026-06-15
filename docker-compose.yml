@@ -18,6 +18,8 @@ services:
       - "8081:8081"
     networks:
       - virtDrone-net
+    depends_on:
+      - simulator
 
   web:
     build:
